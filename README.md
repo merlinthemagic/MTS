@@ -1,13 +1,22 @@
-This is a real Bash shell you can interact with through PHP, it does not have any of the limitations of the exec() or shell_exec() functions. The shell can be setup as root or as the user executing the php script. You control the terminal environtment and all variables are maintained throughout the session.
+This is a real Bash shell you can interact with through PHP, it does not have any of the limitations of the exec() or shell_exec() functions. You control the terminal environtment and all variables are maintained throughout the session.
 
 Basic use example:
 
 <pre>
-  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
   $shell->exeCmd('cd /var/log/');
   $return1    = $shell->exeCmd('ls -sho --color=none');
   echo $return1; // list files in '/var/log/'
 </pre>
+
+PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
+
+<pre>
+  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+  $return1  = $shell->exeCmd('whoami');
+  echo $return1; // root
+</pre>
+
 Initial version works only on Centos 6 and 7.
 
 Your server must have php 5.x installed and a webserver like apache. All other dependencies are resolved during setup.
