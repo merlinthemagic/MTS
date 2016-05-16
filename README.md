@@ -2,7 +2,9 @@ This is a real Bash shell you can interact with through PHP, it does not have an
 
 Basic use example:
 $shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+
 $return1	= $shell->exeCmd('cd /var/log/');
+
 $return2	= $shell->exeCmd('ls -sho --color=none');
 
 echo $return2; // list files in '/var/log/'
