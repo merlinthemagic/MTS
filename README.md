@@ -1,5 +1,11 @@
-<<<<<<< HEAD
-© 2016 Martin Madsen
+This is a real Bash shell you can interact with through PHP, it does not have any of the limitations of the exec() or shell_exec() functions. The shell can be setup as root or as the user executing the php script. You control the terminal environtment and all variables are maintained throughout the session.
+
+Basic use example:
+$shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+$return1	= $shell->exeCmd('cd /var/log/');
+$return2	= $shell->exeCmd('ls -sho --color=none');
+
+echo $return2; // list files in '/var/log/'
 
 Initial version works only on Centos 6 and 7.
 
@@ -19,7 +25,3 @@ Once all dependencies have been resolved you will be provided a path that should
 project whenever you wish to call a function included in the MTS kit.
 
 Currently I have only ported the bash shell for CentOS but once i receive feedback on the package i can add further support.
-=======
-# MTS
-Interactive BASH Shell for PHP
->>>>>>> 623e35c711476e3dd70d9594ed5a8954c3b653f1
