@@ -5,8 +5,8 @@ Basic use example:
 <pre>
   $shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
   $shell->exeCmd('cd /var/log/');
-  $return	= $shell->exeCmd('ls -sho --color=none');
-  echo $return; // list files in '/var/log/'
+  $return1	= $shell->exeCmd('ls -sho --color=none');
+  echo $return1; // list files in '/var/log/'
 </pre>
 Initial version works only on Centos 6 and 7.
 
