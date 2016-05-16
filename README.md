@@ -3,9 +3,9 @@ This is a real Bash shell you can interact with through PHP, it does not have an
 Basic use example:
 
 <pre>
-  $shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
   $shell->exeCmd('cd /var/log/');
-  $return1	= $shell->exeCmd('ls -sho --color=none');
+  $return1    = $shell->exeCmd('ls -sho --color=none');
   echo $return1; // list files in '/var/log/'
 </pre>
 Initial version works only on Centos 6 and 7.
