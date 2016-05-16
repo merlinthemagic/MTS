@@ -2,14 +2,12 @@ This is a real Bash shell you can interact with through PHP, it does not have an
 
 Basic use example:
 
+<pre>
   $shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
-  
-  $return1	= $shell->exeCmd('cd /var/log/');
-  
-  $return2	= $shell->exeCmd('ls -sho --color=none');
-  
-  echo $return2; // list files in '/var/log/'
-
+  $shell->exeCmd('cd /var/log/');
+  $return	= $shell->exeCmd('ls -sho --color=none');
+  echo $return; // list files in '/var/log/'
+</pre>
 Initial version works only on Centos 6 and 7.
 
 Your server must have php 5.x installed and a webserver like apache. All other dependencies are resolved during setup.
