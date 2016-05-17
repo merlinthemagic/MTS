@@ -36,7 +36,7 @@ class ValidateInstall
 			$return[]	= array(
 					"success"	=> false,
 					"function" 	=> "Exec Enabled",
-					"msg"		=> "Your host does not allow the exec() command. martin how to fix"
+					"msg"		=> "Your host does not allow the exec() command. This is required."
 			);
 		}
 		

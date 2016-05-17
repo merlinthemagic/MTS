@@ -7,7 +7,7 @@
 if (defined('MTS_BASE_PATH') === false) {
 	$mtsBasePath	= realpath(dirname(__FILE__));
 	define('MTS_WORK_PATH', $mtsBasePath . DIRECTORY_SEPARATOR . "WorkDirectory");
-	
+
 	$mtsBasePath	= rtrim($mtsBasePath, "MTS" . DIRECTORY_SEPARATOR);
 	define('MTS_BASE_PATH', $mtsBasePath);
 	

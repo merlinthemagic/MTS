@@ -81,21 +81,21 @@ class Files
 	{
 		$this->isFile($fileObj, true);
 		$fileObj->setContent(null);
-		
+	
 		if ($startByte === null && $endByte === null) {
 			$content	= file_get_contents($fileObj->getPathAsString());
 			$fileObj->setContent($content);
 		} else {
-			
-			$fileSize	= $this->getSize($fileObj);
 				
+			$fileSize	= $this->getSize($fileObj);
+	
 			if ($startByte === null) {
 				$startByte	= 0;
 			}
 			if ($endByte === null) {
 				$endByte	= $fileSize;
 			}
-				
+	
 			if ($endByte > $fileSize) {
 				$endByte	= $fileSize;
 			}
@@ -105,21 +105,21 @@ class Files
 			$endByte	= intval($endByte);
 			$startByte	= intval($startByte);
 			$requestLen	= ($endByte - $startByte);
-				
+	
 			if ($endByte > $startByte) {
-				//convert to base64, this avoids all issues with special chars
-				if ($startByte == 0) {
-					$cmdString		= "head -c".($endByte)." \"".$fileObj->getPathAsString()."\" | base64";
+				
+				$fh = fopen($fileObj->getPathAsString(),'r');
+				if ($fh === false) {
+					throw new \Exception(__METHOD__ . ">> Failed to open file for read. File name: " . $fileObj->getPathAsString());
 				} else {
-					$cmdString		= "head -c".($endByte)." \"".$fileObj->getPathAsString()."\" | tail -c".($endByte - $startByte)." | base64";
-				}
-				$data		= base64_decode(shell_exec($cmdString));
-				$dataLen	= strlen($data);
-					
-				if ($requestLen == $dataLen) {
-					$fileObj->setContent($data);
-				} else {
-					throw new \Exception(__METHOD__ . ">> Failed to get byte content from file correctly for: " . $fileObj->getPathAsString());
+					if ($startByte == 0) {
+						$contents	= fread($fh, $requestLen);
+					} else {	
+						fseek($fh, $startByte);
+						$contents 	= fread($fh, $requestLen);
+					}
+					fclose($fh);
+					$fileObj->setContent($contents);
 				}
 					
 			} else {
