@@ -118,12 +118,11 @@ class ValidateInstall
 					);
 				} else {
 					$failMsg	= array(
-							"Edit /etc/sudoers in the following way:",
-							"",
 							"1) A word of warning, giving Sudo access to the webserver user is a security risk.",
 							"Run 'apt-get install sudo' on the command line of the server",
 							"",
-							"2) Find this line: 'root    ALL=(ALL)       ALL'",
+							"2) Edit /etc/sudoers in the following way:",
+							" Find this line: 'root    ALL=(ALL)       ALL'",
 							"Add this line after it: '".$this->getWebserverUsername() ." ALL=(ALL)NOPASSWD:".$this->getPythonExecutablePath()->getPathAsString()."'",
 							"Comment out the line by adding a '#' in front of it.",
 							
