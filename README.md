@@ -1,5 +1,12 @@
 This is a real Bash shell you can interact with through PHP, it does not have any of the limitations of the exec() or shell_exec() functions. You control the terminal environtment and all variables are maintained throughout the session.
 
+Tested working against the following operating systems and versions.
+<pre>
+Centos 6, 7.
+RedHat Enterprise 6.
+Debian 8.
+</pre>
+
 Basic use example:
 
 <pre>
@@ -17,10 +24,7 @@ PHP need only run as the standard webserver user, but the returned shell can hav
   echo $return1; // root
 </pre>
 
-Tested working against the following operating systems and versions.
-Centos 6, 7.
-RedHat Enterprise 6.
-Debian 8.
+
 
 It might work against other versions as long as they are the same flavor of Linux.
 
