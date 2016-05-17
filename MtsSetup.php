@@ -93,7 +93,7 @@
 		//install is acceptable
 		echo "<br><center><font color='#006400'><h2>Install Valid, you can proceed</h2></center>";
 		echo "<pre>
-				Include this line when you need to use the tools: 'require_once ".$mtsInclude.";'
+				Include this line when you need to use the tools: 'require_once \"".$mtsInclude."\";'
 				
 				Here is a test showing you how to use the shell:
 					

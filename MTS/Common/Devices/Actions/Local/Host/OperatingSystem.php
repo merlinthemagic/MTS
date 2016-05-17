@@ -5,8 +5,6 @@ use MTS\Common\Devices\Actions\Local\Base;
 
 class OperatingSystem extends Base
 {
-	private $_classStore=array();
-	
 	public function getOsObj()
 	{
 		$this->_classStore['requestType']	= __FUNCTION__;
@@ -66,7 +64,6 @@ class OperatingSystem extends Base
 			}
 
 			if ($osObj !== null) {
-				$osObj->setActionClass($this);
 				return $osObj;
 			}
 		}

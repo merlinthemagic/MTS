@@ -14,4 +14,11 @@ class Actions
 		}
 		return $this->_classStore[__METHOD__];
 	}
+	public function getLocalApplicationPaths()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Local\Host\ApplicationPaths();
+		}
+		return $this->_classStore[__METHOD__];
+	}
 }

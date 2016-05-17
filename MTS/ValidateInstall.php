@@ -118,7 +118,8 @@ class ValidateInstall
 					$failMsg	= array(
 							"Edit /etc/sudoers in the following way:",
 							"",
-							"1) Find this line: 'root    ALL=(ALL)       ALL'",
+							"1) A word of warning, giving Sudo access to the webserver user is a security risk.",
+							"Find this line: 'root    ALL=(ALL)       ALL'",
 							"Add this line after it: '".$this->getWebserverUsername() ." ALL=(ALL)NOPASSWD:".$this->getPythonExecutablePath()."'",
 							"",
 							"2) Find this line: 'Defaults    requiretty'",
@@ -174,7 +175,7 @@ class ValidateInstall
 			
 			$osName	= strtolower($this->getLocalServerOS()->getName());
 			if ($osName == 'centos' || $osName == 'red hat enterprise linux') {
-				$shell	= $localhost->getShell('bash', true);
+				$shell		= $localhost->getShell('bash', true);
 				$return		= trim($shell->exeCmd("whoami"));
 				
 				if ($return == 'root') {
@@ -230,7 +231,7 @@ class ValidateInstall
 			$pPath		= $this->getPythonExecutablePath();
 			if ($pPath !== false) {
 
-				$cmdString		= "sudo ".$pPath." --help";
+				$cmdString		= "sudo ".$pPath->getPathAsString()." --help";
 				$cReturn		= $this->localShellExec($cmdString);
 				$output			= trim($cReturn);
 				if (strlen($output) > 0) {
@@ -249,12 +250,11 @@ class ValidateInstall
 			$exePath	= null;
 			$osName	= strtolower($this->getLocalServerOS()->getName());
 			if ($osName == 'centos' || $osName == 'red hat enterprise linux') {
-				$cmdString		= "which python";
-				$cReturn		= $this->localShellExec($cmdString);
-				$path			= trim($cReturn);
-
-				if (strlen($path) > 0) {
-					$this->_paths['pythonExe']	= $path;
+				
+				$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('python');
+				
+				if ($fileObj !== false) {
+					$this->_paths['pythonExe']	= $fileObj;
 				} else {
 					//python not installed
 					return false;
@@ -280,12 +280,11 @@ class ValidateInstall
 			$exePath	= null;
 			$osName	= strtolower($this->getLocalServerOS()->getName());
 			if ($osName == 'centos' || $osName == 'red hat enterprise linux') {
-				$cmdString		= "which screen";
-				$cReturn		= $this->localShellExec($cmdString);
-				$path			= trim($cReturn);
-	
-				if (strlen($path) > 0) {
-					$this->_paths['screenExe']	= $path;
+				
+				$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('screen');
+				
+				if ($fileObj !== false) {
+					$this->_paths['screenExe']	= $fileObj;
 				} else {
 					//screen not installed
 					return false;
@@ -344,11 +343,7 @@ class ValidateInstall
 		ini_set('display_errors', true);
 		throw new Exception($msg);
 	}
-	
 
-
-	
-	
 	private function execEnabled()
 	{
 		if (function_exists('exec') === false) {
@@ -359,7 +354,6 @@ class ValidateInstall
 	}
 	private function localShellExec($cmdString)
 	{
-		//make check here if exec is allowed to execute
 		exec($cmdString, $rData);
 		$cReturn	= implode("\n", $rData);
 		return $cReturn;
