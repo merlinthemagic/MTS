@@ -58,6 +58,8 @@ class OperatingSystem extends Base
 							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOS7();
 						} elseif ($osMajorVersion == 6) {
 							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOS6();
+						} elseif ($osMajorVersion == 5) {
+							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOS5();
 						}
 					}
 				}
