@@ -122,8 +122,6 @@ class Files
 					$fileObj->setContent($contents);
 				}
 					
-			} else {
-				//nothing to return
 			}
 		}
 	}

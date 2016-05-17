@@ -26,19 +26,23 @@ class OperatingSystem extends Base
 			$osDetail			= php_uname();
 			if (preg_match("/^Linux\s/", $osDetail)) {
 				$osType			= 'linux';
-				$cmdString		= 'uname -o && uname -r && cat /etc/*release* | awk \'NR==1\'';
+				$cmdString		= 'cat /etc/os-release';
 				$cReturn		= $this->shellExec($cmdString);
+				
+				if (strlen($cReturn) == 0) {
+					$cmdString		= 'cat /etc/redhat-release';
+					$cReturn		= $this->shellExec($cmdString);
+				}
 					
 				if ($cReturn !== null) {
-					preg_match("/GNU\/(Linux)/", $cReturn, $osRaw1);
-					preg_match("/(.*)\.(el[0-9])\.(.*)/", $cReturn, $osRaw2);
-					preg_match("/(CentOS)\s([A-Za-z\s]+)\s(([0-9]+)\.([0-9]+)|([0-9]+)(0))/", $cReturn, $osRaw3);
-						
-					if (isset($osRaw3[1]) === true) {
-						$osName				= strtolower($osRaw3[1]);
+					preg_match("/VERSION_ID=\"([0-9]+)\"/", $cReturn, $rawMajorVersion);
+					preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux)\"/", $cReturn, $rawName);
+
+					if (isset($rawName[1]) === true) {
+						$osName				= strtolower($rawName[1]);
 					}
-					if (isset($osRaw3[4]) === true) {
-						$osMajorVersion		= $osRaw3[4];
+					if (isset($rawMajorVersion[1]) === true) {
+						$osMajorVersion		= $rawMajorVersion[1];
 					}
 				}
 			}
@@ -49,16 +53,15 @@ class OperatingSystem extends Base
 				&& $osMajorVersion !== null
 			) {
 				if ($osType == 'linux') {
-			
-					if ($osName == 'centos') {
-							
-						if ($osMajorVersion == 7) {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOS7();
-						} elseif ($osMajorVersion == 6) {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOS6();
-						} elseif ($osMajorVersion == 5) {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOS5();
-						}
+					if ($osName == 'centos linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOSBase();
+						$osObj->setMajorVersion($osMajorVersion);
+					} elseif ($osName == 'red hat enterprise linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\RHELBase();
+						$osObj->setMajorVersion($osMajorVersion);
+					} elseif ($osName == 'debian gnu/linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\DebianBase();
+						$osObj->setMajorVersion($osMajorVersion);
 					}
 				}
 			}

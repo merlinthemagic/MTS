@@ -17,7 +17,12 @@ PHP need only run as the standard webserver user, but the returned shell can hav
   echo $return1; // root
 </pre>
 
-Initial version works only on Centos 6 and 7.
+Tested working against the following operating systems and versions.
+Centos 6, 7.
+RedHat Enterprise 6.
+Debian 8.
+
+It might work against other versions as long as they are the same flavor of Linux.
 
 Your server must have php 5.x installed and a webserver like apache. All other dependencies are resolved during setup.
 

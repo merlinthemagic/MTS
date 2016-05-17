@@ -2,10 +2,10 @@
 //© 2016 Martin Madsen
 namespace MTS\Common\Data\Computer\OperatingSystems\Linux;
 
-class CentOS5 extends CentOSBase
+class DebianBase extends Base
 {
-	public function getMajorVersion()
+	public function getName()
 	{
-		return 5;
+		return 'Debian';
 	}
 }

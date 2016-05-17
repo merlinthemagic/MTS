@@ -6,6 +6,6 @@ class RHELBase extends Base
 {
 	public function getName()
 	{
-		return 'Red Hat Enterprise Linux';
+		return 'Red Hat Enterprise';
 	}
 }

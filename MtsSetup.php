@@ -140,19 +140,25 @@
 		If you are running a RedHat distribution you can issue the following commands in a shell ONE AT A TIME: 
 
 		CentOS/RHEL 7:
-		rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 		rpm -Uvh http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-5.noarch.rpm
+		rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
 		
 		CentOS/RHEL 6:
-		rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 		rpm -Uvh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+		rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-6.rpm
 		
 		CentOS/RHEL 5:
-		rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-5.rpm
 		rpm -Uvh http://dl.fedoraproject.org/pub/epel/5/x86_64/epel-release-5-4.noarch.rpm
+		rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-5.rpm
 		
 		All CentOS/RHEL:
 		yum install php55 php55-php --enablerepo=remi,epel
+		
+		If you are running a Debian distribution you can issue the following commands in a shell ONE AT A TIME: 
+
+		Debian 8:
+		apt-get install php5
+		
 		</pre>
 	</td>
 	</tr>
