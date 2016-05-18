@@ -12,6 +12,7 @@ It might work against other versions as long as they are the same flavor of Linu
 
 Basic use examples:
 
+PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
 <pre>
 	//all examples start by getting a local shell. 
 	//The first argument is the shell name. 
@@ -26,27 +27,24 @@ Basic use examples:
 </pre>
 
 <pre>
-  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
   $return1  = $shell->exeCmd('service sshd restart');
   echo $return1;
   
-  //on redhat distributions that will return:
+  //on redhat distributions that will return (if the shell was setup as root, as the webserver user would not have priviliges to services):
   //Stopping sshd:                                             [  OK  ]
   //Starting sshd:                                             [  OK  ]
 </pre>
 
 <pre>
-  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
   $shell->exeCmd('cd /var/log/');
   $return1  = $shell->exeCmd('ls -sho --color=none');
   echo $return1; // list files in '/var/log/'
 </pre>
 
-PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
+
 <pre>
-  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
   $return1  = $shell->exeCmd('whoami');
-  echo $return1; // root
+  echo $return1; // root or apache or www-data
 </pre>
 
 Your server must have php 5.x installed and a webserver like apache. All other dependencies are resolved during setup.
