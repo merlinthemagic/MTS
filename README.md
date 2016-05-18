@@ -10,17 +10,39 @@ Ubuntu 16.
 
 It might work against other versions as long as they are the same flavor of Linux.
 
-Basic use example:
+Basic use examples:
+
+<pre>
+	//all examples start by getting a local shell. 
+	//The first argument is the shell name. 
+	//The second argument is wether you want a shell with root priviliges
+    
+    //Bash shell as root
+    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+    
+    //Bash shell as i.e. apache or www-data
+    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+    
+</pre>
+
+<pre>
+  $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+  $return1  = $shell->exeCmd('service sshd restart');
+  echo $return1;
+  
+  //on redhat distributions that will return:
+  //Stopping sshd:                                             [  OK  ]
+  //Starting sshd:                                             [  OK  ]
+</pre>
 
 <pre>
   $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
   $shell->exeCmd('cd /var/log/');
-  $return1    = $shell->exeCmd('ls -sho --color=none');
+  $return1  = $shell->exeCmd('ls -sho --color=none');
   echo $return1; // list files in '/var/log/'
 </pre>
 
 PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
-
 <pre>
   $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
   $return1  = $shell->exeCmd('whoami');
