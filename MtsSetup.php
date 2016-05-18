@@ -12,13 +12,12 @@
 </form>
 
 <?php
-	
 
 	//fill the mtsBasePath input box again
 	if (array_key_exists('mtsBasePath', $_POST) === true && strlen($_POST['mtsBasePath']) > 0) {
 		$mtsBasePath	= trim($_POST['mtsBasePath']);
 		$mtsBasePath	= rtrim($mtsBasePath, DIRECTORY_SEPARATOR);
-		
+
 		echo "<script>document.getElementById('mtsBasePath').value = '".$mtsBasePath."';</script>";
 	} else {
 		echo "<br><center><font color='#FF0000'><h2>You must specify a path to the MTS files</h2></center><br>";
@@ -154,10 +153,18 @@
 		All CentOS/RHEL:
 		yum install php55 php55-php --enablerepo=remi,epel
 		
+		
+		
 		If you are running a Debian distribution you can issue the following commands in a shell ONE AT A TIME: 
 
 		Debian 8:
 		apt-get install php5
+		
+		<!-- Ubuntu apache2 will send the raw php code to the client if the php mod is not loaded. cannot figure out how to make it stop doing that -->
+		Ubuntu: You can issue the following commands in a shell ONE AT A TIME: 
+		apt-get install libapache2-mod-php php
+		
+		
 		
 		</pre>
 	</td>

@@ -17,7 +17,7 @@ class ValidateInstall
 		$osName	= strtolower($this->getLocalServerOS()->getName());
 		if ($osName == 'centos' || $osName == 'red hat enterprise') {
 			return $this->validateRedhat();
-		} elseif ($osName == 'debian') {
+		} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 			return $this->validateDebian();
 		} else {
 			$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
@@ -73,7 +73,7 @@ class ValidateInstall
 				$return[]	= array(
 						"success"	=> false,
 						"function" 	=> "Python Installed",
-						"msg"		=> "Run 'yum install python' on the command line of the server"
+						"msg"		=> "Run 'apt-get install python' on the command line of the server"
 				);
 			}
 				
@@ -88,7 +88,7 @@ class ValidateInstall
 				$return[]	= array(
 						"success"	=> false,
 						"function" 	=> "Screen Installed",
-						"msg"		=> "Run 'yum install screen' on the command line of the server"
+						"msg"		=> "Run 'apt-get install screen' on the command line of the server"
 				);
 			}
 				
@@ -217,7 +217,7 @@ class ValidateInstall
 				$return[]	= array(
 						"success"	=> false,
 						"function" 	=> "Python Installed",
-						"msg"		=> "Run 'apt-get install python' on the command line of the server"
+						"msg"		=> "Run 'yum install python' on the command line of the server"
 				);
 			}
 			
@@ -232,7 +232,7 @@ class ValidateInstall
 				$return[]	= array(
 						"success"	=> false,
 						"function" 	=> "Screen Installed",
-						"msg"		=> "Run 'apt-get install screen' on the command line of the server"
+						"msg"		=> "Run 'yum install screen' on the command line of the server"
 				);
 			}
 			
@@ -324,14 +324,18 @@ class ValidateInstall
 				$osName == 'centos' 
 				|| $osName == 'red hat enterprise'
 				|| $osName == 'debian'
+				|| $osName == 'ubuntu'
 			) {
 				$shell		= $localhost->getShell('bash', true);
 				$return		= trim($shell->exeCmd("whoami"));
-				
+
 				if ($return == 'root') {
 					//we have a root shell
 					$pShell		= $shell;
 				}
+			} else {
+				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
+				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
 			}
 			
 			if ($pShell !== null) {
@@ -345,34 +349,6 @@ class ValidateInstall
 			return false;
 		}
 	}
-	private function getLocalHostDevice()
-	{
-		if ($this->_localhostDevice === null) {
-			$deviceFact					= \MTS\Factories::getDevices();
-			$this->_localhostDevice		= $deviceFact->getLocalHost();
-		}
-
-		return $this->_localhostDevice;
-	}
-	private function canWriteWorkDirectory()
-	{
-		$rwWorkDir	= is_writable(MTS_WORK_PATH);
-		if ($rwWorkDir === true) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	private function timezoneSet()
-	{
-		$timezone	= trim(ini_get('date.timezone'));
-		if ($timezone == "") {
-			return false;
-		} else {
-			return true;
-		}
-	}
-	
 	private function sudoPython()
 	{
 		$osName	= strtolower($this->getLocalServerOS()->getName());
@@ -380,6 +356,7 @@ class ValidateInstall
 			$osName == 'centos' 
 			|| $osName == 'red hat enterprise'
 			|| $osName == 'debian'
+			|| $osName == 'ubuntu'
 		) {
 			
 			$pPath		= $this->getPythonExecutablePath();
@@ -393,6 +370,9 @@ class ValidateInstall
 					return true;
 				}
 			}
+		} else {
+			$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
+			$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
 		}
 		
 		//fail, cannot sudo python for whatever reason
@@ -408,6 +388,7 @@ class ValidateInstall
 				$osName == 'centos' 
 				|| $osName == 'red hat enterprise'
 				|| $osName == 'debian'
+				|| $osName == 'ubuntu'
 			) {
 				
 				$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('python');
@@ -418,6 +399,9 @@ class ValidateInstall
 					//python not installed
 					return false;
 				}
+			} else {
+				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
+				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
 			}
 		}
 		
@@ -442,6 +426,7 @@ class ValidateInstall
 				$osName == 'centos' 
 				|| $osName == 'red hat enterprise'
 				|| $osName == 'debian'	
+				|| $osName == 'ubuntu'
 			) {
 				
 				$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('screen');
@@ -452,6 +437,9 @@ class ValidateInstall
 					//screen not installed
 					return false;
 				}
+			} else {
+				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
+				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
 			}
 		}
 	
@@ -476,6 +464,7 @@ class ValidateInstall
 				$osName == 'centos' 
 				|| $osName == 'red hat enterprise'
 				|| $osName == 'debian'
+				|| $osName == 'ubuntu'
 			) {
 				$cmdString		= "whoami";
 				$cReturn		= $this->localShellExec($cmdString);
@@ -483,6 +472,9 @@ class ValidateInstall
 				if (strlen($rawUser) > 0) {
 					$username	= $rawUser;
 				}
+			} else {
+				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
+				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
 			}
 				
 			if ($username !== null) {
@@ -524,5 +516,32 @@ class ValidateInstall
 		exec($cmdString, $rData);
 		$cReturn	= implode("\n", $rData);
 		return $cReturn;
+	}
+	private function timezoneSet()
+	{
+		$timezone	= trim(ini_get('date.timezone'));
+		if ($timezone == "") {
+			return false;
+		} else {
+			return true;
+		}
+	}
+	private function getLocalHostDevice()
+	{
+		if ($this->_localhostDevice === null) {
+			$deviceFact					= \MTS\Factories::getDevices();
+			$this->_localhostDevice		= $deviceFact->getLocalHost();
+		}
+	
+		return $this->_localhostDevice;
+	}
+	private function canWriteWorkDirectory()
+	{
+		$rwWorkDir	= is_writable(MTS_WORK_PATH);
+		if ($rwWorkDir === true) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

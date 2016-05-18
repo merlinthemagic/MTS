@@ -5,7 +5,10 @@ Tested working against the following operating systems and versions.
 Centos 6, 7.
 RedHat Enterprise 6.
 Debian 8.
+Ubuntu 16.
 </pre>
+
+It might work against other versions as long as they are the same flavor of Linux.
 
 Basic use example:
 
@@ -24,10 +27,6 @@ PHP need only run as the standard webserver user, but the returned shell can hav
   echo $return1; // root
 </pre>
 
-
-
-It might work against other versions as long as they are the same flavor of Linux.
-
 Your server must have php 5.x installed and a webserver like apache. All other dependencies are resolved during setup.
 
 Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
@@ -42,5 +41,3 @@ In this example that path is '/var/www/tools/', because inside the tools directo
 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
-
-Currently I have only ported the bash shell for CentOS but once i receive feedback on the package i can add further support.
