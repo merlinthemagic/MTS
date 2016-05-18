@@ -46,7 +46,7 @@ class Bash extends Base
 		if ($maxTimeout === null) {
 			$maxTimeout		= $this->_cmdMaxTimeout;
 		}
-
+		
 		if ($delimitor === null) {
 			$delimitorProvided	= false;
 			$delimitor		= preg_quote($this->_shellPrompt);
@@ -65,7 +65,7 @@ class Bash extends Base
 			
 			if ($maxTimeout > 0) {
 				$rData	= $this->shellRead($delimitor, $idleTimeout, $maxTimeout);
-				if (strlen($rData['error']) > 0) {
+				if (strlen($rData['error']) > 0 && $delimitor !== false) {
 					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
 				} else {
 					$rawData			= $rData['data'];
@@ -280,22 +280,25 @@ class Bash extends Base
 	}
 	protected function shellKillLastProcess()
 	{
-		//SIGINT current process
-		$strCmd		= chr(3);
-		$wData		= $this->shellWrite($strCmd);
-	
-		$strCmd		= $this->_strCmdCommit . "echo $$\"KILLLAST\"$$"  . $this->_strCmdCommit;
-		$wData		= $this->shellWrite($strCmd);
-		if (strlen($wData['error']) > 0) {
-			throw new \Exception(__METHOD__ . ">> Failed to write command that would kill last process. Error: " . $wData['error']);
-		}
-			
-		//let the process exit, this can take time. Append the delimitor since it must be end of line
-		//after ^C is issued
-		$delimitor	= "[0-9]+KILLLAST[0-9]+";
-		$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
-		if (strlen($rData['error']) > 0) {
-			throw new \Exception(__METHOD__ . ">> Failed to kill last process. Error: " . $rData['error']);
+		if ($this->getInitialized() !== null || $this->getInitialized() !== false) {
+
+			//SIGINT current process
+			$strCmd		= chr(3);
+			$wData		= $this->shellWrite($strCmd);
+		
+			$strCmd		= $this->_strCmdCommit . "echo $$\"KILLLAST\"$$"  . $this->_strCmdCommit;
+			$wData		= $this->shellWrite($strCmd);
+			if (strlen($wData['error']) > 0) {
+				throw new \Exception(__METHOD__ . ">> Failed to write command that would kill last process. Error: " . $wData['error']);
+			}
+				
+			//let the process exit, this can take time. Append the delimitor since it must be end of line
+			//after ^C is issued
+			$delimitor	= "[0-9]+KILLLAST[0-9]+";
+			$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
+			if (strlen($rData['error']) > 0) {
+				throw new \Exception(__METHOD__ . ">> Failed to kill last process. Error: " . $rData['error']);
+			}
 		}
 	}
 	private function shellWrite($strCmd)
