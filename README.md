@@ -47,7 +47,7 @@ PHP need only run as the standard webserver user, but the returned shell can hav
   echo $return1; // root or apache or www-data
 </pre>
 
-Your server must have php 5 - 7 installed and a webserver like apache. All other dependencies are resolved during setup.
+Your server must have php 5 or newer installed and a webserver like apache. All other dependencies are resolved during setup.
 
 Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
