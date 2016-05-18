@@ -20,8 +20,8 @@ Basic use examples:
     //Bash shell as root
     $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
     
-    //Bash shell as i.e. apache or www-data
-    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+    //Bash shell as the webserver user i.e. apache or www-data
+    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
     
 </pre>
 
