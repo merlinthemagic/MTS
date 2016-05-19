@@ -54,4 +54,14 @@ class Directories
 			}
 		}
 	}
+	public function delete($dirObj)
+	{
+		$isDir	= $this->isDirectory($dirObj);
+		if ($isDir === true) {
+			$deleted	= rmdir ($dirObj->getPathAsString());
+			if ($deleted === false) {
+				throw new \Exception(__METHOD__ . ">> Failed to Delete for: " . $dirObj->getPathAsString());
+			}
+		}
+	}
 }

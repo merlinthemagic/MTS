@@ -27,13 +27,13 @@ class Localhost extends Device
 			
 			if ($bashExe !== false) {
 
-				$pipeUuid		= uniqid();
-				$workPath		= MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHS_" . $pipeUuid;
 				$fileFact		= \MTS\Factories::getFiles();
-				
-				$stdIn			= $fileFact->getFile("stdIn", $workPath);
-				$stdOut			= $fileFact->getFile("stdOut", $workPath);
-				$stdErr			= $fileFact->getFile("stdErr", $workPath);
+				$pipeUuid		= uniqid();
+				$workPath		= $fileFact->getDirectory(MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHS_" . $pipeUuid);
+
+				$stdIn			= $fileFact->getFile("stdIn", $workPath->getPathAsString());
+				$stdOut			= $fileFact->getFile("stdOut", $workPath->getPathAsString());
+				$stdErr			= $fileFact->getFile("stdErr", $workPath->getPathAsString());
 				
 				//get screen exe path
 				$screenExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('screen');
@@ -44,14 +44,21 @@ class Localhost extends Device
 				//make sure to make test for bash not available / or screen
 	
 				if ($priviliged === true) {
-					$exeCmd		= "sudo ".$pythonExe->getPathAsString()." -c \"import pty,os; pty.spawn(['".$screenExe->getPathAsString()."', '-s', '".$bashExe->getPathAsString()."', '-h', '5000', '-S', '" . $pipeUuid . "_screen']);\"";
+					$sudoEnabled	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getSudoEnabled('python');
+					if ($sudoEnabled === true) {
+						$exeCmd		= "sudo ".$pythonExe->getPathAsString()." -c \"import pty,os; pty.spawn(['".$screenExe->getPathAsString()."', '-s', '".$bashExe->getPathAsString()."', '-h', '5000', '-S', '" . $pipeUuid . "_screen']);\"";
+					} else {
+						$username	= \MTS\Factories::getActions()->getLocalOperatingSystem()->getUsername();
+						throw new \Exception(__METHOD__ . ">> Cannot obtain priviliged shell access. ".$username." does not have rights to sudo python");
+					}
+					
 				} else {
 					$exeCmd		= "".$pythonExe->getPathAsString()." -c \"import pty,os; pty.spawn(['".$screenExe->getPathAsString()."', '-s', '".$bashExe->getPathAsString()."', '-h', '5000', '-S', '" . $pipeUuid . "_screen']);\"";
 				}
 				
 				//on RHEL 7 the xterm TERm will show a duplicate PS1 command that cannot be removed
 				$term		= 'vt100';
-				$strCmd		= "mkfifo ".$stdIn->getPathAsString()."; ( sleep 1000d > ".$stdIn->getPathAsString()." & ( export TERM=".$term."; SLEEP_PID=$! ; " . $exeCmd." < ".$stdIn->getPathAsString()." > ".$stdOut->getPathAsString()." 2> ".$stdErr->getPathAsString()."; rm -rf ".$stdIn->getPathAsString()."; rm -rf ".$stdOut->getPathAsString()."; rm -rf ".$stdErr->getPathAsString()."; rm -rf ".$workPath."; kill -s TERM \$SLEEP_PID & ) & ) > /dev/null 2>&1";
+				$strCmd		= "mkfifo ".$stdIn->getPathAsString()."; ( sleep 1000d > ".$stdIn->getPathAsString()." & ( export TERM=".$term."; SLEEP_PID=$! ; " . $exeCmd." < ".$stdIn->getPathAsString()." > ".$stdOut->getPathAsString()." 2> ".$stdErr->getPathAsString()."; rm -rf ".$stdIn->getPathAsString()."; rm -rf ".$stdOut->getPathAsString()."; rm -rf ".$stdErr->getPathAsString()."; rm -rf ".$workPath->getPathAsString()."; kill -s TERM \$SLEEP_PID & ) & ) > /dev/null 2>&1";
 	
 				//make the directory and out + err files
 				$fileFact->getFilesTool()->create($stdOut);
@@ -74,6 +81,12 @@ class Localhost extends Device
 				}
 				
 				if ($stdInOk !== true) {
+					//clean up
+					$fileFact->getFilesTool()->delete($stdIn);
+					$fileFact->getFilesTool()->delete($stdOut);
+					$fileFact->getFilesTool()->delete($stdErr);
+					$fileFact->getDirectoriesTool()->delete($workPath);
+					
 					throw new \Exception(__METHOD__ . ">> Failed to setup bash shell on localHost");
 				} else {
 					

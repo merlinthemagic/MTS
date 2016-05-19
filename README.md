@@ -8,23 +8,34 @@ Debian 8.
 Ubuntu 16.
 </pre>
 
-It might work against other versions as long as they are the same flavor of Linux.
+It should work against other versions as long as they are the same flavor of Linux.
+PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
+
+There are now 2 ways to obtain root priviliges.
+
+1) If the webserver user has sudo enabled for python then the second argument on getShell() determines if root is enabled. This may be a security risk.
+
+	<pre>
+		//The first argument is the shell name. The second argument is wether you want a shell with root priviliges
+	    
+	    //Bash shell as root
+	    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+	    
+	    //Bash shell as the webserver user i.e. apache or www-data
+	    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
+	    
+	</pre>
+
+2) Without sudo access to python you must first get a standard shell and then pass it through the following function to obtain root access:
+	<pre>
+	    //Bash shell as the webserver user i.e. apache or www-data
+	    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
+	    \MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
+	</pre>
+
+
 
 Basic use examples:
-
-PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
-<pre>
-	//all examples start by getting a local shell. 
-	//The first argument is the shell name. 
-	//The second argument is wether you want a shell with root priviliges
-    
-    //Bash shell as root
-    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
-    
-    //Bash shell as the webserver user i.e. apache or www-data
-    $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
-    
-</pre>
 
 <pre>
   $return1  = $shell->exeCmd('service sshd restart');

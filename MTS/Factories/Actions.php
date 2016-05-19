@@ -21,4 +21,21 @@ class Actions
 		}
 		return $this->_classStore[__METHOD__];
 	}
+	
+	
+	//remote actions
+	public function getRemoteUsers()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Remote\Host\Users();
+		}
+		return $this->_classStore[__METHOD__];
+	}
+	public function getRemoteOperatingSystem()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Remote\Host\OperatingSystem();
+		}
+		return $this->_classStore[__METHOD__];
+	}
 }

@@ -11,6 +11,13 @@ class ApplicationPaths extends Base
 		$this->_classStore['appName']		= $appName;
 		return $this->execute();
 	}
+	public function getSudoEnabled($appName)
+	{
+		//tests if the user can execute a particular app with sudo
+		$this->_classStore['requestType']	= __FUNCTION__;
+		$this->_classStore['appName']		= $appName;
+		return $this->execute();
+	}
 	private function execute()
 	{
 		$requestType		= $this->_classStore['requestType'];
@@ -37,6 +44,32 @@ class ApplicationPaths extends Base
 				} else {
 					//no path exists
 					return false;
+				}
+			}
+		} elseif ($requestType == 'getSudoEnabled') {
+			
+			$osType		= $this->getLocalOsObj()->getType();
+
+			if ($osType == 'Linux') {
+				$appName	= $this->_classStore['appName'];
+				//first check that sudo is installed
+				$sudoExist	= $this->getExecutionFile("sudo");
+				
+				//same variable used, revert it
+				$this->_classStore['appName']	= $appName;
+				
+				if ($sudoExist === false) {
+					return false;
+				} else {
+					//try the generic --help to determine if the app will respond through sudo
+					$cmdString		= $sudoExist->getPathAsString() . " ".$this->_classStore['appName']." --help";
+					$cReturn		= trim($this->shellExec($cmdString));
+					
+					if (strlen($cReturn) > 0) {
+						return true;
+					} else {
+						return false;
+					}
 				}
 			}
 		}

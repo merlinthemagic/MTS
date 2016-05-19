@@ -4,7 +4,6 @@ namespace MTS;
 
 class ValidateInstall
 {
-	private $_webUser=null;
 	private $_serverOs=null;
 	private $_paths=array();
 	private $_localhostDevice=null;
@@ -117,37 +116,40 @@ class ValidateInstall
 							"msg"		=> "Success"
 					);
 				} else {
-					$failMsg	= array(
-							"1) A word of warning, giving Sudo access to the webserver user is a security risk.",
-							"Run 'apt-get install sudo' on the command line of the server",
+					$warnMsg	= array(
+							"This is just a warning. You can still get a shell.",
+							"To obtain a priviliged shell you must first construct an unpriviliged one 'getShell('bash', false)' and pass that shell with root credentials in the following method: ",
+							"\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser(\$shellObj, 'root', \$rootPass)",
+							"If you want to use the second argument to gain priviliged access follow the steps below:",
 							"",
-							"2) Edit /etc/sudoers in the following way:",
-							" Find this line: 'root    ALL=(ALL)       ALL'",
+							"1) A word of warning, giving Sudo access to the webserver user is a security risk.",
+							"Edit /etc/sudoers in the following way:",
+							"Find this line: 'root    ALL=(ALL)       ALL'",
 							"Add this line after it: '".$this->getWebserverUsername() ." ALL=(ALL)NOPASSWD:".$this->getPythonExecutablePath()->getPathAsString()."'",
+							"",
+							"2) Find this line (if it exists): 'Defaults    requiretty'",
 							"Comment out the line by adding a '#' in front of it.",
-							
-							
 					);
 	
 					$return[]	= array(
-							"success"	=> false,
+							"success"	=> 'warn',
 							"function" 	=> "Sudo Python",
-							"msg"		=> implode("\n", $failMsg)
+							"msg"		=> implode("\n", $warnMsg)
 					);
 				}
 			}
 	
 			if (
-			$this->sudoPython() === true
+			$this->pythonInstalled() === true
 			&& $this->screenInstalled() === true
 			&& $this->canWriteWorkDirectory() === true
 			&& $this->timezoneSet() === true
 			) {
 	
-				if ($this->priviligedShellAvailable() === true) {
+				if ($this->shellAvailable() === true) {
 					$return[]	= array(
 							"success"	=> true,
-							"function" 	=> "Priviliged Shell Creation Possible",
+							"function" 	=> "Shell Creation Possible",
 							"msg"		=> "Success"
 					);
 				} else {
@@ -157,7 +159,7 @@ class ValidateInstall
 	
 					$return[]	= array(
 							"success"	=> false,
-							"function" 	=> "Priviliged Shell Creation Possible",
+							"function" 	=> "Shell Creation Possible",
 							"msg"		=> implode("\n", $failMsg)
 					);
 				}
@@ -258,39 +260,43 @@ class ValidateInstall
 					$return[]	= array(
 							"success"	=> true,
 							"function" 	=> "Sudo Python",
-							"msg"		=> "Success"
+							"msg"		=> "Success, You can use the second argument on 'getShell('bash', true)' to obtain priviliged access"
 					);
 				} else {
-					$failMsg	= array(
-							"Edit /etc/sudoers in the following way:",
+					$warnMsg	= array(
+							"This is just a warning. You can still get a shell.",
+							"To obtain a priviliged shell you must first construct an unpriviliged one 'getShell('bash', false)' and pass that shell with root credentials in the following method: ",
+							"\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser(\$shellObj, 'root', \$rootPass)",
+							"If you want to use the second argument to gain priviliged access follow the steps below:",
 							"",
 							"1) A word of warning, giving Sudo access to the webserver user is a security risk.",
+							"Edit /etc/sudoers in the following way:",
 							"Find this line: 'root    ALL=(ALL)       ALL'",
 							"Add this line after it: '".$this->getWebserverUsername() ." ALL=(ALL)NOPASSWD:".$this->getPythonExecutablePath()->getPathAsString()."'",
 							"",
-							"2) Find this line: 'Defaults    requiretty'",
+							"2) Find this line (if it exists): 'Defaults    requiretty'",
 							"Comment out the line by adding a '#' in front of it.",
 					);
 	
 					$return[]	= array(
-							"success"	=> false,
+							"success"	=> 'warn',
 							"function" 	=> "Sudo Python",
-							"msg"		=> implode("\n", $failMsg)
+							"msg"		=> implode("\n", $warnMsg)
 					);
 				}
 			}
 	
 			if (
-				$this->sudoPython() === true
+				$this->pythonInstalled() === true
 				&& $this->screenInstalled() === true
 				&& $this->canWriteWorkDirectory() === true
 				&& $this->timezoneSet() === true
 			) {
 				
-				if ($this->priviligedShellAvailable() === true) {
+				if ($this->shellAvailable() === true) {
 					$return[]	= array(
 							"success"	=> true,
-							"function" 	=> "Priviliged Shell Creation Possible",
+							"function" 	=> "Shell Creation Possible",
 							"msg"		=> "Success"
 					);
 				} else {
@@ -300,7 +306,7 @@ class ValidateInstall
 				
 					$return[]	= array(
 							"success"	=> false,
-							"function" 	=> "Priviliged Shell Creation Possible",
+							"function" 	=> "Shell Creation Possible",
 							"msg"		=> implode("\n", $failMsg)
 					);
 				}
@@ -312,96 +318,42 @@ class ValidateInstall
 		return $return;
 	}
 	
-	private function priviligedShellAvailable()
+	private function shellAvailable()
 	{
-		$pShell		= null;
 		$localhost	= $this->getLocalHostDevice();
-		if ($localhost !== false) {
-			//check the shell is priviliged / superuser
+		$osType		= $this->getLocalServerOS()->getType();
+		if ($osType == 'Linux') {
 			
-			$osName	= strtolower($this->getLocalServerOS()->getName());
-			if (
-				$osName == 'centos' 
-				|| $osName == 'red hat enterprise'
-				|| $osName == 'debian'
-				|| $osName == 'ubuntu'
-			) {
-				$shell		= $localhost->getShell('bash', true);
-				$return		= trim($shell->exeCmd("whoami"));
-
-				if ($return == 'root') {
-					//we have a root shell
-					$pShell		= $shell;
-				}
-			} else {
-				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
-				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
-			}
-			
-			if ($pShell !== null) {
+			try {
+				$shellObj		= $localhost->getShell('bash', false);
+				$username		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getUsername($shellObj);
 				return true;
-			} else {
-				$exceptionMsg	= "Unable to get shell from localhost";
-				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
+			} catch (\Exception $e) {
+				switch($e->getCode()){
+					default;
+					return false;
+				}
 			}
-			
 		} else {
-			return false;
+			$exceptionMsg	= "Expand to handle OS Type:" . $osType;
+			$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
 		}
 	}
 	private function sudoPython()
 	{
-		$osName	= strtolower($this->getLocalServerOS()->getName());
-		if (
-			$osName == 'centos' 
-			|| $osName == 'red hat enterprise'
-			|| $osName == 'debian'
-			|| $osName == 'ubuntu'
-		) {
-			
-			$pPath		= $this->getPythonExecutablePath();
-			if ($pPath !== false) {
-
-				$cmdString		= "sudo ".$pPath->getPathAsString()." --help";
-				$cReturn		= $this->localShellExec($cmdString);
-				$output			= trim($cReturn);
-
-				if (strlen($output) > 0) {
-					return true;
-				}
-			}
-		} else {
-			$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
-			$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
-		}
-		
-		//fail, cannot sudo python for whatever reason
-		return false;
+		return \MTS\Factories::getActions()->getLocalApplicationPaths()->getSudoEnabled('python');
 	}
 	private function getPythonExecutablePath()
 	{
 		if (array_key_exists('pythonExe', $this->_paths) === false) {
 			
-			$exePath	= null;
-			$osName	= strtolower($this->getLocalServerOS()->getName());
-			if (
-				$osName == 'centos' 
-				|| $osName == 'red hat enterprise'
-				|| $osName == 'debian'
-				|| $osName == 'ubuntu'
-			) {
+			$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('python');
 				
-				$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('python');
-				
-				if ($fileObj !== false) {
-					$this->_paths['pythonExe']	= $fileObj;
-				} else {
-					//python not installed
-					return false;
-				}
+			if ($fileObj !== false) {
+				$this->_paths['pythonExe']	= $fileObj;
 			} else {
-				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
-				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
+				//python not installed
+				return false;
 			}
 		}
 		
@@ -420,26 +372,13 @@ class ValidateInstall
 	{
 		if (array_key_exists('screenExe', $this->_paths) === false) {
 				
-			$exePath	= null;
-			$osName	= strtolower($this->getLocalServerOS()->getName());
-			if (
-				$osName == 'centos' 
-				|| $osName == 'red hat enterprise'
-				|| $osName == 'debian'	
-				|| $osName == 'ubuntu'
-			) {
-				
-				$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('screen');
-				
-				if ($fileObj !== false) {
-					$this->_paths['screenExe']	= $fileObj;
-				} else {
-					//screen not installed
-					return false;
-				}
+			$fileObj	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('screen');
+			
+			if ($fileObj !== false) {
+				$this->_paths['screenExe']	= $fileObj;
 			} else {
-				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
-				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
+				//screen not installed
+				return false;
 			}
 		}
 	
@@ -456,36 +395,7 @@ class ValidateInstall
 	}
 	private function getWebserverUsername()
 	{
-		if ($this->_webUser === null) {
-	
-			$username	= null;
-			$osName	= strtolower($this->getLocalServerOS()->getName());
-			if (
-				$osName == 'centos' 
-				|| $osName == 'red hat enterprise'
-				|| $osName == 'debian'
-				|| $osName == 'ubuntu'
-			) {
-				$cmdString		= "whoami";
-				$cReturn		= $this->localShellExec($cmdString);
-				$rawUser		= trim($cReturn);
-				if (strlen($rawUser) > 0) {
-					$username	= $rawUser;
-				}
-			} else {
-				$exceptionMsg	= "Expand to handle OS name:" . $this->getLocalServerOS()->getName();
-				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
-			}
-				
-			if ($username !== null) {
-				$this->_webUser	= $username;
-			} else {
-				$exceptionMsg	= "Unable to get the name of the user that runs the webserver";
-				$this->throwException(__METHOD__ . ">> " . $exceptionMsg);
-			}
-		}
-	
-		return $this->_webUser;
+		return \MTS\Factories::getActions()->getLocalOperatingSystem()->getUsername();
 	}
 	private function getLocalServerOS()
 	{

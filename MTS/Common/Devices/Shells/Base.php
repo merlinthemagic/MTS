@@ -4,6 +4,16 @@ namespace MTS\Common\Devices\Shells;
 
 class Base
 {
+	protected $_childShell=null;
+	protected $_parentShell=null;
+	protected $_initialized=null;
+	
+	public function __destruct()
+	{
+		if ($this->getInitialized() === true) {
+			$this->terminate();
+		}
+	}
 	public function exeCmd($strCmd, $delimitor=null, $idleTimeout=null, $maxTimeout=null)
 	{
 		//$strCmd: string command to execute
@@ -23,7 +33,14 @@ class Base
 		//default is determined by the shell class
 
 		try {
-			return $this->shellStrExecute($strCmd, $delimitor, $idleTimeout, $maxTimeout);
+			$childShell	= $this->getChildShell();
+			if ($childShell !== null) {
+				//must execute on child as it rides on top of this shell
+				return $childShell->exeCmd($strCmd, $delimitor, $idleTimeout, $maxTimeout);
+			} else {
+				return $this->shellStrExecute($strCmd, $delimitor, $idleTimeout, $maxTimeout);
+			}
+			
 		} catch (\Exception $e) {
 			switch($e->getCode()){
 				default;
@@ -33,6 +50,61 @@ class Base
 	}
 	public function killLastProcess()
 	{
-		$this->shellKillLastProcess();
+		$childShell	= $this->getChildShell();
+		if ($childShell !== null) {
+			//must execute on child as it rides on top of this shell
+			return $childShell->killLastProcess();
+		} else {
+			$this->shellKillLastProcess();
+		}
+		
+	}
+	public function terminate()
+	{
+		//child shells must be shutdown before this
+		$childShell	= $this->getChildShell();
+		if ($childShell !== null) {
+			$childShell->terminate();
+		}
+		
+		$this->shellTerminate();
+		
+		//tell the parent we are shutdown
+		$parentShell	= $this->getParentShell();
+		if ($parentShell !== null) {
+			$parentShell->setChildShell(null);
+			//clear the parent shell for leftover logout information
+			$parentShell->exeCmd("");
+		}
+	}
+	public function setChildShell($shellObj)
+	{
+		if ($shellObj === null) {
+			//this is a child destructing it self and letting its parent know it is done
+			$this->_childShell = null;
+		} else {
+			$childShell	= $this->getChildShell();
+			if ($childShell !== null) {
+				$this->setChildShell($shellObj);
+			} else {
+				$this->_childShell = $shellObj;
+			}
+		}
+	}
+	public function getChildShell()
+	{
+		return $this->_childShell;
+	}
+	public function setParentShell($shellObj)
+	{
+		$this->_parentShell	= $shellObj;
+	}
+	public function getParentShell()
+	{
+		return $this->_parentShell;
+	}
+	public function getInitialized()
+	{
+		return $this->_initialized;
 	}
 }

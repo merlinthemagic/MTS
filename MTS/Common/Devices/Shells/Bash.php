@@ -10,8 +10,7 @@ class Bash extends Base
 	private $_cmdIdleTimeout=null;
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
-	private $_initialized=null;
-	
+
 	public function __construct()
 	{
 		$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
@@ -19,20 +18,18 @@ class Bash extends Base
 		$this->_cmdIdleTimeout	= 2000;
 		$this->_cmdMaxTimeout	= 3600000;
 	}
-	public function __destruct()
-	{
-		//if you wanna keep the screen session around after
-		//you will need to build logic to construct a new pipeObj
-		//and remove this termination 
-		$this->shellTerminate();
-	}
 	public function setPipes($procPipeObj)
 	{
 		$this->_procPipe		= $procPipeObj;
 	}
-	private function getPipes()
+	public function getPipes()
 	{
-		return $this->_procPipe;
+		$parentShell	= $this->getParentShell();
+		if ($parentShell === null) {
+			return $this->_procPipe;
+		} else {
+			return $parentShell->getPipes();
+		}
 	}
 	protected function shellStrExecute($strCmd, $delimitor, $idleTimeout, $maxTimeout)
 	{
@@ -137,7 +134,7 @@ class Bash extends Base
 			}
 		}
 	}
-	private function shellInitialize()
+	protected function shellInitialize()
 	{
 		if ($this->getInitialized() === null) {
 			$this->_initialized		= 'setup';
@@ -263,7 +260,6 @@ class Bash extends Base
 	protected function shellTerminate()
 	{
 		if ($this->getInitialized() === true || $this->getInitialized() == "setup") {
-			$this->_initialized	= false;
 			$this->shellKillLastProcess();
 			
 			$strCmd		= "exit" . $this->_strCmdCommit;
@@ -276,6 +272,7 @@ class Bash extends Base
 			if (strlen($rData['error']) > 0) {
 				throw new \Exception(__METHOD__ . ">> Failed to receive shell termination result. Error: " . $rData['error']);
 			}
+			$this->_initialized	= false;
 		}
 	}
 	protected function shellKillLastProcess()
@@ -360,14 +357,5 @@ class Bash extends Base
 		}
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		return $return;
-	}
-
-	public function getInitialized()
-	{
-		return $this->_initialized;
-	}
-	public function getShellName()
-	{
-		return 'bash';
 	}
 }

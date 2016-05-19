@@ -58,8 +58,8 @@
 			<center>
 			<table border=1>
 			<tr>
-			<th width='400'>Function</th>
-			<th width='600'>Result</th>
+			<th width='250'>Function</th>
+			<th width='750'>Result</th>
 			</tr>
 			";
 	
@@ -70,6 +70,13 @@
 			<tr>
 			<td bgcolor='#66CD00'>".$result['function']."</td>
 			<td bgcolor='#66CD00'>".str_replace("\n", "<br>", $result['msg'])."</td>
+			</tr>
+			";
+		} elseif ($result['success'] === 'warn') {
+			$rTable	.= "
+			<tr>
+			<td bgcolor='#FFFF00'>".$result['function']."</td>
+			<td bgcolor='#FFFF00'>".str_replace("\n", "<br>", $result['msg'])."</td>
 			</tr>
 			";
 		} else {
@@ -96,14 +103,14 @@
 				
 				Here is a test showing you how to use the shell:
 					
-				\$shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+				\$shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 				\$return1	= \$shell->exeCmd('whoami');
 				
-				echo \$return1; //root
+				echo \$return1; //apache or www-data
 					
 				Another test:
 					
-				\$shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+				\$shell		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 				\$return1	= \$shell->exeCmd('cd /etc/sysconfig');
 				\$return2	= \$shell->exeCmd('ls -sho --color=none');
 				

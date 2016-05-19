@@ -50,6 +50,15 @@ class Files
 			}
 		}
 	}
+	public function delete($fileObj)
+	{
+		if ($this->isFile($fileObj) === true) {
+			$deleted	= unlink($fileObj->getPathAsString());
+			if ($deleted === false) {
+				throw new \Exception(__METHOD__ . ">> Failed to Delete for: " . $fileObj->getPathAsString());
+			}
+		}
+	}
 	public function appendContent($fileObj)
 	{
 		//add content implies the file exists already
