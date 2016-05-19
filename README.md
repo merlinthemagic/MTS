@@ -10,6 +10,7 @@ Ubuntu 16.
 
 It should work against other versions as long as they are the same flavor of Linux.
 PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
+Your server must have php 5 or newer installed and a webserver like apache. All other dependencies are resolved during setup.
 
 There are 2 ways to obtain root priviliges.
 
@@ -52,7 +53,7 @@ Basic use examples:
   echo $return1; // root or apache or www-data
 </pre>
 
-Your server must have php 5 or newer installed and a webserver like apache. All other dependencies are resolved during setup.
+<h3>Installation</h3>
 
 Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
