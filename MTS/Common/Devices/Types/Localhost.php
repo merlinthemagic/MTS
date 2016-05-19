@@ -13,8 +13,11 @@ class Localhost extends Device
 		//currently only bash is available
 		
 		//$priviliged
-		//setting this to true will return a shell where commands are executed as root.
-		//a false setting will return a shell where you execute as the script owner
+		//setting this to true will return a shell where commands are executed as root if sudo is available.
+		//a false setting will return a shell where you execute as the php execution user, most likely apache or www-data
+		
+		//if you do not have sudo setup you can still get a root shell by running the unpriviliged shellObj through this function later:
+		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
 		
 		//dont cache return new instance every time
 		$shellName		= strtolower($shellName);

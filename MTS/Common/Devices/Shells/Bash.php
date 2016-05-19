@@ -7,7 +7,6 @@ class Bash extends Base
 	private $_procPipe=null;
 	private $_shellPrompt=null;
 	private $_strCmdCommit=null;
-	private $_cmdIdleTimeout=null;
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 
@@ -15,8 +14,7 @@ class Bash extends Base
 	{
 		$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
 		$this->_strCmdCommit	= chr(13);
-		$this->_cmdIdleTimeout	= 2000;
-		$this->_cmdMaxTimeout	= 3600000;
+		$this->_cmdMaxTimeout	= 2000;
 	}
 	public function setPipes($procPipeObj)
 	{
@@ -31,14 +29,10 @@ class Bash extends Base
 			return $parentShell->getPipes();
 		}
 	}
-	protected function shellStrExecute($strCmd, $delimitor, $idleTimeout, $maxTimeout)
+	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)
 	{
 		if ($this->getInitialized() !== true) {
 			$this->shellInitialize();
-		}
-		
-		if ($idleTimeout === null) {
-			$idleTimeout	= $this->_cmdIdleTimeout;
 		}
 		if ($maxTimeout === null) {
 			$maxTimeout		= $this->_cmdMaxTimeout;
@@ -61,7 +55,7 @@ class Bash extends Base
 		} else {
 			
 			if ($maxTimeout > 0) {
-				$rData	= $this->shellRead($delimitor, $idleTimeout, $maxTimeout);
+				$rData	= $this->shellRead($delimitor, $maxTimeout);
 				if (strlen($rData['error']) > 0 && $delimitor !== false) {
 					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
 				} else {
@@ -156,7 +150,7 @@ class Bash extends Base
 			}
 			
 			$delimitor	= "[0-9]+MERLIN[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
+			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
 			if (strlen($rData['error']) > 0) {
 				$this->shellTerminate();
 				throw new \Exception(__METHOD__ . ">> Failed to read shell promt validation command. Error: " . $rData['error']);
@@ -188,7 +182,7 @@ class Bash extends Base
 			}
 				
 			$delimitor	= "[0-9]+DUNBAR[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
+			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
 			if (strlen($rData['error']) > 0) {
 				$this->shellTerminate();
 				throw new \Exception(__METHOD__ . ">> Failed to read column count command. Error: " . $rData['error']);
@@ -228,7 +222,7 @@ class Bash extends Base
 			}
 			
 			$delimitor	= "[0-9]+MERLIN[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
+			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
 			if (strlen($rData['error']) > 0) {
 				$this->shellTerminate();
 				throw new \Exception(__METHOD__ . ">> Failed to read terminal break test command. Error: " . $rData['error']);
@@ -268,7 +262,7 @@ class Bash extends Base
 				throw new \Exception(__METHOD__ . ">> Failed to write shell termination command. Error: " . $wData['error']);
 			}
 			$delimitor	= "(screen is terminating)|(exit)";
-			$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
+			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
 			if (strlen($rData['error']) > 0) {
 				throw new \Exception(__METHOD__ . ">> Failed to receive shell termination result. Error: " . $rData['error']);
 			}
@@ -292,7 +286,7 @@ class Bash extends Base
 			//let the process exit, this can take time. Append the delimitor since it must be end of line
 			//after ^C is issued
 			$delimitor	= "[0-9]+KILLLAST[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdIdleTimeout, $this->_cmdMaxTimeout);
+			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
 			if (strlen($rData['error']) > 0) {
 				throw new \Exception(__METHOD__ . ">> Failed to kill last process. Error: " . $rData['error']);
 			}
@@ -315,7 +309,7 @@ class Bash extends Base
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		return $return;
 	}
-	private function shellRead($regex=false, $maxIdleMs=0, $maxWaitMs=0)
+	private function shellRead($regex=false, $maxWaitMs=0)
 	{
 		$return['error']	= null;
 		$return['data']		= null;
@@ -335,16 +329,10 @@ class Bash extends Base
 						//found pattern match
 						$done	= true;
 					}
-				} else {
-					if ($done === false && ($exeTime - $lDataTime) > $maxIdleMs) {
-						//idle timed out
-						$return['error']	= 'idle timeout';
-						$done				= true;
-					}
 				}
 				if ($done === false && ($exeTime - $return['stime']) > $maxWaitMs) {
 					//timed out
-					$return['error']	= 'max timeout';
+					$return['error']	= 'timeout';
 					$done				= true;
 				}
 			}
