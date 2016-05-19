@@ -59,6 +59,7 @@ class Bash extends Base
 				if (strlen($rData['error']) > 0 && $delimitor !== false) {
 					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
 				} else {
+					
 					$rawData			= $rData['data'];
 					$lines				= explode("\n", $rawData);
 					if (count($lines) > 0) {

@@ -21,12 +21,16 @@ class Base
 		//$delimitor: regex when matched ends the command and returns data.
 		//defaults to a custom shell prompt determined by the shell class
 		//You should only override the default if the command does not end in a regular prompt, or you want only a partial return from the command.
-		//If you do not want to use a delimitor at all set to false, this will force a read until the $idleTimeout or $maxTimeout is exceeded
+		//If you do not want to use a delimitor at all set to false, this will force a read until $timeout is exceeded
 
-		//$maxTimeout: the absolute longest the command is allowed to run
+		//$timeout: the absolute longest the command is allowed to run
 		//set to 0 if you do not wish the receive a return from the command
-		//use if a command continues to return data, i.e ping, without a max the command would never return
+		//You should only override if a command takes a very long time or for a command that continues to return data
+		//i.e ping. Without a timeout on a ping the command would never finish and return
 		//default is determined by the shell class
+		
+		//if you know a command will continue to return output and hold up the shell
+		//you should issue another command to stop it or use the killLastProcess() function
 
 		try {
 			$childShell	= $this->getChildShell();
