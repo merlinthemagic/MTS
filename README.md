@@ -59,11 +59,16 @@ Upload the MTS directory to a location on your server. i.e. /var/www/tools/.
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
 Remember the location you uploaded to, you will need it later.
 
-Place the 'MtsSetup.php' file in a folder that is published by your webserver.
+You can run the setup in one of 2 ways:
 
-Access the 'MtsSetup.php' file in a browser and follow the instructions. 
+1) Place the 'MtsSetup.php' file in a folder that is published by your webserver.
+Then Access the 'MtsSetup.php' file in a browser and follow the instructions. 
 At the top of the page you will be asked to give 'Absolute Path to the directory that holds the MTS folder:'.
 In this example that path is '/var/www/tools/', because inside the tools directory is the MTS directory you uploaded.
+
+2)
+Run the setup from the command line of the server.
+In this case you cannot move the 'MtsSetup.php' file, it must be located in the same directory as the 'MTS' directory.
 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
