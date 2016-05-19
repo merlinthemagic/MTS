@@ -32,7 +32,6 @@ $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false
 
 Basic use examples:
 
-
 <pre>
   $return1  = $shell->exeCmd('service sshd restart');
   echo $return1;
