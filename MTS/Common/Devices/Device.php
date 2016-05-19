@@ -1,4 +1,5 @@
 <?php
+//© 2016 Martin Madsen
 namespace MTS\Common\Devices;
 
 class Device
