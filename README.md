@@ -89,7 +89,7 @@ In this case you cannot move the 'MtsSetup.php' file, it must be located in the 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
 
-<h3>Using command:</h3>
+<h3>Using commands:</h3>
 The project sets up a real bash shell inside a screen instance. When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
 
 The exeCmd() method takes 3 arguments.
@@ -100,17 +100,21 @@ delimitor
 
 timeout
 
-<h5>The string commands:</h5>
+<h5>The string command:</h5>
 Is the command you want to execute.
 
 <h5>The delimitor:</h5>
 Is a regular expression that is compared to the return data, once the expression is matched the data is returned.
 By default the delimitor is set to a custom shell prompt determined by the shell class. so dont mess with the PS1 variable.
 
-You would change the delimitor if the command you are executing will not end in a prompt. One example could be you are doing a ssh session to another server.
+If you have a command that you want returned once the timeout expires you set it to false.
+You would also change the delimitor if the command you are executing will not end in a prompt. One example could be you are doing a ssh session to another server.
 in that case the delimitor should most likely be 'Passsword:', since doing a ssh login will next prompt you for a password.
 
-If you have a command that you want returned once the timeout expires you set it to false.
+Note: If you plan on opening i.e. ssh connections or nesting a screen instance or changing shells, it will be your responsibillity to exit those sessions.
+The process can only exit successfully if the shell contains the same bash shell as when it started. If you leave the shell inside i.e. screen then the process
+never terminates and will need to be terminated manually, by you.  
+
 
 <h5>The timeout:</h5>
 Is the absolute longest the current command is allowed to run. This argument is in mili seconds.
