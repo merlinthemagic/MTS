@@ -89,12 +89,15 @@ In this case you cannot move the 'MtsSetup.php' file, it must be located in the 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
 
-<h3>Using commands:</h3>
+<h3>Using command:</h3>
 The project sets up a real bash shell inside a screen instance. When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
 
 The exeCmd() method takes 3 arguments.
+
 string_command
+
 delimitor
+
 timeout
 
 <h5>The string commands:</h5>
