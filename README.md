@@ -11,15 +11,17 @@ Ubuntu 16.
 It should work against other versions as long as they are the same flavor of Linux.
 PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
 
-Your server must have php 5 or newer installed. All other dependencies are resolved during setup.
-
 Mandetory packages:
+<pre>
+php5 or newer
 python
 screen
+</pre>
 
 Optional packages:
+<pre>
 sudo
-
+</pre>
 There are 2 ways to obtain root priviliges.
 
 1) Without sudo access to python you must first get a standard shell and then pass it through the following function to obtain root access:
