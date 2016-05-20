@@ -183,7 +183,7 @@
 		function wantSudoPython()
 		{
 			echo "\nInfo: If the user that triggers a php script is not allowed to sudo python,";
-			echo "\nthen you will only be able to instanciate non-root shells.";
+			echo "\nthen you will only be able to instantiate non-root shells.";
 			echo "\nYou will still be able to elevate those non-root shell to root by calling:";
 			echo "\n\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser(\$shellObj, 'root', 'rootPassword')";
 			
@@ -383,7 +383,7 @@
 			if ($enabled === false) {
 				
 				$warningMsg	.= "The ".getWebserverUsername()." user is not allowed to sudo python.";
-				$warningMsg	.= "<br>This is not required, but optional, but you will only be able to instanciate non-root shells.";
+				$warningMsg	.= "<br>This is not required, but optional, but you will only be able to instantiate non-root shells.";
 				$warningMsg	.= "<br>You will still be able to elevate those non-root shell to root by calling:";
 				$warningMsg	.= "<br>\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser(\$shellObj, 'root', 'rootPassword')";
 				
