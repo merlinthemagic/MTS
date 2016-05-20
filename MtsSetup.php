@@ -102,8 +102,8 @@
 			$writable	= workDirectoryWritable();
 			if ($writable === false) {
 				echo "\nPHP cannot write to the MTS WorkDirectory and that is required.";
-				echo "\nExecute the following command to allow it:\n";
-				echo "chown -R ".getWebserverUsername() .":".getWebserverUsername() ." ".MTS_WORK_PATH."\n\n";
+				echo "\nExample if the user that runs php is apache then you can execute the following command to allow it:\n";
+				echo "chown -R apache:apache ".MTS_WORK_PATH."\n\n";
 				exit;
 			} else {
 				
