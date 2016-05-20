@@ -36,7 +36,7 @@ The first argument is the shell name. The second argument is whether you want a 
 <pre>
 //Bash shell as root
 $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
-	    
+
 //Bash shell as the webserver user i.e. apache or www-data
 $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false); 
 </pre>

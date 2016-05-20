@@ -14,7 +14,7 @@ class Bash extends Base
 	{
 		$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
 		$this->_strCmdCommit	= chr(13);
-		$this->_cmdMaxTimeout	= 2000;
+		$this->_cmdMaxTimeout	= (ini_get('max_execution_time') - 0.5) * 1000;
 	}
 	public function setPipes($procPipeObj)
 	{
