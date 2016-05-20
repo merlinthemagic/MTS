@@ -400,7 +400,7 @@
 				$warningMsg	.= "<br>1) Find this line: 'root    ALL=(ALL)       ALL'";
 				$warningMsg	.= "<br>Add this line after it: '".getWebserverUsername()." ALL=(ALL)NOPASSWD:".getPythonExe()->getPathAsString()."'.";
 				$warningMsg	.= "<br><br>2) Find this line (if it exists): 'Defaults    requiretty'";
-				$warningMsg	.= "<br>1) Find this line: 'root    ALL=(ALL)       ALL'";
+				$warningMsg	.= "<br>Comment out the line by adding a '#' in front of it.";
 			}
 		}
 
