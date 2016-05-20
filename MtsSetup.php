@@ -99,35 +99,26 @@
 		}
 		function isWorkWritable()
 		{
-			$writable	= workDirectoryWritable();
-			if ($writable === false) {
-				echo "\nPHP cannot write to the MTS WorkDirectory and that is required.";
-				echo "\nExample if the user that runs php is apache then you can execute the following command to allow it:\n";
+			echo "\nThe Work directory must be writable for the user that runs PHP.";
+			echo "\nPlease make sure ".MTS_WORK_PATH." is writable by that user.";
+
+			echo "\n\nChoose from the following options..\n\n";
+			echo "1. I am sure the path is writable\n";
+			echo "2. How do i make sure?\n";
+			echo "Enter your choice:";
+			$choice = trim(fgets(STDIN));
+				
+			if ($choice == 1) {
+			
+			} elseif ($choice == 2) {
+			
+				echo "\nExample if the user that runs php is apache then you can issue this command to be sure:\n";
 				echo "chown -R apache:apache ".MTS_WORK_PATH."\n\n";
 				exit;
+			
 			} else {
-				
-				echo "\nThe Work directory must be writable for the user that runs PHP.";
-				echo "\nPlease make sure ".MTS_WORK_PATH." is writable by that user.";
-
-				echo "\n\nChoose from the following options..\n\n";
-				echo "1. I am sure the path is writable\n";
-				echo "2. How do i make sure?\n";
-				echo "Enter your choice:";
-				$choice = trim(fgets(STDIN));
-					
-				if ($choice == 1) {
-				
-				} elseif ($choice == 2) {
-				
-					echo "\nExample if the user that runs php is apache then you can issue this command to be sure:\n";
-					echo "chown -R apache:apache ".MTS_WORK_PATH."\n\n";
-					exit;
-				
-				} else {
-					echo "\nNot a valid choice.\n";
-					exit;
-				}
+				echo "\nNot a valid choice.\n";
+				exit;
 			}
 		}
 		function installPython()
