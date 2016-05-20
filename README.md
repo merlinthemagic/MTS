@@ -2,6 +2,25 @@
 
 This is a real Bash shell you can interact with through PHP, it does not have any of the limitations of the exec() or shell_exec() functions. You control the terminal environment and all variables are maintained throughout the session.
 
+<h3>Obtaining root access:</h3>
+There are 2 ways to obtain root priviliges.
+
+1) Without sudo access to python you must first get a standard shell and then pass it through the following function to obtain root access:
+<pre>
+//Bash shell as the webserver user i.e. apache or www-data
+$shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
+\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
+</pre>
+
+2) If the webserver user has sudo enabled for python then the second argument on getShell() determines if root is enabled. This may be a security risk.
+The first argument is the shell name. The second argument is whether you want a shell with root priviliges
+<pre>
+//Bash shell as root
+$shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+
+//Bash shell as the webserver user i.e. apache or www-data
+$shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false); 
+</pre>
 
 <h3>Requirements:</h3>
 Tested working against the following operating systems and versions.
@@ -27,47 +46,6 @@ Optional packages:
 sudo
 </pre>
 
-<h3>Obtaining root access:</h3>
-There are 2 ways to obtain root priviliges.
-
-1) Without sudo access to python you must first get a standard shell and then pass it through the following function to obtain root access:
-<pre>
-//Bash shell as the webserver user i.e. apache or www-data
-$shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
-\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
-</pre>
-
-2) If the webserver user has sudo enabled for python then the second argument on getShell() determines if root is enabled. This may be a security risk.
-The first argument is the shell name. The second argument is whether you want a shell with root priviliges
-<pre>
-//Bash shell as root
-$shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
-
-//Bash shell as the webserver user i.e. apache or www-data
-$shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false); 
-</pre>
-
-Basic use examples:
-
-<pre>
-  $return1  = $shell->exeCmd('service sshd restart');
-  echo $return1;
-  
-  //on redhat distributions that will return (if the shell was setup as root, as the webserver user would not have priviliges to services):
-  //Stopping sshd:                                             [  OK  ]
-  //Starting sshd:                                             [  OK  ]
-</pre>
-
-<pre>
-  $shell->exeCmd('cd /var/log/');
-  $return1  = $shell->exeCmd('ls -sho --color=none');
-  echo $return1; // list files in '/var/log/'
-</pre>
-
-<pre>
-  $return1  = $shell->exeCmd('whoami');
-  echo $return1; // root or apache or www-data
-</pre>
 
 <h3>Installation</h3>
 
@@ -88,6 +66,28 @@ In this case you cannot move the 'MtsSetup.php' file, it must be located in the 
 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
+
+<h3>Basic use examples:</h3>
+
+<pre>
+  $return1  = $shell->exeCmd('service sshd restart');
+  echo $return1;
+  
+  //on redhat distributions that will return (if the shell was setup as root, as the webserver user would not have priviliges to services):
+  //Stopping sshd:                                             [  OK  ]
+  //Starting sshd:                                             [  OK  ]
+</pre>
+
+<pre>
+  $shell->exeCmd('cd /var/log/');
+  $return1  = $shell->exeCmd('ls -sho --color=none');
+  echo $return1; // list files in '/var/log/'
+</pre>
+
+<pre>
+  $return1  = $shell->exeCmd('whoami');
+  echo $return1; // root or apache or www-data
+</pre>
 
 <h3>Using commands:</h3>
 The project sets up a real bash shell inside a screen instance. When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
