@@ -174,7 +174,7 @@
 			} catch (\Exception $e) {
 				switch($e->getCode()){
 					default;
-					echo "\nWas unable to create a shell, Unknown reason Sorry.";
+					echo "\nWas unable to create a shell. Msg: " . $e->getMessage();
 					exit;
 				}
 			}
@@ -391,7 +391,6 @@
 				$warningMsg	.= "<br>If you want to enable sudo follow the steps below.";
 
 				$sudoFile	= getSudoExe();
-				$sudoFile	= false;
 				if ($sudoFile === false) {
 					$warningMsg	.= "<br><br>Sudo is not installed and is required.";
 					$warningMsg	.= "<br>Execute the following command to install it:<br>";
