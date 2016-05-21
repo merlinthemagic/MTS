@@ -164,3 +164,22 @@ $data  = $shell->exeCmd('ping -c5 www.google.com');
 This time the ping runs for 5 seconds and returns to the prompt.
 
 Structure your commands the same way you would if you sat at the console and entered them manually. Its not magic, we are simply piping the terminal input output :)....
+
+<h5>Debugging:</h5>
+
+Figuring out what happens when a command fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
+
+$shell->debug	= true;
+
+try {
+
+	//execute the trouble command here
+
+} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				
+			}
+		}
+
+print_r($shell->debugData);

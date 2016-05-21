@@ -10,6 +10,8 @@ class Bash extends Base
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
+	public $debug=false;
+	public $debugData=array();
 
 	public function setPipes($procPipeObj)
 	{
@@ -41,12 +43,24 @@ class Bash extends Base
 		}
 		
 		//make sure nothing if left over from last command
-		$this->getPipes()->resetReadPosition();
+// 		$this->getPipes()->resetReadPosition();
+		
+		
+// 		$wData		= $this->shellWrite($rawCmdStr);
+
+		
 		
 		$rawCmdStr	= $strCmd . $this->_strCmdCommit;
-		$wData		= $this->shellWrite($rawCmdStr);
+		$wData		= $this->shellWrite($strCmd);
 		if (strlen($wData['error']) > 0) {
 			throw new \Exception(__METHOD__ . ">> Failed to write command. Error: " . $wData['error']);
+		}
+		//we need to submit and then trigger the command. otherwise the prompt shows up in the read return
+		//and many commands do not get a return
+		$this->getPipes()->resetReadPosition();
+		$wData		= $this->shellWrite($this->_strCmdCommit);
+		if (strlen($wData['error']) > 0) {
+			throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
 		} else {
 			
 			if ($maxTimeout > 0) {
@@ -397,6 +411,19 @@ class Bash extends Base
 		}
 	
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
+		
+		if ($this->debug === true) {
+			$debugData			= $return;
+			$debugData['cmd']	= $strCmd;
+			$debugData['type']	= __FUNCTION__;
+			
+			if ($strCmd == $this->_strCmdCommit) {
+				$debugData['action']	= "Cmd Submission";
+			} else {
+				$debugData['action']	= "Cmd write";
+			}
+			$this->debugData[]	= $debugData;
+		}
 		return $return;
 	}
 	private function shellRead($regex=false, $maxWaitMs=0)
@@ -434,6 +461,12 @@ class Bash extends Base
 			}
 		}
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
+		
+		if ($this->debug === true) {
+			$debugData			= $return;
+			$debugData['type']	= __FUNCTION__;
+			$this->debugData[]	= $debugData;
+		}
 		return $return;
 	}
 }
