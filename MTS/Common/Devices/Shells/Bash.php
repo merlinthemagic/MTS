@@ -28,37 +28,23 @@ class Bash extends Base
 	}
 	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)
 	{
-		if ($this->getInitialized() !== true) {
+		if ($this->getInitialized() !== true && $this->getInitialized() != 'setup') {
 			$this->shellInitialize();
+		}
+		if ($delimitor === null) {
+			$delimitorProvided	= false;
+			$delimitor			= preg_quote($this->_shellPrompt);
+		} else {
+			$delimitorProvided	= true;
 		}
 		if ($maxTimeout === null) {
 			$maxTimeout		= $this->_cmdMaxTimeout;
 		}
-		
-		if ($delimitor === null) {
-			$delimitorProvided	= false;
-			$delimitor		= preg_quote($this->_shellPrompt);
-		} else {
-			$delimitorProvided	= true;
-		}
-		
-		//make sure nothing if left over from last command
-// 		$this->getPipes()->resetReadPosition();
-		
-		
-// 		$wData		= $this->shellWrite($rawCmdStr);
 
-		
+		$this->getPipes()->resetReadPosition();
 		
 		$rawCmdStr	= $strCmd . $this->_strCmdCommit;
-		$wData		= $this->shellWrite($strCmd);
-		if (strlen($wData['error']) > 0) {
-			throw new \Exception(__METHOD__ . ">> Failed to write command. Error: " . $wData['error']);
-		}
-		//we need to submit and then trigger the command. otherwise the prompt shows up in the read return
-		//and many commands do not get a return
-		$this->getPipes()->resetReadPosition();
-		$wData		= $this->shellWrite($this->_strCmdCommit);
+		$wData		= $this->shellWrite($rawCmdStr);
 		if (strlen($wData['error']) > 0) {
 			throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
 		} else {
@@ -73,7 +59,7 @@ class Bash extends Base
 					$lines				= explode("\n", $rawData);
 					if (count($lines) > 0) {
 						//strip command if on line 1
-						$expectCmd			= str_replace($this->_termBreakDetail['breakSeq'], "", $lines[0]);
+						$expectCmd			= str_replace($this->_termBreakDetail, "", $lines[0]);
 						if ($expectCmd == $rawCmdStr) {
 							//command as expected
 							unset($lines[0]);
@@ -185,112 +171,43 @@ class Bash extends Base
 				}
 			}
 			
-			//make sure nothing if left over from last command
-			$this->getPipes()->resetReadPosition();
+			//shell is now usable
+			$strCmd		= "echo \$COLUMNS";
+			$reData		= $this->shellStrExecute($strCmd, null, null);
 			
-			//how wide is the terminal window we are working with
-			$strCmd		= "echo \$COLUMNS && echo $$\"DUNBAR\"$$" . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
+			if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
+				$columnCount	= $rawColCount[1];
+			} else {
 				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to get write column count command. Error: " . $wData['error']);
-			}
-				
-			$delimitor	= "[0-9]+DUNBAR[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
-			if (strlen($rData['error']) > 0) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to read column count command. Error: " . $rData['error']);
+				throw new \Exception(__METHOD__ . ">> Failed to get column count");
 			}
 			
-			$columnCount	= null;
-			$rLines	= array_reverse(explode("\n", $rData['data']));
-			foreach ($rLines as $index => $rLine) {
-				if (preg_match("/".$delimitor."/", $rLine)) {
-					//next line is the prompt
-					if (preg_match("/([0-9]+)/", $rLines[$index + 1], $rawPrompt)) {
-						//got the column count
-						$columnCount	= $rawPrompt[1];
-						break;
-					}
-				}
-			}
-			
-			if ($columnCount === null) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to find column count");
-			}
-			
-			//make sure nothing if left over from last command
-			$this->getPipes()->resetReadPosition();
-			
-			//the terminal window will break up long commands. NOT the return but the actual command
-			//we need to know what that break looks like so we can filter the command itself from the return
 			$repeatChar		= "A";
 			$repeatCount	= $columnCount * 2;
-
-			$strCmd		= "echo \"".str_repeat($repeatChar, $repeatCount)."\" && echo $$\"MERLIN\"$$" . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to get write terminal break test command. Error: " . $wData['error']);
-			}
 			
-			$delimitor	= "[0-9]+MERLIN[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
-			if (strlen($rData['error']) > 0) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to read terminal break test command. Error: " . $rData['error']);
-			}
-
-			$regEx			= "echo \"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";
-			preg_match("/".$regEx."/", $rData['data'], $breakerRaw);
+			$strCmd			= "echo \"".str_repeat($repeatChar, $repeatCount)."\"";
+			$reData			= $this->shellStrExecute($strCmd, null, null);
 			
-			if (array_key_exists(2, $breakerRaw) === false) {
+			$regEx			= "echo \"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";		
+			if (preg_match("/".$regEx."/", $reData, $breakerRaw)) {
+				//if the result for the previous command did not end in a line break, then the terminal will
+				//introduce a 200d (hex) terminal break rather than the normal 2008 (hex) break for the next command. not sure why
+				$this->_termBreakDetail[]		= $breakerRaw[2];
+				$this->_termBreakDetail[]		= " \r";
+			} else {
 				$this->shellTerminate();
 				throw new \Exception(__METHOD__ . ">> Failed to determine terminal break detail.");
 			}
-			
-			$this->_termBreakDetail['charCount']	= strlen($breakerRaw[1]);
-			
-			//if the result for the previous command did not end in a line break, then the terminal will
-			//introduce a 200d (hex) terminal break rather than the normal 2008 (hex) break for the next command. not sure why				
-			$this->_termBreakDetail['breakSeq'][]		= $breakerRaw[2];
-			$this->_termBreakDetail['breakSeq'][]		= " \r";
-			
+
 			if ($this->getParentShell() === null) {
 				//if there is no parent then this is the initial shell
 				//get the PID of the parent so we can kill that process if everything else fails.
-				$this->getPipes()->resetReadPosition();
-				
-				$strCmd		= "(cat /proc/$$/status | grep PPid | awk '{print $2}') && echo $$\"DUNBAR\"$$" . $this->_strCmdCommit;
-				$wData		= $this->shellWrite($strCmd);
-				if (strlen($wData['error']) > 0) {
-					$this->shellTerminate();
-					throw new \Exception(__METHOD__ . ">> Failed to get write parent process id command. Error: " . $wData['error']);
-				}
-				
-				$delimitor	= "[0-9]+DUNBAR[0-9]+";
-				$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
-				if (strlen($rData['error']) > 0) {
-					$this->shellTerminate();
-					throw new \Exception(__METHOD__ . ">> Failed to read parent process id command. Error: " . $rData['error']);
-				}
-				
-				$parentPID	= null;
-				$rLines		= array_reverse(explode("\n", $rData['data']));
-				foreach ($rLines as $index => $rLine) {
-					if (preg_match("/".$delimitor."/", $rLine)) {
-						//next line is the prompt
-						if (preg_match("/([0-9]+)/", $rLines[$index + 1], $rawPrompt)) {
-							//got the parent PPID
-							$this->_baseShellPPID	= $rawPrompt[1];
-							break;
-						}
-					}
-				}
-					
-				if ($this->_baseShellPPID === null) {
+				$strCmd			= "(cat /proc/$$/status | grep PPid)";
+				$reData			= $this->shellStrExecute($strCmd, null, null);
+
+				if (preg_match("/([0-9]+)/", $reData, $rawPPID)) {
+					$this->_baseShellPPID	= $rawPPID[1];
+				} else {
 					$this->shellTerminate();
 					throw new \Exception(__METHOD__ . ">> Failed to get parent process id");
 				}
