@@ -8,6 +8,11 @@ class Base
 	protected $_parentShell=null;
 	protected $_initialized=null;
 	
+	public function __construct()
+	{
+		//on uncaught exception __destruct is not called, this leaves the shell running on the system we cant have that.
+		register_shutdown_function(array($this, '__destruct'));
+	}
 	public function __destruct()
 	{
 		if ($this->getInitialized() === true) {

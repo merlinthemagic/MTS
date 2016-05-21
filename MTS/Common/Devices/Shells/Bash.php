@@ -11,16 +11,6 @@ class Bash extends Base
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
 
-	public function __construct()
-	{
-		$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
-		$this->_strCmdCommit	= chr(13);
-		$this->_cmdMaxTimeout	= (ini_get('max_execution_time') - 0.5) * 1000;
-		
-		//on uncaught exception __destruct is not called, this leaves the shell running on the system we cant have that.
-		register_shutdown_function(array($this, '__destruct'));
-	}
-
 	public function setPipes($procPipeObj)
 	{
 		$this->_procPipe		= $procPipeObj;
@@ -138,6 +128,11 @@ class Bash extends Base
 	{
 		if ($this->getInitialized() === null) {
 			$this->_initialized		= 'setup';
+			
+			//set the variables
+			$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
+			$this->_strCmdCommit	= chr(13);
+			$this->_cmdMaxTimeout	= (ini_get('max_execution_time') - 0.5) * 1000;
 			
 			//set the prompt to a known value
 			$strCmd		= "PS1=\"".$this->_shellPrompt."\"" . $this->_strCmdCommit;
