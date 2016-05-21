@@ -4,7 +4,7 @@ The shell in Linux is very powerful, but PHP never had a good way to interact wi
 There are 100's of questions on sites like askubuntu.com or stackoverflow.com asking: my PHP script needs to run as root, how do I do it?
 There has never been an easy way to accomplish that. That is by design, of course, letting PHP anywhere near root presents real security issues.
 
-Regardless there are times when we need the power of root to get the job done. The fear I have is that some of us get lost in the sea of suggested solutions and opt for the easy solution: run apache as root. Everything equal that’s dangerous.
+Regardless there are times when we need the power of root to get the job done. I fear some of us get lost in the sea of suggested solutions and opt for the easy solution: run apache as root. Everything equal that’s dangerous.
 I hope this project will become the standard way to interact with the shell in PHP when the job requires root or real interaction with a shell. I want other programmers to comment and collaborate on this project in hopes we can mitigate as 
 many of the security issues as possible.
 
