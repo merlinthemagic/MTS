@@ -169,8 +169,9 @@ Structure your commands the same way you would if you sat at the console and ent
 
 Figuring out what happens when a command fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
 
-$shell->debug	= true;
 <pre>
+$shell->debug	= true;
+
 try {
 
 	//execute the trouble command here
