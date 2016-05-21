@@ -10,9 +10,7 @@ class Bash extends Base
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
-	public $debug=false;
-	public $debugData=array();
-
+	
 	public function setPipes($procPipeObj)
 	{
 		$this->_procPipe		= $procPipeObj;
@@ -26,8 +24,45 @@ class Bash extends Base
 			return $parentShell->getPipes();
 		}
 	}
+	public function getMaxExecutionTime()
+	{
+		//returns time until max_execution_time is exceeded
+		$curRunTime				= ((\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() / 1000) - MTS_EXECUTION_START);
+		$this->_cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
+		
+		return $this->_cmdMaxTimeout;
+	}
+	public function getTerminalWidth()
+	{
+		$strCmd		= "echo \$COLUMNS";
+		$reData		= $this->exeCmd($strCmd, null, null);
+			
+		if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
+			return $rawColCount[1];
+		} else {
+			throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
+		}
+	}
+	public function setTerminalWidth($count)
+	{
+		if (preg_match("/^[0-9]+$/", $count)) {
+			$strCmd			= "stty columns " . $count;
+			$this->exeCmd($strCmd, null, null);
+			
+			if ($this->getTerminalWidth() != $count) {
+				throw new \Exception(__METHOD__ . ">> Failed to set terminal width");
+			}
+		} else {
+			throw new \Exception(__METHOD__ . ">> Terminal Width can only be an integer");
+		}
+	}
+
 	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)
 	{
+		//this method should only be called from base::exeCmd()
+		//if this method is called directly it breaks the child shell logic
+		//all commands must be executed on the furthest child
+		
 		if ($this->getInitialized() !== true && $this->getInitialized() != 'setup') {
 			$this->shellInitialize();
 		}
@@ -37,8 +72,17 @@ class Bash extends Base
 		} else {
 			$delimitorProvided	= true;
 		}
-		if ($maxTimeout === null) {
-			$maxTimeout		= $this->_cmdMaxTimeout;
+		
+		//we dont want to issue new commands in the just before the server will issue a fatal error on exceeding
+		$rTimeout	= ($this->getMaxExecutionTime() - 1500);
+		if ($rTimeout > 0) {
+			if ($maxTimeout === null) {
+				$maxTimeout		= $rTimeout;
+			} elseif ($maxTimeout > $rTimeout) {
+				throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
+			}
+		} else {
+			throw new \Exception(__METHOD__ . ">> PHP max_execution_time about to be exceeded");
 		}
 
 		$this->getPipes()->resetReadPosition();
@@ -129,98 +173,117 @@ class Bash extends Base
 		if ($this->getInitialized() === null) {
 			$this->_initialized		= 'setup';
 			
-			//set the variables
-			$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
-			$this->_strCmdCommit	= chr(13);
-			$this->_cmdMaxTimeout	= (ini_get('max_execution_time') - 0.5) * 1000;
+			try {
+				
+				//set the variables
+				$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
+				$this->_strCmdCommit	= chr(13);
 			
-			//set the prompt to a known value
-			$strCmd		= "PS1=\"".$this->_shellPrompt."\"" . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to write shell promt command. Error: " . $wData['error']);
-			}
-			
-			//see if it took hold
-			$strCmd		= $this->_strCmdCommit . "echo \">>>>\"\$PS1\"<<<<\" && echo $$\"MERLIN\"$$"  . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to write shell promt validation command. Error: " . $wData['error']);
-			}
-			
-			$delimitor	= "[0-9]+MERLIN[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
-			if (strlen($rData['error']) > 0) {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to read shell promt validation command. Error: " . $rData['error']);
-			}
-
-			$rLines	= array_reverse(explode("\n", $rData['data']));
-			foreach ($rLines as $index => $rLine) {
-				if (preg_match("/".$delimitor."/", $rLine)) {
-					//next line is the prompt
-					if (preg_match("/>>>>(.*?)<<<</", $rLines[$index + 1], $rawPrompt)) {
-						//got the right prompt
-						break;
-					} else {
-						$this->shellTerminate();
-						throw new \Exception(__METHOD__ . ">> Failed to set shell prompt value");
+				//set the prompt to a known value
+				$strCmd		= "PS1=\"".$this->_shellPrompt."\"" . $this->_strCmdCommit;
+				$wData		= $this->shellWrite($strCmd);
+				if (strlen($wData['error']) > 0) {
+					throw new \Exception(__METHOD__ . ">> Failed to write shell promt command. Error: " . $wData['error']);
+				}
+				
+				//see if it took hold
+				$strCmd		= $this->_strCmdCommit . "echo \">>>>\"\$PS1\"<<<<\" && echo $$\"MERLIN\"$$"  . $this->_strCmdCommit;
+				$wData		= $this->shellWrite($strCmd);
+				if (strlen($wData['error']) > 0) {
+					throw new \Exception(__METHOD__ . ">> Failed to write shell promt validation command. Error: " . $wData['error']);
+				}
+				
+				$delimitor	= "[0-9]+MERLIN[0-9]+";
+				$rData		= $this->shellRead($delimitor, $this->getMaxExecutionTime());
+				if (strlen($rData['error']) > 0) {
+					throw new \Exception(__METHOD__ . ">> Failed to read shell promt validation command. Error: " . $rData['error']);
+				}
+	
+				$rLines	= array_reverse(explode("\n", $rData['data']));
+				foreach ($rLines as $index => $rLine) {
+					if (preg_match("/".$delimitor."/", $rLine)) {
+						//next line is the prompt
+						if (preg_match("/>>>>(.*?)<<<</", $rLines[$index + 1], $rawPrompt)) {
+							//got the right prompt
+							break;
+						} else {
+							throw new \Exception(__METHOD__ . ">> Failed to set shell prompt value");
+						}
 					}
 				}
-			}
-			
-			//shell is now usable
-			$strCmd		= "echo \$COLUMNS";
-			$reData		= $this->shellStrExecute($strCmd, null, null);
-			
-			if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
-				$columnCount	= $rawColCount[1];
-			} else {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to get column count");
-			}
-			
-			$repeatChar		= "A";
-			$repeatCount	= $columnCount * 2;
-			
-			$strCmd			= "echo \"".str_repeat($repeatChar, $repeatCount)."\"";
-			$reData			= $this->shellStrExecute($strCmd, null, null);
-			
-			$regEx			= "echo \"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";		
-			if (preg_match("/".$regEx."/", $reData, $breakerRaw)) {
-				//if the result for the previous command did not end in a line break, then the terminal will
-				//introduce a 200d (hex) terminal break rather than the normal 2008 (hex) break for the next command. not sure why
-				$this->_termBreakDetail[]		= $breakerRaw[2];
-				$this->_termBreakDetail[]		= " \r";
-			} else {
-				$this->shellTerminate();
-				throw new \Exception(__METHOD__ . ">> Failed to determine terminal break detail.");
-			}
-
-			if ($this->getParentShell() === null) {
-				//if there is no parent then this is the initial shell
-				//get the PID of the parent so we can kill that process if everything else fails.
-				$strCmd			= "(cat /proc/$$/status | grep PPid)";
-				$reData			= $this->shellStrExecute($strCmd, null, null);
-
-				if (preg_match("/([0-9]+)/", $reData, $rawPPID)) {
-					$this->_baseShellPPID	= $rawPPID[1];
+				
+				//shell is now usable
+				$columnCount	= $this->getTerminalWidth();
+				$repeatChar		= "A";
+				$repeatCount	= $columnCount * 2;
+				
+				$strCmd			= "echo \"".str_repeat($repeatChar, $repeatCount)."\"";
+				$reData			= $this->exeCmd($strCmd, null, null);
+				
+				$regEx			= "echo \"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";		
+				if (preg_match("/".$regEx."/", $reData, $breakerRaw)) {
+					//if the result for the previous command did not end in a line break, then the terminal will
+					//introduce a 200d (hex) terminal break rather than the normal 2008 (hex) break for the next command. not sure why
+					$this->_termBreakDetail[]		= $breakerRaw[2];
+					$this->_termBreakDetail[]		= " \r";
 				} else {
+					throw new \Exception(__METHOD__ . ">> Failed to determine terminal break detail.");
+				}
+	
+				if ($this->getParentShell() === null) {
+					//if there is no parent then this is the initial shell
+					//get the PID of the parent so we can kill that process if everything else fails.
+					$strCmd			= "(cat /proc/$$/status | grep PPid)";
+					$reData			= $this->exeCmd($strCmd, null, null);
+	
+					if (preg_match("/([0-9]+)/", $reData, $rawPPID)) {
+						$this->_baseShellPPID	= $rawPPID[1];
+					} else {
+						throw new \Exception(__METHOD__ . ">> Failed to get parent process id");
+					}
+				}
+				
+				//reset the output so we have a clean beginning
+				$this->getPipes()->resetReadPosition();
+				
+				//shell is now initialized
+				$this->_initialized 			= true;
+			
+			} catch (\Exception $e) {
+				switch($e->getCode()){
+					default;
+					//cleanup then throw
 					$this->shellTerminate();
-					throw new \Exception(__METHOD__ . ">> Failed to get parent process id");
+					throw $e;
 				}
 			}
-			
-			//reset the output so we have a clean beginning
-			$this->getPipes()->resetReadPosition();
-			
-			//shell is now initialized
-			$this->_initialized 			= true;
 			
 		} elseif ($this->getInitialized() === false) {
 			throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot initiate");
+		}
+	}
+	protected function shellKillLastProcess()
+	{
+		if ($this->getInitialized() !== null || $this->getInitialized() !== false) {
+	
+			//SIGINT current process
+			$strCmd		= chr(3);
+			$wData		= $this->shellWrite($strCmd);
+	
+			$strCmd		= $this->_strCmdCommit . "echo $$\"KILLLAST\"$$"  . $this->_strCmdCommit;
+			$wData		= $this->shellWrite($strCmd);
+			if (strlen($wData['error']) > 0) {
+				throw new \Exception(__METHOD__ . ">> Failed to write command that would kill last process. Error: " . $wData['error']);
+			}
+	
+			//let the process exit, this can take time. Append the delimitor since it must be end of line
+			//after ^C is issued
+			$delimitor	= "[0-9]+KILLLAST[0-9]+";
+			$rTimeout	= $this->getMaxExecutionTime();
+			$rData		= $this->shellRead($delimitor, $rTimeout);
+			if (strlen($rData['error']) > 0) {
+				throw new \Exception(__METHOD__ . ">> Failed to kill last process. Error: " . $rData['error'] . ", remaining exetime: " . $rTimeout);
+			}
 		}
 	}
 	protected function shellTerminate()
@@ -240,7 +303,7 @@ class Bash extends Base
 					throw new \Exception(__METHOD__ . ">> Failed to write shell termination command. Error: " . $wData['error']);
 				}
 				$delimitor	= "(screen is terminating)|(exit)";
-				$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
+				$rData		= $this->shellRead($delimitor, $this->getMaxExecutionTime());
 				if (strlen($rData['error']) > 0) {
 					throw new \Exception(__METHOD__ . ">> Failed to receive shell termination result. Error: " . $rData['error']);
 				}
@@ -253,6 +316,7 @@ class Bash extends Base
 			}
 
 			if ($this->_baseShellPPID !== null) {
+			
 				//if we are the base shell lets make sure the process is dead
 				$cmdRunning	= "(kill -0 ".$this->_baseShellPPID." 2> /dev/null && echo \"Alive\" ) || echo \"Dead\"";
 				exec($cmdRunning, $pData);
@@ -270,6 +334,8 @@ class Bash extends Base
 							$cmdKill	= $killPath . " -SIGTERM " . $this->_baseShellPPID;
 							exec($cmdKill);
 							
+							//let the process die, before checking again
+							usleep(50000);
 							exec($cmdRunning, $peData);
 							
 							if (isset($peData[0]) && trim($peData[0]) == "Dead") {
@@ -289,30 +355,6 @@ class Bash extends Base
 			$this->_initialized	= false;
 		}
 	}
-	
-	protected function shellKillLastProcess()
-	{
-		if ($this->getInitialized() !== null || $this->getInitialized() !== false) {
-
-			//SIGINT current process
-			$strCmd		= chr(3);
-			$wData		= $this->shellWrite($strCmd);
-		
-			$strCmd		= $this->_strCmdCommit . "echo $$\"KILLLAST\"$$"  . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
-				throw new \Exception(__METHOD__ . ">> Failed to write command that would kill last process. Error: " . $wData['error']);
-			}
-				
-			//let the process exit, this can take time. Append the delimitor since it must be end of line
-			//after ^C is issued
-			$delimitor	= "[0-9]+KILLLAST[0-9]+";
-			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
-			if (strlen($rData['error']) > 0) {
-				throw new \Exception(__METHOD__ . ">> Failed to kill last process. Error: " . $rData['error']);
-			}
-		}
-	}
 	private function shellWrite($strCmd)
 	{
 		$return['error']	= null;
@@ -330,16 +372,17 @@ class Bash extends Base
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
 		if ($this->debug === true) {
+			
 			$debugData			= $return;
 			$debugData['cmd']	= $strCmd;
 			$debugData['type']	= __FUNCTION__;
 			
-			if ($strCmd == $this->_strCmdCommit) {
-				$debugData['action']	= "Cmd Submission";
+			$parentShell	= $this->getParentShell();
+			if ($parentShell === null) {
+				$this->debugData[]			= $debugData;
 			} else {
-				$debugData['action']	= "Cmd write";
+				$parentShell->debugData[]	= $debugData;
 			}
-			$this->debugData[]	= $debugData;
 		}
 		return $return;
 	}
@@ -380,9 +423,17 @@ class Bash extends Base
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
 		if ($this->debug === true) {
-			$debugData			= $return;
-			$debugData['type']	= __FUNCTION__;
-			$this->debugData[]	= $debugData;
+			$debugData				= $return;
+			$debugData['type']		= __FUNCTION__;
+			$debugData['regex']		= $regex;
+			$debugData['timeout']	= $maxWaitMs;
+			
+			$parentShell	= $this->getParentShell();
+			if ($parentShell === null) {
+				$this->debugData[]			= $debugData;
+			} else {
+				$parentShell->debugData[]	= $debugData;
+			}
 		}
 		return $return;
 	}

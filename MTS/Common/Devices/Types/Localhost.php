@@ -99,6 +99,9 @@ class Localhost extends Device
 					$bashShell	= new \MTS\Common\Devices\Shells\Bash();
 					$bashShell->setPipes($stdPipe);
 					
+					//must issue one command to initialize the shell, otherwise it will not be torn down
+					$shellUser	= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getUsername($bashShell);
+					
 					return $bashShell;
 				}
 

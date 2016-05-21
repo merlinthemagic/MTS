@@ -7,6 +7,8 @@ class Base
 	protected $_childShell=null;
 	protected $_parentShell=null;
 	protected $_initialized=null;
+	public $debug=false;
+	public $debugData=array();
 	
 	public function __construct()
 	{
@@ -79,8 +81,6 @@ class Base
 		$parentShell	= $this->getParentShell();
 		if ($parentShell !== null) {
 			$parentShell->setChildShell(null);
-			//clear the parent shell for leftover logout information
-			$parentShell->exeCmd("");
 		}
 	}
 	public function setChildShell($shellObj)
@@ -91,9 +91,10 @@ class Base
 		} else {
 			$childShell	= $this->getChildShell();
 			if ($childShell !== null) {
-				$this->setChildShell($shellObj);
+				$childShell->setChildShell($shellObj);
 			} else {
-				$this->_childShell = $shellObj;
+				$this->_childShell 			= $shellObj;
+				$this->_childShell->debug	= $this->debug;
 			}
 		}
 	}

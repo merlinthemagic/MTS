@@ -25,4 +25,7 @@ if (defined('MTS_BASE_PATH') === false) {
 			}
 		}
 	});
+	
+	//set execution start microtime
+	define('MTS_EXECUTION_START', (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() / 1000));
 }
