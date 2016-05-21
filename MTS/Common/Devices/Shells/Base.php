@@ -14,6 +14,7 @@ class Base
 			$this->terminate();
 		}
 	}
+	
 	public function exeCmd($strCmd, $delimitor=null, $timeout=null)
 	{
 		//$strCmd: string command to execute

@@ -9,13 +9,18 @@ class Bash extends Base
 	private $_strCmdCommit=null;
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
+	private $_baseShellPPID=null;
 
 	public function __construct()
 	{
 		$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
 		$this->_strCmdCommit	= chr(13);
 		$this->_cmdMaxTimeout	= (ini_get('max_execution_time') - 0.5) * 1000;
+		
+		//on uncaught exception __destruct is not called, this leaves the shell running on the system we cant have that.
+		register_shutdown_function(array($this, '__destruct'));
 	}
+
 	public function setPipes($procPipeObj)
 	{
 		$this->_procPipe		= $procPipeObj;
@@ -244,10 +249,50 @@ class Bash extends Base
 			$this->_termBreakDetail['breakSeq'][]		= $breakerRaw[2];
 			$this->_termBreakDetail['breakSeq'][]		= " \r";
 			
-			//reset the output, shell is now initialized
+			if ($this->getParentShell() === null) {
+				//if there is no parent then this is the initial shell
+				//get the PID of the parent so we can kill that process if everything else fails.
+				$this->getPipes()->resetReadPosition();
+				
+				$strCmd		= "(cat /proc/$$/status | grep PPid | awk '{print $2}') && echo $$\"DUNBAR\"$$" . $this->_strCmdCommit;
+				$wData		= $this->shellWrite($strCmd);
+				if (strlen($wData['error']) > 0) {
+					$this->shellTerminate();
+					throw new \Exception(__METHOD__ . ">> Failed to get write parent process id command. Error: " . $wData['error']);
+				}
+				
+				$delimitor	= "[0-9]+DUNBAR[0-9]+";
+				$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
+				if (strlen($rData['error']) > 0) {
+					$this->shellTerminate();
+					throw new \Exception(__METHOD__ . ">> Failed to read parent process id command. Error: " . $rData['error']);
+				}
+				
+				$parentPID	= null;
+				$rLines		= array_reverse(explode("\n", $rData['data']));
+				foreach ($rLines as $index => $rLine) {
+					if (preg_match("/".$delimitor."/", $rLine)) {
+						//next line is the prompt
+						if (preg_match("/([0-9]+)/", $rLines[$index + 1], $rawPrompt)) {
+							//got the parent PPID
+							$this->_baseShellPPID	= $rawPrompt[1];
+							break;
+						}
+					}
+				}
+					
+				if ($this->_baseShellPPID === null) {
+					$this->shellTerminate();
+					throw new \Exception(__METHOD__ . ">> Failed to get parent process id");
+				}
+			}
+			
+			//reset the output so we have a clean beginning
 			$this->getPipes()->resetReadPosition();
 			
+			//shell is now initialized
 			$this->_initialized 			= true;
+			
 		} elseif ($this->getInitialized() === false) {
 			throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot initiate");
 		}
@@ -255,21 +300,70 @@ class Bash extends Base
 	protected function shellTerminate()
 	{
 		if ($this->getInitialized() === true || $this->getInitialized() == "setup") {
-			$this->shellKillLastProcess();
 			
-			$strCmd		= "exit" . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
-				throw new \Exception(__METHOD__ . ">> Failed to write shell termination command. Error: " . $wData['error']);
+			$this->_initialized	= "terminating";
+			$termError	= null;
+			
+			try {
+			
+				$this->shellKillLastProcess();
+				
+				$strCmd		= "exit" . $this->_strCmdCommit;
+				$wData		= $this->shellWrite($strCmd);
+				if (strlen($wData['error']) > 0) {
+					throw new \Exception(__METHOD__ . ">> Failed to write shell termination command. Error: " . $wData['error']);
+				}
+				$delimitor	= "(screen is terminating)|(exit)";
+				$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
+				if (strlen($rData['error']) > 0) {
+					throw new \Exception(__METHOD__ . ">> Failed to receive shell termination result. Error: " . $rData['error']);
+				}
+				
+			} catch (\Exception $e) {
+				switch($e->getCode()){
+					default;
+					$termError	= $e;
+				}
 			}
-			$delimitor	= "(screen is terminating)|(exit)";
-			$rData		= $this->shellRead($delimitor, $this->_cmdMaxTimeout);
-			if (strlen($rData['error']) > 0) {
-				throw new \Exception(__METHOD__ . ">> Failed to receive shell termination result. Error: " . $rData['error']);
+
+			if ($this->_baseShellPPID !== null) {
+				//if we are the base shell lets make sure the process is dead
+				$cmdRunning	= "(kill -0 ".$this->_baseShellPPID." 2> /dev/null && echo \"Alive\" ) || echo \"Dead\"";
+				exec($cmdRunning, $pData);
+				
+				if (isset($pData[0])) {
+					if ($pData[0] == "Alive") {
+						
+						$cmdKillPath	= "which kill";
+						exec($cmdKillPath, $killPath);
+						
+						if (isset($killPath[0]) && strlen(trim($killPath[0])) > 0) {
+							$killPath	= trim($killPath[0]);
+							
+							//something went wrong in terminating the process, try and force it down
+							$cmdKill	= $killPath . " -SIGTERM " . $this->_baseShellPPID;
+							exec($cmdKill);
+							
+							exec($cmdRunning, $peData);
+							
+							if (isset($peData[0]) && trim($peData[0]) == "Dead") {
+								//successfully killed the process
+							} else {
+								throw new \Exception(__METHOD__ . ">> Failed to kill the shell. Process still alive, manual intervention required for PID: " . $this->_baseShellPPID);
+							}
+						}
+					}
+				}
 			}
+			
+			if ($termError !== null) {
+				throw $termError;
+			}
+			
 			$this->_initialized	= false;
 		}
 	}
+	
 	protected function shellKillLastProcess()
 	{
 		if ($this->getInitialized() !== null || $this->getInitialized() !== false) {

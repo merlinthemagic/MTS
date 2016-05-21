@@ -30,6 +30,10 @@ class Users extends Base
 					$suReturn			= $shellObj->exeCmd("su " . $username, "Password:");
 					$loginReturn		= $shellObj->exeCmd($password, $username);
 					
+					//remove the username and password, they are too sensetive to keep around in case the object is dumped
+					unset($this->_classStore['username']);
+					unset($this->_classStore['password']);
+					
 					$childShell			= new \MTS\Common\Devices\Shells\Bash();
 					$childShell->setParentShell($shellObj);
 					$shellObj->setChildShell($childShell);
