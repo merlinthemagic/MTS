@@ -62,9 +62,13 @@ class Bash extends Base
 		//this method should only be called from base::exeCmd()
 		//if this method is called directly it breaks the child shell logic
 		//all commands must be executed on the furthest child
-		
-		if ($this->getInitialized() !== true && $this->getInitialized() != 'setup') {
-			$this->shellInitialize();
+		if ($this->getInitialized() !== true) {
+			
+			if ($this->getInitialized() === false) {
+				throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot execute anymore commands.");
+			} else {
+				$this->shellInitialize();
+			}
 		}
 		if ($delimitor === null) {
 			$delimitorProvided	= false;
@@ -73,16 +77,20 @@ class Bash extends Base
 			$delimitorProvided	= true;
 		}
 		
-		//we dont want to issue new commands in the just before the server will issue a fatal error on exceeding
-		$rTimeout	= ($this->getMaxExecutionTime() - 1500);
-		if ($rTimeout > 0) {
-			if ($maxTimeout === null) {
-				$maxTimeout		= $rTimeout;
-			} elseif ($maxTimeout > $rTimeout) {
-				throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
-			}
+		if ($this->getInitialized()	== "terminating") {
+			$maxTimeout		= $this->getMaxExecutionTime();
 		} else {
-			throw new \Exception(__METHOD__ . ">> PHP max_execution_time about to be exceeded");
+			//we dont want to issue new commands in the just before the server will issue a fatal error on exceeding
+			$rTimeout	= ($this->getMaxExecutionTime() - 1500);
+			if ($rTimeout > 0) {
+				if ($maxTimeout === null) {
+					$maxTimeout		= $rTimeout;
+				} elseif ($maxTimeout > $rTimeout) {
+					throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
+				}
+			} else {
+				throw new \Exception(__METHOD__ . ">> PHP max_execution_time about to be exceeded");
+			}
 		}
 
 		$this->getPipes()->resetReadPosition();
@@ -242,7 +250,7 @@ class Bash extends Base
 						throw new \Exception(__METHOD__ . ">> Failed to get parent process id");
 					}
 				}
-				
+
 				//reset the output so we have a clean beginning
 				$this->getPipes()->resetReadPosition();
 				
@@ -257,57 +265,23 @@ class Bash extends Base
 					throw $e;
 				}
 			}
-			
-		} elseif ($this->getInitialized() === false) {
-			throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot initiate");
-		}
-	}
-	protected function shellKillLastProcess()
-	{
-		if ($this->getInitialized() !== null || $this->getInitialized() !== false) {
-	
-			//SIGINT current process
-			$strCmd		= chr(3);
-			$wData		= $this->shellWrite($strCmd);
-	
-			$strCmd		= $this->_strCmdCommit . "echo $$\"KILLLAST\"$$"  . $this->_strCmdCommit;
-			$wData		= $this->shellWrite($strCmd);
-			if (strlen($wData['error']) > 0) {
-				throw new \Exception(__METHOD__ . ">> Failed to write command that would kill last process. Error: " . $wData['error']);
-			}
-	
-			//let the process exit, this can take time. Append the delimitor since it must be end of line
-			//after ^C is issued
-			$delimitor	= "[0-9]+KILLLAST[0-9]+";
-			$rTimeout	= $this->getMaxExecutionTime();
-			$rData		= $this->shellRead($delimitor, $rTimeout);
-			if (strlen($rData['error']) > 0) {
-				throw new \Exception(__METHOD__ . ">> Failed to kill last process. Error: " . $rData['error'] . ", remaining exetime: " . $rTimeout);
-			}
 		}
 	}
 	protected function shellTerminate()
 	{
 		if ($this->getInitialized() === true || $this->getInitialized() == "setup") {
-			
 			$this->_initialized	= "terminating";
-			$termError	= null;
+			$termError			= null;
 			
 			try {
-			
-				$this->shellKillLastProcess();
+				//make sure the last command is dead
+				$this->killLastProcess();
 				
-				$strCmd		= "exit" . $this->_strCmdCommit;
-				$wData		= $this->shellWrite($strCmd);
-				if (strlen($wData['error']) > 0) {
-					throw new \Exception(__METHOD__ . ">> Failed to write shell termination command. Error: " . $wData['error']);
-				}
-				$delimitor	= "(screen is terminating)|(exit)";
-				$rData		= $this->shellRead($delimitor, $this->getMaxExecutionTime());
-				if (strlen($rData['error']) > 0) {
-					throw new \Exception(__METHOD__ . ">> Failed to receive shell termination result. Error: " . $rData['error']);
-				}
-				
+				//issue the exit
+				$strCmd		= "exit";
+				$delimitor	= "(screen is terminating)|(exit)|(logout)";
+				$this->exeCmd($strCmd, $delimitor);
+
 			} catch (\Exception $e) {
 				switch($e->getCode()){
 					default;
@@ -347,12 +321,20 @@ class Bash extends Base
 					}
 				}
 			}
-			
+
+			$this->_initialized	= false;
 			if ($termError !== null) {
 				throw $termError;
 			}
-			
-			$this->_initialized	= false;
+		}
+	}
+	protected function shellKillLastProcess()
+	{
+		if ($this->getInitialized() !== null && $this->getInitialized() !== false) {
+	
+			//SIGINT current process and get prompt
+			$strCmd		= chr(3) . $this->_strCmdCommit;
+			$this->exeCmd($strCmd);
 		}
 	}
 	private function shellWrite($strCmd)
@@ -376,13 +358,7 @@ class Bash extends Base
 			$debugData			= $return;
 			$debugData['cmd']	= $strCmd;
 			$debugData['type']	= __FUNCTION__;
-			
-			$parentShell	= $this->getParentShell();
-			if ($parentShell === null) {
-				$this->debugData[]			= $debugData;
-			} else {
-				$parentShell->debugData[]	= $debugData;
-			}
+			$this->addDebugData($debugData);
 		}
 		return $return;
 	}
@@ -427,13 +403,7 @@ class Bash extends Base
 			$debugData['type']		= __FUNCTION__;
 			$debugData['regex']		= $regex;
 			$debugData['timeout']	= $maxWaitMs;
-			
-			$parentShell	= $this->getParentShell();
-			if ($parentShell === null) {
-				$this->debugData[]			= $debugData;
-			} else {
-				$parentShell->debugData[]	= $debugData;
-			}
+			$this->addDebugData($debugData);
 		}
 		return $return;
 	}

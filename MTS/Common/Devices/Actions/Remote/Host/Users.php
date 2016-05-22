@@ -48,7 +48,7 @@ class Users extends Base
 							throw new \Exception(__METHOD__ . ">> User: " . $username . ", requires a password, but none provided, cannot change shell user");
 						} else {
 							
-							$regExPass	= "(".$username."|Authentication failure)";
+							$regExPass	= "(".$username."@|Authentication failure)";
 							$passReturn	= $shellObj->exeCmd($password, $regExPass);
 							preg_match("/".$regExPass."/", $passReturn, $returnPass);
 							
@@ -70,7 +70,6 @@ class Users extends Base
 
 					if ($success === true) {
 						$childShell			= new \MTS\Common\Devices\Shells\Bash();
-						$childShell->setParentShell($shellObj);
 						$shellObj->setChildShell($childShell);
 							
 						//we must issue at least one command to initialize the new shell, because it is already running

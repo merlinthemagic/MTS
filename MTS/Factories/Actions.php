@@ -38,4 +38,11 @@ class Actions
 		}
 		return $this->_classStore[__METHOD__];
 	}
+	public function getRemoteConnectionsSsh()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Remote\Connections\Ssh();
+		}
+		return $this->_classStore[__METHOD__];
+	}
 }

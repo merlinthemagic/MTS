@@ -68,6 +68,16 @@ $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false
 Is it safe to allow sudo to python or pass root credentials in code?
 The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now you have the choice.
 
+<h3>Remote Shells:</h3>
+
+<h4>SSH:</h4>
+You can also get a shell to a remote server through SSH if you like. Here is how:
+<pre>
+//Example
+$shell = \MTS\Factories::getDevices()->getRemoteHost('10.25.22.63')->getShellBySsh('root', 'secretPassword');
+</pre>
+
+The returned shell can be used just like a local shell
 
 <h3>Requirements:</h3>
 Tested working against the following operating systems and versions.
@@ -94,7 +104,7 @@ sudo
 </pre>
 
 
-<h3>Installation</h3>
+<h3>Installation:</h3>
 
 Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
@@ -138,7 +148,7 @@ in that case the delimitor should most likely be 'Password:', since doing a ssh 
 
 Note: If you plan on opening i.e. ssh connections or nesting a screen instance or changing shells, it will be your responsibillity to exit those sessions.
 The process can only exit successfully if the shell contains the same bash shell as when it started. If you leave the shell inside i.e. screen then the process
-never terminates and will need to be terminated manually, by you.  
+may never terminate and would need to be terminated manually by you.  
 
 
 <h5>The timeout:</h5>
@@ -170,7 +180,7 @@ Structure your commands the same way you would if you sat at the console and ent
 Figuring out what happens when a command fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
 
 <pre>
-$shell->debug	= true;
+$shell->setDebug(true);
 
 try {
 

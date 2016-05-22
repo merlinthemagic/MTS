@@ -17,8 +17,27 @@ class Base
 	}
 	public function __destruct()
 	{
-		if ($this->getInitialized() === true) {
+		if ($this->_parentShell === null && $this->getInitialized() === true) {
+			//destruction should only be triggered in the initial shell.
+			//that way we get an orderly shutdown of nested shells
 			$this->terminate();
+		}
+	}
+	public function setDebug($bool)
+	{
+		$this->debug	= $bool;
+		$childShell		= $this->getChildShell();
+		if ($childShell !== null && $childShell->debug !== $bool) {
+			$childShell->setDebug($bool);
+		}
+	}
+	public function addDebugData($debugData)
+	{
+		$parentShell		= $this->getParentShell();
+		if ($parentShell === null) {
+			$this->debugData[]	= $debugData;
+		} else {
+			$parentShell->addDebugData($debugData);
 		}
 	}
 	
@@ -61,26 +80,52 @@ class Base
 		$childShell	= $this->getChildShell();
 		if ($childShell !== null) {
 			//must execute on child as it rides on top of this shell
-			return $childShell->killLastProcess();
+			$childShell->killLastProcess();
 		} else {
 			$this->shellKillLastProcess();
 		}
-		
 	}
 	public function terminate()
 	{
-		//child shells must be shutdown before this
-		$childShell	= $this->getChildShell();
-		if ($childShell !== null) {
-			$childShell->terminate();
+		$childError	= null;
+		$ownError	= null;
+		try {
+			//child shells must be shutdown before this
+			$childShell	= $this->getChildShell();
+			if ($childShell !== null) {
+				$childShell->terminate();
+			}
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				$childError = $e;
+			}
 		}
 		
-		$this->shellTerminate();
-		
+		try {
+			
+			$this->shellTerminate();
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				$ownError = $e;
+			}
+		}
+
 		//tell the parent we are shutdown
 		$parentShell	= $this->getParentShell();
 		if ($parentShell !== null) {
 			$parentShell->setChildShell(null);
+		}
+		
+		//finish by throwing the errors. It is crucial that the parent
+		//is informed it no longer has a child, even though it may have failed 
+		//some part of the termination process. otherwise commands are still passed upstream
+		//and the initial shell will never get a chance to terminate
+		if ($childError !== null) {
+			throw $childError;
+		} elseif ($ownError !== null) {
+			throw $ownError;
 		}
 	}
 	public function setChildShell($shellObj)
@@ -94,7 +139,8 @@ class Base
 				$childShell->setChildShell($shellObj);
 			} else {
 				$this->_childShell 			= $shellObj;
-				$this->_childShell->debug	= $this->debug;
+				$this->_childShell->setDebug($this->debug);
+				$this->_childShell->setParentShell($this);
 			}
 		}
 	}
@@ -104,6 +150,7 @@ class Base
 	}
 	public function setParentShell($shellObj)
 	{
+		//this should only be set by the parent shell itself
 		$this->_parentShell	= $shellObj;
 	}
 	public function getParentShell()
