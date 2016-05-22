@@ -140,20 +140,20 @@ Is the command you want to execute.
 
 <h5>The delimitor:</h5>
 Is a regular expression that is compared to the return data, once the expression is matched the data is returned.
-By default the delimitor is set to a custom shell prompt determined by the shell class. so dont mess with the PS1 variable.
+By default the delimitor is set to a custom shell prompt determined by the shell class, so dont mess with the PS1 variable.
 
 If you have a command that you want returned once the timeout expires you set it to false.
-You would also change the delimitor if the command you are executing will not end in a prompt. One example could be you are doing a ssh session to another server.
-in that case the delimitor should most likely be 'Password:', since doing a ssh login will next prompt you for a password.
+You would also change the delimitor if the command you are executing will not end in a prompt. One example could be you are doing a telnet session to another server.
+in that case the delimitor should most likely be 'Password:', since doing a telnet login might prompt you for a password after the initial connect.
 
-Note: If you plan on opening i.e. ssh connections or nesting a screen instance or changing shells, it will be your responsibillity to exit those sessions.
+Note: If you plan on opening i.e. telnet connections or nesting a screen instance or changing shells, it will be your responsibillity to exit those sessions.
 The process can only exit successfully if the shell contains the same bash shell as when it started. If you leave the shell inside i.e. screen then the process
-may never terminate and would need to be terminated manually by you.  
+may never terminate and would need to be terminated manually by you.
 
 
 <h5>The timeout:</h5>
 Is the absolute longest the current command is allowed to run. This argument is in mili seconds.
-By default this is set to 500 ms shorter than the 'max_execution_time'.
+By default this is set to what remains of the 'max_execution_time'.
 
 You would change this argument to 0 if you simply want to trigger the command and do not want any return.
 If you have a command that runs for a long time and you just want the first 5 seconds of return then you set the delimitor to false and timeout to 5000.

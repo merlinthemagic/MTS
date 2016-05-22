@@ -12,7 +12,7 @@ class Base
 	
 	public function __construct()
 	{
-		//on uncaught exception __destruct is not called, this leaves the shell running on the system we cant have that.
+		//on uncaught exception __destruct is not called, this leaves the shell as a zombie running on the system we cant have that.
 		register_shutdown_function(array($this, '__destruct'));
 	}
 	public function __destruct()
@@ -116,6 +116,7 @@ class Base
 		$parentShell	= $this->getParentShell();
 		if ($parentShell !== null) {
 			$parentShell->setChildShell(null);
+			$parentShell->exeCmd("");
 		}
 		
 		//finish by throwing the errors. It is crucial that the parent

@@ -37,7 +37,7 @@ class Ssh extends Base
 				
 				$connCmd			= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
 				
-				$regExConn		= "(".$ipaddress."'s password:|No route to host)";
+				$regExConn		= "(".$ipaddress."'s password:|No route to host|Could not resolve hostname)";
 				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn);
 				
 				preg_match("/".$regExConn."/", $connReturn, $returnConn);
@@ -81,6 +81,8 @@ class Ssh extends Base
 					
 				} elseif ($returnConn[1] == "No route to host") {
 					throw new \Exception(__METHOD__ . ">> SSH: No route to host");
+				} elseif ($returnConn[1] == "Could not resolve hostname") {
+					throw new \Exception(__METHOD__ . ">> SSH: Could not resolve hostname: " . $ipaddress);
 				}
 			}
 		}

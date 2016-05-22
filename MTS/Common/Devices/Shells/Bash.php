@@ -30,6 +30,10 @@ class Bash extends Base
 		$curRunTime				= ((\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() / 1000) - MTS_EXECUTION_START);
 		$this->_cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
 		
+		if ($this->_cmdMaxTimeout < 0) {
+			$this->_cmdMaxTimeout = 0;
+		}
+		
 		return $this->_cmdMaxTimeout;
 	}
 	public function getTerminalWidth()
@@ -76,21 +80,11 @@ class Bash extends Base
 		} else {
 			$delimitorProvided	= true;
 		}
-		
-		if ($this->getInitialized()	== "terminating") {
+
+		if ($maxTimeout === null) {
 			$maxTimeout		= $this->getMaxExecutionTime();
-		} else {
-			//we dont want to issue new commands in the just before the server will issue a fatal error on exceeding
-			$rTimeout	= ($this->getMaxExecutionTime() - 1500);
-			if ($rTimeout > 0) {
-				if ($maxTimeout === null) {
-					$maxTimeout		= $rTimeout;
-				} elseif ($maxTimeout > $rTimeout) {
-					throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
-				}
-			} else {
-				throw new \Exception(__METHOD__ . ">> PHP max_execution_time about to be exceeded");
-			}
+		} elseif ($maxTimeout > $rTimeout) {
+			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
 		}
 
 		$this->getPipes()->resetReadPosition();
