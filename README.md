@@ -63,10 +63,13 @@ $shell    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false
 
 //Pass that shell to the following function with root credentials.
 \MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
+
+$return1  = $shell->exeCmd('whoami');
+echo $return1; //root
 </pre>
 
 Is it safe to allow sudo to python or pass root credentials in code?
-The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now you have the choice.
+The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now it is your choice.
 
 <h3>Remote Shells:</h3>
 
@@ -74,7 +77,7 @@ The answer is of course not, but if you need root access it has inherent risk. T
 You can also get a shell to a remote server through SSH if you like. Here is how:
 <pre>
 //Example
-$shell = \MTS\Factories::getDevices()->getRemoteHost('10.25.22.63')->getShellBySsh('root', 'secretPassword');
+$shell = \MTS\Factories::getDevices()->getRemoteHost('ip_address')->getShellBySsh('username', 'password');
 </pre>
 
 The returned shell can be used just like a local shell
