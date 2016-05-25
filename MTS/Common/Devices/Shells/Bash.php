@@ -40,7 +40,7 @@ class Bash extends Base
 	{
 		$strCmd		= "echo \$COLUMNS";
 		$reData		= $this->exeCmd($strCmd, null, null);
-			
+
 		if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
 			return $rawColCount[1];
 		} else {
@@ -215,6 +215,10 @@ class Bash extends Base
 				}
 				
 				//shell is now usable
+				
+				//just a tiny sleep (1 ms) to make sure the last command has completed its prompt
+				//this seems to only be needed on Arch, but i imagine that other busy servers will encounter the same issue.
+				usleep(1000);
 				$columnCount	= $this->getTerminalWidth();
 				$repeatChar		= "A";
 				$repeatCount	= $columnCount * 2;

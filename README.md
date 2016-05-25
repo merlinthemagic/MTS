@@ -89,6 +89,7 @@ Centos 6, 7.
 RedHat Enterprise 6.
 Debian 8.
 Ubuntu 16.
+Arch 2016-05-01
 </pre>
 
 It should work against other versions as long as they are the same flavor of Linux.

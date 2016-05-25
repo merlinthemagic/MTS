@@ -41,14 +41,28 @@ class OperatingSystem extends Base
 				}
 					
 				if ($cReturn !== null) {
-					preg_match("/VERSION_ID=\"([0-9]+)/", $cReturn, $rawMajorVersion);
-					preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu)\"/", $cReturn, $rawName);
-
+					preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/", $cReturn, $rawName);
+					
 					if (isset($rawName[1]) === true) {
 						$osName				= strtolower($rawName[1]);
 					}
-					if (isset($rawMajorVersion[1]) === true) {
-						$osMajorVersion		= $rawMajorVersion[1];
+					
+					if ($osName == 'arch linux') {
+						$cmdString		= 'cat /proc/version';
+						$cReturn		= $this->shellExec($cmdString);
+						
+						preg_match("/([0-9]{8})/", $cReturn, $rawMajorVersion);
+						
+						if (isset($rawMajorVersion[1]) === true) {
+							$osMajorVersion		= $rawMajorVersion[1];
+						}
+						
+					} else {
+						preg_match("/VERSION_ID=\"([0-9]+)/", $cReturn, $rawMajorVersion);
+						
+						if (isset($rawMajorVersion[1]) === true) {
+							$osMajorVersion		= $rawMajorVersion[1];
+						}
 					}
 				}
 			}
@@ -70,6 +84,9 @@ class OperatingSystem extends Base
 						$osObj->setMajorVersion($osMajorVersion);
 					} elseif ($osName == 'ubuntu') {
 						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\UbuntuBase();
+						$osObj->setMajorVersion($osMajorVersion);
+					} elseif ($osName == 'arch linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\ArchBase();
 						$osObj->setMajorVersion($osMajorVersion);
 					}
 				}

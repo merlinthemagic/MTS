@@ -133,6 +133,8 @@
 					echo "yum -y install python\n\n";
 				} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 					echo "apt-get -y install python\n\n";
+				} elseif ($osName == 'arch') {
+					echo "pacman -S python\n\n";
 				} else {
 					echo "Expand to handle OS name:" . getOS()->getName() . "\n\n";
 				}
@@ -151,6 +153,8 @@
 					echo "yum -y install screen\n\n";
 				} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 					echo "apt-get -y install screen\n\n";
+				} elseif ($osName == 'arch') {
+					echo "pacman -S python\n\n";
 				} else {
 					echo "Expand to handle OS name:" . getOS()->getName() . "\n\n";
 				}
@@ -199,6 +203,8 @@
 						echo "yum -y install sudo\n\n";
 					} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 						echo "apt-get -y install sudo\n\n";
+					} elseif ($osName == 'arch') {
+						echo "pacman -S sudo\n\n";
 					} else {
 						echo "Expand to handle OS name:" . getOS()->getName() . "\n\n";
 					}
@@ -333,6 +339,8 @@
 					$errorMsg	.= "yum -y install python";
 				} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 					$errorMsg	.= "apt-get -y install python";
+				} elseif ($osName == 'arch') {
+					$errorMsg	.= "pacman -S python";
 				} else {
 					$errorMsg	.= "Expand to handle OS name:" . getOS()->getName() . "";
 				}
@@ -350,6 +358,8 @@
 					$errorMsg	.= "yum -y install screen";
 				} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 					$errorMsg	.= "apt-get -y install screen";
+				} elseif ($osName == 'arch') {
+					$errorMsg	.= "pacman -S screen";
 				} else {
 					$errorMsg	.= "Expand to handle OS name:" . getOS()->getName() . "";
 				}
@@ -391,6 +401,8 @@
 						$warningMsg	.= "yum -y install sudo";
 					} elseif ($osName == 'debian' || $osName == 'ubuntu') {
 						$warningMsg	.= "apt-get -y install sudo";
+					} elseif ($osName == 'arch') {
+						$warningMsg	.= "pacman -S sudo";
 					} else {
 						$warningMsg	.= "Expand to handle OS name:" . getOS()->getName() . "";
 					}
