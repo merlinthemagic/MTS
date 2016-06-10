@@ -1,15 +1,19 @@
 <?php
 //© 2016 Martin Madsen
 
-//setup the MTS tool kit for use
+//setup the MTS (Merlin Tool Set) for use
 
 //set the base path to MTS
 if (defined('MTS_BASE_PATH') === false) {
 	$mtsBasePath	= realpath(dirname(__FILE__));
-	define('MTS_WORK_PATH', $mtsBasePath . DIRECTORY_SEPARATOR . "WorkDirectory");
+	
+	//this is the directory used for all temp files. There seems to be a problem
+	//with file attributes being updated quickly enough when the underlying FS is tempFS like /tmp/
+	$mtsWorkPath	= $mtsBasePath . DIRECTORY_SEPARATOR . "WorkDirectory";
+	define('MTS_WORK_PATH', $mtsWorkPath);
 
-	$mtsBasePath	= rtrim($mtsBasePath, "MTS" . DIRECTORY_SEPARATOR);
-	define('MTS_BASE_PATH', $mtsBasePath);
+	$mtsClassPath	= rtrim($mtsBasePath, "MTS" . DIRECTORY_SEPARATOR);
+	define('MTS_BASE_PATH', $mtsClassPath);
 	
 	//register the autoloader
 	spl_autoload_register(function($className)
@@ -27,5 +31,5 @@ if (defined('MTS_BASE_PATH') === false) {
 	});
 	
 	//set execution start microtime
-	define('MTS_EXECUTION_START', (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() / 1000));
+	define('MTS_EXECUTION_START', \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime());
 }

@@ -58,7 +58,7 @@ class Files
 		return $procPipe;
 	}
 	
-	
+	//Tools
 	public function getDirectoriesTool()
 	{
 		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
@@ -72,5 +72,23 @@ class Files
 			$this->_classStore[__METHOD__]	= new \MTS\Common\Tools\FileSystems\Files();
 		}
 		return $this->_classStore[__METHOD__];
+	}
+	
+	//vendor Files
+	public function getVendorFile($name)
+	{
+		$name	= strtolower($name);
+		if ($name == "pjslinux64") {
+			$vendorPath		= $this->getDirectory(MTS_BASE_PATH . DIRECTORY_SEPARATOR . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
+			return $this->getFile("PJSLinux64", $vendorPath->getPathAsString());
+		} elseif ($name == "pjslinux32") {
+			$vendorPath		= $this->getDirectory(MTS_BASE_PATH . DIRECTORY_SEPARATOR . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
+			return $this->getFile("PJSLinux32", $vendorPath->getPathAsString());
+		} elseif ($name == "pjsctrl") {
+			$vendorPath		= $this->getDirectory(MTS_BASE_PATH . DIRECTORY_SEPARATOR . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
+			return $this->getFile("PJSCtrl.js", $vendorPath->getPathAsString());
+		} else {
+			throw new \Exception(__METHOD__ . ">> Vendor File Name: ".$name.", not defined");
+		}
 	}
 }

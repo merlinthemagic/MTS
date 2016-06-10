@@ -86,6 +86,26 @@ class Files
 			return $byteSize;
 		}
 	}
+	public function setContent($fileObj)
+	{
+		$exist	= $this->isFile($fileObj, false);
+		if ($exist === false) {
+			$this->create($fileObj);
+		} else {
+			//empty the file
+			$f = @fopen($fileObj->getPathAsString(), "r+");
+			if ($f !== false) {
+				ftruncate($f, 0);
+				fclose($f);
+			} else {
+				throw new \Exception(__METHOD__ . ">> Failed to open file to truncate: " . $fileObj->getPathAsString());
+			}
+		}
+		
+		if ($fileObj->getContent() !== null) {
+			$this->appendContent($fileObj);
+		}
+	}
 	public function getContent($fileObj, $startByte=null, $endByte=null)
 	{
 		$this->isFile($fileObj, true);

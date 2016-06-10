@@ -5,6 +5,7 @@ namespace MTS\Common\Data\Computer\OperatingSystems\Linux;
 class Base
 {
 	protected $_mVersion=null;
+	protected $_architecture=null;
 	
 	public function getType()
 	{
@@ -17,5 +18,13 @@ class Base
 	public function getMajorVersion()
 	{
 		return $this->_mVersion;
+	}
+	public function setArchitecture($arch)
+	{
+		$this->_architecture	= $arch;
+	}
+	public function getArchitecture()
+	{
+		return $this->_architecture;
 	}
 }

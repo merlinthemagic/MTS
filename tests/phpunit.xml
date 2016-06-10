@@ -1,0 +1,14 @@
+<phpunit backupGlobals="false"
+   		 bootstrap="Bootstrap.php"
+         backupStaticAttributes="false"
+         syntaxCheck="false"
+         colors="true">
+	<testsuites>
+	    <testsuite name="Factories">
+			<directory suffix=".php">Factories</directory>
+		</testsuite>
+		<testsuite name="LocalHost">
+			<directory suffix=".php">Common/Devices/Local/Host</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>

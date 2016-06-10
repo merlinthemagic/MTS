@@ -41,15 +41,31 @@ class ProcessPipe
 	}
 	public function getOutputFileSize()
 	{
-		//clear cache before getting size, php tends to cache file attrbutes
-		clearstatcache(true, $this->getOutputFile()->getPathAsString());
-		return \MTS\Factories::getFiles()->getFilesTool()->getSize($this->getOutputFile());
+		try {
+			//clear cache before getting size, php tends to cache file attrbutes
+			clearstatcache(true, $this->getOutputFile()->getPathAsString());
+			return \MTS\Factories::getFiles()->getFilesTool()->getSize($this->getOutputFile());
+		
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
 	}
 	public function getErrorFileSize()
 	{
-		//clear cache before getting size, php tends to cache file attrbutes
-		clearstatcache(true, $this->getErrorFile()->getPathAsString());
-		return \MTS\Factories::getFiles()->getFilesTool()->getSize($this->getErrorFile());
+		try {
+			//clear cache before getting size, php tends to cache file attrbutes
+			clearstatcache(true, $this->getErrorFile()->getPathAsString());
+			return \MTS\Factories::getFiles()->getFilesTool()->getSize($this->getErrorFile());
+		
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
 	}
 	public function resetReadPosition()
 	{
@@ -59,39 +75,61 @@ class ProcessPipe
 
 	public function strWrite($data)
 	{
-		\MTS\Factories::getFiles()->getFilesTool()->isFile($this->getInputFile(), true);
-		$this->getInputFile()->setContent($data);
-		\MTS\Factories::getFiles()->getFilesTool()->appendContent($this->getInputFile());
-		$this->getInputFile()->setContent(null);
+		try {
+			\MTS\Factories::getFiles()->getFilesTool()->isFile($this->getInputFile(), true);
+			$this->getInputFile()->setContent($data);
+			\MTS\Factories::getFiles()->getFilesTool()->appendContent($this->getInputFile());
+			$this->getInputFile()->setContent(null);
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
 	}
 	public function strRead()
 	{
-		$content	= "";
-		$sizeBytes	= $this->getOutputFileSize();
-		if ($this->_stdoutPos < $sizeBytes) {
-			//new content avaliable
-			\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getOutputFile(), $this->_stdoutPos, $sizeBytes);
-			$this->_stdoutPos	= $sizeBytes;
-			
-			$content	= $this->getOutputFile()->getContent();
-			$this->getOutputFile()->setContent(null);
+		try {
+			$content	= "";
+			$sizeBytes	= $this->getOutputFileSize();
+			if ($this->_stdoutPos < $sizeBytes) {
+				//new content avaliable
+				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getOutputFile(), $this->_stdoutPos, $sizeBytes);
+				$this->_stdoutPos	= $sizeBytes;
+				
+				$content	= $this->getOutputFile()->getContent();
+				$this->getOutputFile()->setContent(null);
+			}
+	
+			return $content;
+		
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
 		}
-
-		return $content;
 	}
 	public function strErrorRead()
 	{
-		$content	= "";
-		$sizeBytes	= $this->getErrorFileSize();
-		if ($this->_stderrPos < $sizeBytes) {
-			//new content avaliable
-			\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getErrorFile(), $this->_stderrPos, $sizeBytes);
-			$this->_stderrPos	= $sizeBytes;
-				
-			$content	= $this->getErrorFile()->getContent();
-			$this->getErrorFile()->setContent(null);
+		try {
+			$content	= "";
+			$sizeBytes	= $this->getErrorFileSize();
+			if ($this->_stderrPos < $sizeBytes) {
+				//new content avaliable
+				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getErrorFile(), $this->_stderrPos, $sizeBytes);
+				$this->_stderrPos	= $sizeBytes;
+					
+				$content	= $this->getErrorFile()->getContent();
+				$this->getErrorFile()->setContent(null);
+			}
+			
+			return $content;
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
 		}
-		
-		return $content;
 	}
 }

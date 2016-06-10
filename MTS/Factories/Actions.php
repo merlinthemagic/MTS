@@ -21,6 +21,34 @@ class Actions
 		}
 		return $this->_classStore[__METHOD__];
 	}
+	public function getLocalProcesses()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Local\Host\Processes();
+		}
+		return $this->_classStore[__METHOD__];
+	}
+	public function getLocalShell()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Local\Host\Shell();
+		}
+		return $this->_classStore[__METHOD__];
+	}
+	public function getLocalBrowser()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Local\Host\Browser();
+		}
+		return $this->_classStore[__METHOD__];
+	}
+	public function getLocalPhpEnvironment()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Local\Host\PhpEnvironment();
+		}
+		return $this->_classStore[__METHOD__];
+	}
 	
 	
 	//remote actions

@@ -8,10 +8,10 @@ class Epoch
 	{
 		//time of day micro secs varies in length
 		$stime		= gettimeofday();
-		return intval($stime["sec"] . str_repeat(0, (6 - strlen($stime["usec"]))) . $stime["usec"]);
+		return ($stime["sec"] . "." . str_repeat(0, (6 - strlen($stime["usec"]))) . $stime["usec"]);
 	}
 	public function getCurrentMiliTime()
 	{
-		return intval($this->getCurrentMicroTime() / 1000);
+		return substr($this->getCurrentMicroTime(), 0, -3);
 	}
 }

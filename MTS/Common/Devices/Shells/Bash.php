@@ -10,6 +10,7 @@ class Bash extends Base
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
+	private $_terminating=false;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -27,7 +28,7 @@ class Bash extends Base
 	public function getMaxExecutionTime()
 	{
 		//returns time until max_execution_time is exceeded
-		$curRunTime				= ((\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() / 1000) - MTS_EXECUTION_START);
+		$curRunTime				= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
 		$this->_cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
 		
 		if ($this->_cmdMaxTimeout < 0) {
@@ -81,8 +82,9 @@ class Bash extends Base
 			$delimitorProvided	= true;
 		}
 
+		$rTimeout	= $this->getMaxExecutionTime();
 		if ($maxTimeout === null) {
-			$maxTimeout		= $this->getMaxExecutionTime();
+			$maxTimeout		= $rTimeout;
 		} elseif ($maxTimeout > $rTimeout) {
 			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
 		}
@@ -267,62 +269,60 @@ class Bash extends Base
 	}
 	protected function shellTerminate()
 	{
-		if ($this->getInitialized() === true || $this->getInitialized() == "setup") {
-			$this->_initialized	= "terminating";
-			$termError			= null;
-			
+		
+		if ($this->_terminating === false) {
+			$this->_terminating		= true;
+				
+			$errObj	= null;
 			try {
+		
+		
+				if ($this->getInitialized() !== true) {
+					//in case the shell was setup, but no commands were
+					//issued, we will need to initiate before terminating
+					$this->shellInitialize();
+				}
+		
 				//make sure the last command is dead
 				$this->killLastProcess();
 				
 				//issue the exit
 				$strCmd		= "exit";
-				$delimitor	= "(screen is terminating)|(exit)|(logout)";
+				$delimitor	= "(screen is terminating)|(logout)";
 				$this->exeCmd($strCmd, $delimitor);
-
+		
 			} catch (\Exception $e) {
+					
 				switch($e->getCode()){
 					default;
-					$termError	= $e;
+					$errObj	= $e;
 				}
 			}
 
-			if ($this->_baseShellPPID !== null) {
-			
-				//if we are the base shell lets make sure the process is dead
-				$cmdRunning	= "(kill -0 ".$this->_baseShellPPID." 2> /dev/null && echo \"Alive\" ) || echo \"Dead\"";
-				exec($cmdRunning, $pData);
-				
-				if (isset($pData[0])) {
-					if ($pData[0] == "Alive") {
+			if ($errObj !== null) {
+				//something went wrong, try force killing the process
+				try {
+					
+					if ($this->_baseShellPPID !== null) {
 						
-						$cmdKillPath	= "which kill";
-						exec($cmdKillPath, $killPath);
-						
-						if (isset($killPath[0]) && strlen(trim($killPath[0])) > 0) {
-							$killPath	= trim($killPath[0]);
-							
-							//something went wrong in terminating the process, try and force it down
-							$cmdKill	= $killPath . " -SIGTERM " . $this->_baseShellPPID;
-							exec($cmdKill);
-							
-							//let the process die, before checking again
-							usleep(50000);
-							exec($cmdRunning, $peData);
-							
-							if (isset($peData[0]) && trim($peData[0]) == "Dead") {
-								//successfully killed the process
-							} else {
-								throw new \Exception(__METHOD__ . ">> Failed to kill the shell. Process still alive, manual intervention required for PID: " . $this->_baseShellPPID);
-							}
+						if ($this->debug === true) {
+							$this->addDebugData("Sending SIGTERM to process PID: " . $this->_baseShellPPID);
 						}
+						//if we are the base shell try to forcefully kill
+						\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->_baseShellPPID);
+						//success problem handled
+					}
+					
+					$this->_initialized	= false;
+
+				} catch (\Exception $e) {
+					switch($e->getCode()){
+						default;
+						throw $errObj;
 					}
 				}
-			}
-
-			$this->_initialized	= false;
-			if ($termError !== null) {
-				throw $termError;
+			} else {
+				$this->_initialized	= false;
 			}
 		}
 	}
@@ -362,6 +362,8 @@ class Bash extends Base
 	}
 	private function shellRead($regex=false, $maxWaitMs=0)
 	{
+		//getCurrentMiliTime returns a decimal
+		$maxWaitMs			= $maxWaitMs / 1000;
 		$return['error']	= null;
 		$return['data']		= null;
 		$lDataTime			= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();

@@ -24,7 +24,8 @@ class OperatingSystem extends Base
 
 			$osObj				= null;
 			
-			//we need 3 things to determine the correct class of OS
+			//we need 4 things to determine the correct class of OS
+			$osArch				= null;
 			$osType				= null;
 			$osName				= null;
 			$osMajorVersion		= null;
@@ -32,6 +33,17 @@ class OperatingSystem extends Base
 			$osDetail			= php_uname();
 			if (preg_match("/^Linux\s/", $osDetail)) {
 				$osType			= 'linux';
+				
+				preg_match("/(x86_64|i386|i686)/i", $osDetail, $rawArch);
+				if (isset($rawArch[1])) {
+					$rawArch	= strtolower($rawArch[1]);
+					if ($rawArch == "x86_64") {
+						$osArch	= 64;
+					} elseif ($rawArch == "i386" || $rawArch == "i686") {
+						$osArch	= 32;
+					}
+				}
+				
 				$cmdString		= 'cat /etc/os-release';
 				$cReturn		= $this->shellExec($cmdString);
 				
@@ -71,30 +83,30 @@ class OperatingSystem extends Base
 				$osType !== null
 				&& $osName !== null
 				&& $osMajorVersion !== null
+				&& $osArch !== null
 			) {
+				$osObj	= null;
 				if ($osType == 'linux') {
 					if ($osName == 'centos linux') {
 						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOSBase();
-						$osObj->setMajorVersion($osMajorVersion);
 					} elseif ($osName == 'red hat enterprise linux') {
 						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\RHELBase();
-						$osObj->setMajorVersion($osMajorVersion);
 					} elseif ($osName == 'debian gnu/linux') {
 						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\DebianBase();
-						$osObj->setMajorVersion($osMajorVersion);
 					} elseif ($osName == 'ubuntu') {
 						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\UbuntuBase();
-						$osObj->setMajorVersion($osMajorVersion);
 					} elseif ($osName == 'arch linux') {
 						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\ArchBase();
-						$osObj->setMajorVersion($osMajorVersion);
 					}
+				}
+				
+				if ($osObj !== null) {
+					$osObj->setMajorVersion($osMajorVersion);
+					$osObj->setArchitecture($osArch);
+					return $osObj;
 				}
 			}
 
-			if ($osObj !== null) {
-				return $osObj;
-			}
 		} elseif ($requestType == 'getUsername') {
 			
 			$osType		= $this->getLocalOsObj()->getType();

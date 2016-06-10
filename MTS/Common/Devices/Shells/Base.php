@@ -17,7 +17,7 @@ class Base
 	}
 	public function __destruct()
 	{
-		if ($this->_parentShell === null && $this->getInitialized() === true) {
+		if ($this->_parentShell === null) {
 			//destruction should only be triggered in the initial shell.
 			//that way we get an orderly shutdown of nested shells
 			$this->terminate();
