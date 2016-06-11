@@ -141,7 +141,7 @@ class Window
 	{
 		$this->_browserObj	= $browserObj;
 	}
-	private function getBrowser()
+	public function getBrowser()
 	{
 		return $this->_browserObj;
 	}
