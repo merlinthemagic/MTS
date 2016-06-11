@@ -371,14 +371,25 @@ function sendKeyPresses(cmdObj)
 
 		for (var i=0; i < keyCount; i++) {
 			var kp		= cmdObj.cmd.options.keys[i];
-			if (String(kp).toLowerCase() == "backspace") {
+			var kpLow	= String(kp).toLowerCase();
+			if (
+				kpLow == "backspace"
+				|| kpLow == "enter"
+				|| kpLow == "delete"
+				|| kpLow == "up"
+				|| kpLow == "down"
+				|| kpLow == "left"
+				|| kpLow == "right"
+				|| kpLow == "pageup"
+				|| kpLow == "pagedown"
+			) {
 				var result	= windowObj.pjsPage.sendEvent("keypress", windowObj.pjsPage.event.key[kp], modString);
 			} else {
 				var result	= windowObj.pjsPage.sendEvent("keypress", kp, modString);
 			}
 		}
 
-		//result is undefined, dont know how we could validate
+		//result is undefined, dont know how we could validate the job was done
 		cmdObj.result.code			= 200;
 		writeReturn(cmdObj);
 		processLoop();
@@ -525,11 +536,10 @@ function screenshot(cmdObj)
 			cmdObj.cmd.options.imgFormat != 'png'
 			&& cmdObj.cmd.options.imgFormat != 'jpeg'
 			&& cmdObj.cmd.options.imgFormat != 'gif'
-			&& cmdObj.cmd.options.imgFormat != 'pdf'
 		) {
 			throw "Invalid image format: " + cmdObj.cmd.options.imgFormat;
 		}
-		
+
 		cmdObj.result.data.image	= windowObj.pjsPage.renderBase64(cmdObj.cmd.options.imgFormat);
 		cmdObj.result.code			= 200;
 		writeReturn(cmdObj);

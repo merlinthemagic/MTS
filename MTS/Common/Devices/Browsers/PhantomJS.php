@@ -68,7 +68,7 @@ class PhantomJS extends Base implements BrowserInterface
 			$options					= array();
 			$options['imgFormat']		= strtolower($format);
 			
-			if (preg_match("/(png|jpeg|gif|pdf)/", $format) == 0) {
+			if (preg_match("/(png|jpeg|gif)/", $format) == 0) {
 				throw new \Exception(__METHOD__ . ">> Invalid image format: " . $format . ". Allowed: png|jpeg|gif|pdf");
 			}
 
@@ -89,14 +89,7 @@ class PhantomJS extends Base implements BrowserInterface
 	}
 	protected function browserCloseWindow($windowObj)
 	{
-		echo "\n <pre> \nClass: ".get_class($this)." \nMethod: ".__FUNCTION__. "  \n";
-		//print_r($_POST);
-		echo "\n not yet done \n";
-		//print_r($_GET);
-		echo "\n 3333 \n";
-		print_r($_POST);
-		echo "\n ".time()."</pre> \n ";
-		die;
+		//needs to be completed
 	}
 	public function getDom($windowObj)
 	{
@@ -335,6 +328,7 @@ class PhantomJS extends Base implements BrowserInterface
 			if ($this->debug === true) {
 				//read the debug file content into the file, the phantom JS process waits a bit before really exiting
 				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->debugFile);
+				$this->addDebugData("Debug File Start>>>\n" . $this->debugFile->getContent() . "\n<<<Debug File End");
 			}
 				
 			if ($errObj !== null) {

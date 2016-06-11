@@ -26,10 +26,13 @@ class Base
 	{
 		$this->debugData[]	= $debugData;
 	}
-	public function getNewWindow($url=null)
+	public function getNewWindow($url=null, $width=null, $height=null)
 	{
 		$newWindow	= new \MTS\Common\Devices\Browsers\Window();
 		$newWindow->setBrowser($this);
+		if ($width !== null && $height !== null) {
+			$newWindow->setSize($width, $height);
+		}
 		if ($url !== null) {
 			$newWindow->setURL($url);
 		}

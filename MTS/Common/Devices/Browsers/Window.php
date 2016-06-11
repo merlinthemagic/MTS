@@ -49,8 +49,9 @@ class Window
 	{
 		return $this->getBrowser()->setURL($this, $strUrl);
 	}
-	public function screenshot($format='png')
+	public function screenshot($format='jpeg')
 	{
+		//have noticed 'png' sometimes returns a broken image, not sure why
 		return $this->getBrowser()->screenshot($this, $format);
 	}
 	public function getDom()
