@@ -8,13 +8,12 @@ class Localhost extends Device
 	private $_classStore=array();
 	public $debug=false;
 	
-	public function getBrowser($browserName)
+	public function getBrowser($browserName='phantomjs')
 	{
-		//dont cache return new instance every time
 		return \MTS\Factories::getActions()->getLocalBrowser()->getBrowser($browserName, $this->debug);
 	}
 	
-	public function getShell($shellType, $asRoot=false)
+	public function getShell($shellType='bash', $asRoot=false)
 	{
 		//$asRoot
 		//setting this to true will return a shell where commands are executed as root if sudo is available.
@@ -22,8 +21,7 @@ class Localhost extends Device
 		
 		//if you do not have sudo setup you can still get a root shell by running the unpriviliged shellObj through this function later:
 		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
-		
-		//dont cache return new instance every time
+
 		return \MTS\Factories::getActions()->getLocalShell()->getShell($shellType, $asRoot, $this->debug);
 	}
 	public function getOS()
