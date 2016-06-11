@@ -150,7 +150,7 @@ Structure your commands the same way you would if you sat at the console and ent
 
 Figuring out what happens when a command fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
 
-<code>
+<pre>
 $errMsg	= null;
 try {
 
@@ -170,11 +170,11 @@ try {
 	}
 }
 
-echo "Start Debug>>>\n <code><pre> \n ";
+echo "Start Debug>>>\n &ltcode&gt&ltpre&gt \n ";
 echo "Exception Message: " . $errMsg;
 print_r($shellObj->debugData);
-echo "\n </pre></code> \n <<<End Debug";
-</code>
+echo "\n &lt/pre&gt&lt/code&gt \n <<<End Debug";
+</pre>
 
 
 <h2>A Headless Browser:</h2>
