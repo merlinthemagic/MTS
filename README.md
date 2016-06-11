@@ -2,10 +2,9 @@
 
 Simple, its a tool set for PHP. Currently comprised of two core components, shell and browser.
 
-My philosophy: <b>If it can be automated it should be. People do interesting work, computers push buttons</b>
+This project strives to give developers the tools that let them automate processes that were designed for people.
 
-This project strives to give developers the tools that let them automate processes that 
-were designed for people.
+My philosophy: <b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
 
 <h2>The Shell:</h2>
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
