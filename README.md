@@ -153,15 +153,12 @@ Figuring out what happens when a command fails can be a challenge, but if you en
 <code><pre>
 $errMsg	= null;
 try {
-
 	$localHost			= \MTS\Factories::getDevices()->getLocalHost();
 	$localHost->setDebug(true);
 	$shellObj			= $localHost->getShell('bash', false);
-
 	//execute the trouble command here
 	$data  = $shellObj->exeCmd("command_that_fails_unexpectedly");
 	$shellObj->terminate();
-
 } catch (\Exception $e) {
 	switch($e->getCode()){
 		default;
@@ -169,12 +166,10 @@ try {
 		$errMsg	= $e->getMessage();
 	}
 }
-
-echo "Start Debug>>>\n &ltcode&gt&ltpre&gt \n ";
+echo "Start Debug>>>\n <code><pre> \n ";
 echo "Exception Message: " . $errMsg;
 print_r($shellObj->debugData);
-echo "\n &lt/pre&gt&lt/code&gt \n <<<End Debug";
-
+echo "\n </pre></code> \n <<<End Debug";
 </pre></code>
 
 
