@@ -7,7 +7,7 @@ My philosophy: <b>If it can be automated it should be. People do interesting wor
 This project strives to give developers the tools that let them automate processes that 
 were designed for people.
 
-<h2>A Real Bash Shell:</h2>
+<h2>The Shell:</h2>
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
 Would it not be nice if the built in functions were more verbose. 
 
@@ -97,7 +97,7 @@ $shellObj = \MTS\Factories::getDevices()->getRemoteHost('ip_address')->getShellB
 The returned shell can be used just like a local shell
 
 <h3>Using commands:</h3>
-The project sets up a real bash shell inside a screen instance. When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
+When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
 
 The exeCmd() method takes 3 arguments.
 
@@ -165,7 +165,6 @@ try {
 } catch (\Exception $e) {
 	switch($e-&gtgetCode()){
 		default;
-		$shellObj-&gtterminate();
 		$errMsg	= $e-&gtgetMessage();
 	}
 }
@@ -176,7 +175,10 @@ echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
 </pre>
 
 
-<h2>A Headless Browser:</h2>
+
+
+
+<h2>The Browser:</h2>
 Ever needed to login to a webpage, navigate to a specific menu and retrive content and the page relies on AJAX?
 I have, tons of times, let me give you one example. 
 
@@ -357,7 +359,6 @@ try {
 } catch (\Exception $e) {
 	switch($e-&gtgetCode()){
 		default;
-		$browserObj-&gtterminate();
 		$errMsg	= $e-&gtgetMessage();
 	}
 }
