@@ -2,9 +2,9 @@
 
 Simple, its a tool set for PHP. Currently comprised of two core components, shell and browser.
 
-My philosophy: <b>People should do interesting work, computers should push buttons</b>
+My philosophy: <b>If it can be automated it should be. People do interesting work, computers push buttons</b>
 
-So if it can be automated it should be. This project strives to give developers the tools that let them automate processes that 
+This project strives to give developers the tools that let them automate processes that 
 were designed for people.
 
 <h2>A Real Bash Shell:</h2>
