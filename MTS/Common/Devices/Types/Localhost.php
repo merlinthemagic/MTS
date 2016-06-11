@@ -31,4 +31,8 @@ class Localhost extends Device
 		}
 		return $this->_classStore[__METHOD__];
 	}
+	public function setDebug($bool)
+	{
+		$this->debug	= $bool;
+	}
 }

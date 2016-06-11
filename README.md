@@ -2,12 +2,14 @@
 
 Simple, its a tool set for PHP. Currently comprised of two core components, shell and browser.
 
-My philosophy: <b>People should do interesting work, computers should push buttons</b> 
+My philosophy: <b>People should do interesting work, computers should push buttons</b>
+
 So if it can be automated it should be. This project strives to give developers the tools that let them automate processes that 
 were designed for people.
 
 <h2>A Real Bash Shell:</h2>
-The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? Would be nice if they were more verbose. 
+The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? Would be nice if the built in functions were more verbose. 
+
 More generally the shell in Linux is very powerful, but PHP never had a good way to interact with it.
 There are 100's of questions on sites like askubuntu.com or stackoverflow.com asking: my PHP script needs to run as root, how do I do it?
 There has never been an easy way to accomplish that. That is by design, of course, letting PHP anywhere near root presents real security issues.
@@ -60,7 +62,8 @@ Read the segment 'Using commands' below for more detail.
 
 Getting a shell with root privileges is easy and there are 2 ways to obtain it.
 
-Like i mentioned above, if you allowed sudo to python during the installation then the second argument on getShell() is all you need. But for those users who are not comfortable with that type of setup, there is another option. 
+Like i mentioned above, if you allowed sudo to python during the installation then the second argument on getShell() is all you need. 
+But for those users who are not comfortable with that type of setup, there is another option. 
 
 <pre>
 //Get a shell as the webserver user i.e. apache or www-data
@@ -78,7 +81,7 @@ echo $return1; //root
 We obtain a real shell by creating a Bash shell inside an instance of screen. 
 You can then interact with it through PHP, you control the terminal environment and all variables are maintained throughout the session.
 
-Is it safe to allow sudo to python or pass root credentials in code?
+In terms of security, is it safe to allow sudo to python or pass root credentials in code?
 The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now it is your choice.
 
 <h3>Remote Shells:</h3>
@@ -148,17 +151,21 @@ Structure your commands the same way you would if you sat at the console and ent
 Figuring out what happens when a command fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
 
 <pre>
-$shellObj->setDebug(true);
-
 $errMsg	= null;
 try {
 
+	$localHost			= \MTS\Factories::getDevices()->getLocalHost();
+	$localHost->setDebug(true);
+	$shellObj			= $localHost->getShell('bash', false);
+
 	//execute the trouble command here
 	$data  = $shellObj->exeCmd("command_that_fails_unexpectedly");
+	$shellObj->terminate();
 
 } catch (\Exception $e) {
 	switch($e->getCode()){
 		default;
+		$shellObj->terminate();
 		$errMsg	= $e->getMessage();
 	}
 }
@@ -314,6 +321,41 @@ if (count(childWindowObjs) > 0) {
 	//i.e. you can take a screen shot
 	$childImageData		= $childWindowObj->screenshot();
 }
+</pre>
+
+<h5>Debugging:</h5>
+
+Figuring out what happens when a call fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
+
+<pre>
+$errMsg	= null;
+try {
+
+	$localHost			= \MTS\Factories::getDevices()->getLocalHost();
+	$localHost->setDebug(true);
+
+	$browserObj		= $localHost->getBrowser('phantomjs');
+	
+	$myUrl			= "https://www.wikipedia.org/";
+	$windowObj		= $browserObj->getNewWindow($myUrl);
+
+	//execute the trouble command here i.e:
+	$funcReturn 	= $windowObj->callJSFunction("myHelloWorld");
+
+	$browserObj->terminate();
+	
+} catch (\Exception $e) {
+	switch($e->getCode()){
+		default;
+		$browserObj->terminate();
+		$errMsg	= $e->getMessage();
+	}
+}
+
+echo "Start Debug>>>\n <code><pre> \n ";
+echo "Exception Message: " . $errMsg;
+print_r($browserObj->debugData);
+echo "\n </pre></code> \n <<<End Debug";
 </pre>
 
 
