@@ -6,6 +6,7 @@ class Base
 {
 	public $debug=false;
 	public $debugData=array();
+	protected $_keepAlive=false;
 	protected $_initialized=null;
 	protected $_windowObjs=array();
 
@@ -16,11 +17,17 @@ class Base
 	}
 	public function __destruct()
 	{
-		$this->terminate();
+		if ($this->_keepAlive !== true) {
+			$this->terminate();
+		}
 	}
 	public function setDebug($bool)
 	{
 		$this->debug	= $bool;
+	}
+	public function setKeepalive($bool)
+	{
+		$this->_keepAlive	= $bool;
 	}
 	public function addDebugData($debugData)
 	{
