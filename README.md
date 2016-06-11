@@ -8,7 +8,8 @@ This project strives to give developers the tools that let them automate process
 were designed for people.
 
 <h2>A Real Bash Shell:</h2>
-The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? Would be nice if the built in functions were more verbose. 
+The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
+Would it not be nice if the built in functions were more verbose. 
 
 More generally the shell in Linux is very powerful, but PHP never had a good way to interact with it.
 There are 100's of questions on sites like askubuntu.com or stackoverflow.com asking: my PHP script needs to run as root, how do I do it?
@@ -384,15 +385,20 @@ PHP need only run as the standard webserver user, but the returned shell can hav
 
 Mandetory packages:
 <pre>
-php5 or newer, allowing exec().
+php5 (or newer)
+php must allow "exec()"
 python
 screen
+fontconfig
 </pre>
 
 Optional packages:
 <pre>
 sudo
+msttcore-fonts
 </pre>
+If browser screenshots are not rendering text on buttons you are most likely missing the correct fonts. 
+
 
 <h3>Perform Install:</h3>
 Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
