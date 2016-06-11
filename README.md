@@ -79,6 +79,7 @@ echo $return1; //root
 
 
 <h3>How It Works:</h3>
+PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
 We obtain a real shell by creating a Bash shell inside an instance of screen. 
 You can then interact with it through PHP, you control the terminal environment and all variables are maintained throughout the session.
 
@@ -390,7 +391,6 @@ Arch 2016-05-01
 </pre>
 
 It should work against other versions as long as they are the same flavor of Linux.
-PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
 
 Mandetory packages:
 <pre>
