@@ -185,12 +185,12 @@ and that process could only be done via a web page. Its a process that always ca
 Its always the one off, once a year processes that do.
 
 With this browser that process has been automated. Three weeks before new years eve, the system does a dry run to make sure the portal webpage has not changed.
-The staff get an alert if it changed so they can update the process (has not changed the last 5 years), otherwise the system automatically updates the token at 3am on new years while we are popping champagne.
+If it changed (has not in the last 5 years) the staff gets an alert so they can update the process, otherwise the system automatically updates the token at 3am on new years while we are popping champagne.
 
 Not a huge problem, but 15 minutes of coding and the system is truely automated.
 
 This component would not be possible without the awesome work done by the people who built <a href="http://phantomjs.org/">PhantomJS</a>.
-We are simply wrapping their work so it is easy for you to access using PHP. 
+This project simply wraps their work so it is easy for you to access using PHP. 
 
 <h3>Basic use:</h3>
 
@@ -329,33 +329,32 @@ Figuring out what happens when a call fails can be a challenge, but if you enabl
 $errMsg	= null;
 try {
 
-	$localHost			= \MTS\Factories::getDevices()->getLocalHost();
-	$localHost->setDebug(true);
+	$localHost			= \MTS\Factories::getDevices()-&gtgetLocalHost();
+	$localHost-&gtsetDebug(true);
 
-	$browserObj		= $localHost->getBrowser('phantomjs');
+	$browserObj		= $localHost-&gtgetBrowser('phantomjs');
 	
 	$myUrl			= "https://www.wikipedia.org/";
-	$windowObj		= $browserObj->getNewWindow($myUrl);
+	$windowObj		= $browserObj-&gtgetNewWindow($myUrl);
 
 	//execute the trouble command here i.e:
-	$funcReturn 	= $windowObj->callJSFunction("myHelloWorld");
+	$funcReturn 	= $windowObj-&gtcallJSFunction("myHelloWorld");
 
-	$browserObj->terminate();
+	$browserObj-&gtterminate();
 	
 } catch (\Exception $e) {
-	switch($e->getCode()){
+	switch($e-&gtgetCode()){
 		default;
-		$browserObj->terminate();
-		$errMsg	= $e->getMessage();
+		$browserObj-&gtterminate();
+		$errMsg	= $e-&gtgetMessage();
 	}
 }
 
-echo "Start Debug>>>\n <code><pre> \n ";
+echo "Start Debug&gt&gt&gt\n &ltcode&gt&ltpre&gt \n ";
 echo "Exception Message: " . $errMsg;
-print_r($browserObj->debugData);
-echo "\n </pre></code> \n <<<End Debug";
+print_r($browserObj-&gtdebugData);
+echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
 </pre>
-
 
 <h2>Installation:</h2>
 
