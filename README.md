@@ -177,7 +177,6 @@ echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
 
 
 
-
 <h2>The Browser:</h2>
 Ever needed to login to a webpage, navigate to a specific menu and retrive content and the page relies on AJAX?
 I have, tons of times, let me give you one example. 
