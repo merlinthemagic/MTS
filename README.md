@@ -386,7 +386,7 @@ PHP need only run as the standard webserver user, but the returned shell can hav
 Mandetory packages:
 <pre>
 php5 (or newer)
-php must allow "exec()"
+php must allow the "exec()" function
 python
 screen
 fontconfig

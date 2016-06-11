@@ -1,7 +1,7 @@
 <?php
 //© 2016 Martin Madsen
 
-ini_set('max_execution_time', 60);
+ini_set('max_execution_time', 120);
 
 if (php_sapi_name() == "cli") {
 	//if run from the CLI

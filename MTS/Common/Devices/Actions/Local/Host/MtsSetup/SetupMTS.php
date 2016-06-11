@@ -290,25 +290,27 @@ class SetupMTS
 			$msttcoreFonts	= trim($this->localShellExec("rpm -qa | grep -i \"msttcore-fonts\""));
 			if ($msttcoreFonts == "") {
 				$result['errorLevel']	= "Warning";
-				$result['msgHead']		= "Msttcore fonts is not installed. This is recommended";
-				$result['msgLines'][]	= "Execute the following command to install:";
-				$result['msgLines'][]	= "yum -y install msttcore-fonts";
+				$result['msgHead']		= "MS core fonts is not installed. This is recommended";
+				$result['msgLines'][]	= "Please Google 'msttcore-fonts' to find a source, then install ";
+				$result['msgLines'][]	= "This may help: https://sourceforge.net/projects/mscorefonts2/files/rpms/";
 			}
 		} elseif ($osName == 'debian' || $osName == 'ubuntu') {
-			$msttcoreFonts	= trim($this->localShellExec("dpkg-query -l \"msttcore-fonts\""));
+			$msttcoreFonts	= trim($this->localShellExec("dpkg-query -l \"ttf-mscorefonts-installer\""));
 			if ($msttcoreFonts == "") {
 				$result['errorLevel']	= "Warning";
-				$result['msgHead']		= "Msttcore fonts is not installed. This is recommended";
-				$result['msgLines'][]	= "Execute the following command to install:";
-				$result['msgLines'][]	= "apt-get -y install msttcore-fonts";
+				$result['msgHead']		= "MS core fonts is not installed. This is recommended";
+				$result['msgLines'][]	= "The standard repos do not have this package";
+				$result['msgLines'][]	= "Please Google 'ttf-mscorefonts-installer' to find a source, then install ";
+				$result['msgLines'][]	= "This may help: http://serverfault.com/questions/89931/installing-msttcorefonts-on-ubuntu";
 			}
 		} elseif ($osName == 'arch') {
-			$msttcoreFonts	= trim($this->localShellExec("pacman -Qi \"fontconfig\""));
+			$msttcoreFonts	= trim($this->localShellExec("pacman -Qi \"ttf-ms-fonts\""));
 			if ($msttcoreFonts == "") {
 				$result['errorLevel']	= "Warning";
-				$result['msgHead']		= "Msttcore fonts is not installed. This is recommended";
-				$result['msgLines'][]	= "Execute the following command to install:";
-				$result['msgLines'][]	= "pacman -S msttcore-fonts";
+				$result['msgHead']		= "MS core fonts is not installed. This is recommended";
+				$result['msgLines'][]	= "The standard repos do not have this package";
+				$result['msgLines'][]	= "Please Google 'ttf-ms-fonts' to find a source, then install ";
+				$result['msgLines'][]	= "This may help: http://experimentswithlinuxrelatedtech.blogspot.pt/2014/04/how-to-quickly-install-packages-from.html";
 			}
 	
 		} else {
