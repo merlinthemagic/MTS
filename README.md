@@ -254,6 +254,15 @@ $height	= 480;
 $windowObj->setSize($width, $height);
 </pre>
 
+Set the area of the window you want to screenshot:
+<pre>
+$top	= 0;
+$left	= 0;
+$width	= 640;
+$height	= 480;
+$windowObj->setRasterSize($top, $left, $width, $height);
+</pre>
+
 Take a screenshot of the window:
 <pre>
 $imageData	= $windowObj->screenshot();
