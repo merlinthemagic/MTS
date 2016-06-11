@@ -314,7 +314,7 @@ $windowObj->loadJS($scriptData);
 
 Call a JavaScript function:
 <pre>
-//only content that can be serialize by Json is allowed, no objects.
+//only content that can be serialize by Json can be returned, no objects.
 //$funcReturn will contain a string with the return from the function.
 $funcReturn = $windowObj->callJSFunction("myHelloWorld");
 </pre>
