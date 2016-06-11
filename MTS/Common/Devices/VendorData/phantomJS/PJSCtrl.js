@@ -166,6 +166,15 @@ function getElement(cmdObj)
 		        	var result							= {};
 		        	result.tagName						= element.tagName;
 		        	
+		        	//get value
+		        	if (typeof element.value != 'undefined') {
+		        		result.value					= element.value;
+		    		}
+		        	//get type
+		        	if (typeof element.type != 'undefined') {
+		        		result.type						= element.type;
+		    		}
+		        	
 		        	//get location
 		        	result.location						= {};
 		        	var rect 							= element.getBoundingClientRect();
@@ -173,6 +182,8 @@ function getElement(cmdObj)
 		        	result.location.bottom				= rect.bottom;
 		        	result.location.right				= rect.right;
 		        	result.location.left				= rect.left;
+		        	
+		        	
 		      		        	
 		        	return JSON.stringify(result);
 		        	

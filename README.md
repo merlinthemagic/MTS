@@ -230,7 +230,7 @@ The page is now displaying the search result. Lets do a screen shot to make sure
 $screenshotData	= $windowObj->screenshot();
 
 //render it is the browser window:
-echo '<img src="data:image/jpeg;base64,' . base64_encode($screenshotData) . '" />';
+echo '&ltimg src="data:image/jpeg;base64,' . base64_encode($screenshotData) . '" /&gt';
 </pre>
 
 See "Window Methods" below for a complete list of examples
@@ -240,7 +240,7 @@ PhantomJS is executed and the stdIn / stdOut are used to send and receive JSON e
 The JS file that is executed by PhantomJS is constantly checking its stdIn to see if any new commands have arrived.
 Once a command is received the action is completed and the result returned.
 
-You only have to worry about opening a page and then manipulating it.
+You only have to worry about opening a page and manipulating it.
 
 <h3>Window Methods:</h3>
 
@@ -256,7 +256,7 @@ Take a screenshot of the window:
 $imageData	= $windowObj->screenshot();
 </pre>
 
-get the DOM:
+Get the DOM:
 <pre>
 //get the HTML of the current page:
 $domData	= $windowObj->getDom();
@@ -272,9 +272,12 @@ Type with the keyboard:
 <pre>
 $keys	= "My Search Key Words";
 $windowObj->sendKeyPresses($keys);
+
+//sendKeyPresses takes a second argument, if you want to i.e. be holding "shift", "ctrl" or "alt" down while typing. 
+$keys		= "My Search Key Words";
+$modifiers	= array("shift").
+$windowObj->sendKeyPresses($keys, modifiers);
 </pre>
-sendKeyPresses takes a second argument, if you want to i.e. be holding "shift", "ctrl" or "alt" down while typing. 
-It takes the format of an array: $modifiers = array("shift").
 
 Perform a mouse event on an element:
 <pre>
@@ -302,6 +305,14 @@ Call a JavaScript function:
 //only content that can be serialize by Json is allowed, no objects.
 //$funcReturn will contain a string with the return from the function.
 $funcReturn = $windowObj->callJSFunction("myHelloWorld");
+</pre>
+
+
+Get details of an element i.e. value:
+<pre>
+//limited currently, will get more detail over time
+$selector		= "[id=someElementId]";
+$elementDetails	= $windowObj->getElement($selector);
 </pre>
 
 Set the url in the window:

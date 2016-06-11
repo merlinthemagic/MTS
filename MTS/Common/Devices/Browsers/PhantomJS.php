@@ -154,6 +154,27 @@ class PhantomJS extends Base implements BrowserInterface
 			}
 		}
 	}
+	public function getElement($windowObj, $selector)
+	{
+		try {
+	
+			$options				= array();
+			$options['selector']	= $selector;
+	
+			$result					= $this->getResultArray($this->browserExecute($windowObj, 'getelement', $options));
+			if ($result['code'] != 200) {
+				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+			} else {
+				return json_decode($result['data']['dom'], true);
+			}
+	
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
+	}
 	public function sendKeyPresses($windowObj, $keys, $modifiers)
 	{
 		try {
