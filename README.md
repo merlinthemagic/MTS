@@ -232,7 +232,7 @@ The page is now displaying the search result. Lets do a screen shot to make sure
 //perform a screenshot:
 $screenshotData	= $windowObj->screenshot();
 
-//render it is the browser window:
+//render it:
 echo '&ltimg src="data:image/jpeg;base64,' . base64_encode($screenshotData) . '" /&gt';
 </pre>
 

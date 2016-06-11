@@ -13,8 +13,8 @@ class Window
 
 	private $_rasterTop=0;
 	private $_rasterLeft=0;
-	private $_rasterWidth=0;
-	private $_rasterHeight=0;
+	private $_rasterWidth=1920;
+	private $_rasterHeight=1080;
 	
 	
 	public function __construct()
@@ -36,6 +36,7 @@ class Window
 	}
 	public function setRasterSize($top, $left, $width, $height)
 	{
+		//size of the window we want to take a screenshot off
 		$this->_rasterTop		= intval($top);
 		$this->_rasterLeft		= intval($left);
 		$this->_rasterWidth		= intval($width);
@@ -49,10 +50,24 @@ class Window
 	{
 		return $this->getBrowser()->setURL($this, $strUrl);
 	}
-	public function screenshot($format='jpeg')
+	public function screenshot($format='png')
 	{
-		//have noticed 'png' sometimes returns a broken image, not sure why
-		return $this->getBrowser()->screenshot($this, $format);
+		$changedRs	= false;
+		$rSize		= $this->getRasterSize();
+		if ($rSize['top'] == 0 && $rSize['left'] == 0 && $rSize['width'] == 0 && $rSize['height'] == 0) {
+			//area cannot be all zeros, we need something to take a picture off
+			$changedRs	= true;
+			$winSize	= $this->getSize();
+			$this->setRasterSize(0, 0, $winSize['width'], $winSize['height']);
+		}
+		
+		$imageData	= $this->getBrowser()->screenshot($this, $format);
+		
+		if ($changedRs === true) {
+			$this->setRasterSize($rSize['top'], $rSize['left'], $rSize['width'], $rSize['height']);
+		}
+		
+		return $imageData;
 	}
 	public function getDom()
 	{
