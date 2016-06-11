@@ -206,7 +206,7 @@ $myUrl			= "https://www.wikipedia.org/";
 $windowObj		= \MTS\Factories::getDevices()->getLocalHost()->getBrowser('phantomjs')->getNewWindow($myUrl);
 </pre>
 
-The $windowObj variable now contains a browser window opened with wikipedias website.
+$windowObj now contains a browser window with wikipedias website loaded.
 
 Lets do a search on wikipedia. Whenever we wish to manipulate an element we do so by using a css selector to identify it. Its really easy i.e.:
 if we want an element with id='mySearchBox' the selector would be: [id=mySearchBox]. Basically [attribute=value].
