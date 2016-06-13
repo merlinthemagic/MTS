@@ -72,12 +72,17 @@ function exeCmd(cmdObj)
 				commandWaitForWindowLoad(cmdObj, focusElement);
 			} else if (cmdObj.cmd.name == "getelement") {
 				commandWaitForWindowLoad(cmdObj, getElement);
+			} else if (cmdObj.cmd.name == "getdocument") {
+				commandWaitForWindowLoad(cmdObj, getDocument);
 			} else if (cmdObj.cmd.name == "sendkeypresses") {
 				commandWaitForWindowLoad(cmdObj, sendKeyPresses);
 			} else if (cmdObj.cmd.name == "clickelement") {
 				commandWaitForWindowLoad(cmdObj, clickElement);
 			} else if (cmdObj.cmd.name == "mouseeventonelement") {
 				commandWaitForWindowLoad(cmdObj, mouseEventOnElement);
+			} else if (cmdObj.cmd.name == "closewindow") {
+				//no need to wait for load
+				closeWindow(cmdObj);
 			} else {
 				var eMsg	= "Unknown command: " + cmdObj.cmd.name;
 				writeError(null, eMsg);
@@ -140,6 +145,40 @@ function setUrl(cmdObj)
 		processLoop();
 	}
 }
+function closeWindow(cmdObj)
+{
+	try {
+		
+		var windowObj	= getWindowByCommand(cmdObj);
+		var winLen		= classData.windows.length;
+		if (winLen > 0) {
+			
+			for (var i=0; i < winLen; i++) {
+				var winObj	= classData.windows[i];
+				if (windowObj.uuid == winObj.uuid) {
+					//found the correct window
+					//close the window and free up the memory
+					windowObj.pjsPage.close();
+					//remove from the array
+					myArray.splice(i, 1);
+					break;
+				}
+			}
+		}
+		
+		
+
+		cmdObj.result.code	= 200;
+		
+		writeReturn(cmdObj);
+		processLoop();
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to close window. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
 function getElement(cmdObj)
 {
 	try {
@@ -182,9 +221,7 @@ function getElement(cmdObj)
 		        	result.location.bottom				= rect.bottom;
 		        	result.location.right				= rect.right;
 		        	result.location.left				= rect.left;
-		        	
-		        	
-		      		        	
+    	
 		        	return JSON.stringify(result);
 		        	
 	        	} catch(e) {
@@ -206,7 +243,63 @@ function getElement(cmdObj)
 		processLoop();
 
 	} catch(e) {
-		cmdObj.result.error.msg		= "Failed to focus selector. Error: " + e;
+		cmdObj.result.error.msg		= "Failed to get element. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
+function getDocument(cmdObj)
+{
+	try {
+
+		//validate
+		var windowObj	= getWindowByCommand(cmdObj);
+		var result		= windowObj.pjsPage.evaluate(function(){
+
+        	//keep adding data on document over time, this shoud be the primary way to get data on
+        	//the document outside of getDom()
+	        	
+        	try {
+	        	
+	        	var result									= {};
+	        	
+	        	//body attributes
+	        	result.body	 								= {};
+	        	result.body.clientHeight	 				= document.body.clientHeight;
+	        	result.body.offsetHeight	 				= document.body.offsetHeight;
+	        	result.body.scrollHeight	 				= document.body.scrollHeight;
+	        	result.body.clientWidth	 					= document.body.clientWidth;
+	        	result.body.offsetWidth	 					= document.body.offsetWidth;
+	        	result.body.scrollWidth	 					= document.body.scrollWidth;
+	        
+	        	result.documentElement						= {};
+	        	result.documentElement.clientHeight	 		= document.documentElement.clientHeight;
+	        	result.documentElement.scrollHeight	 		= document.documentElement.scrollHeight;
+	        	result.documentElement.clientWidth	 		= document.documentElement.clientWidth;
+	        	result.documentElement.scrollWidth	 		= document.documentElement.scrollWidth;
+
+	        	result.document	 							= {};
+	        	//best guess of total document height and width
+	        	result.document.width						= Math.max(result.body.clientWidth, result.body.offsetWidth, result.body.scrollWidth, result.documentElement.clientWidth, result.documentElement.scrollWidth);
+	        	result.document.height						= Math.max(result.body.clientHeight, result.body.offsetHeight, result.body.scrollHeight, result.documentElement.clientHeight, result.documentElement.scrollHeight);
+	        	return JSON.stringify(result);
+	        	
+        	} catch(e) {
+        		return "Get Document Inside Evaluate. Error: " + String(e);
+        	}
+	    });
+		
+		if (result.match(/^Get Document Inside Evaluate/)) {
+			cmdObj.result.error.msg		= result;
+		} else {
+			cmdObj.result.code			= 200;
+			cmdObj.result.data.dom		= result;
+		}
+		writeReturn(cmdObj);
+		processLoop();
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to get document. Error: " + e;
 		writeReturn(cmdObj);
 		processLoop();
 	}
@@ -393,6 +486,7 @@ function sendKeyPresses(cmdObj)
 				|| kpLow == "right"
 				|| kpLow == "pageup"
 				|| kpLow == "pagedown"
+				|| kpLow == "numlock"
 			) {
 				var result	= windowObj.pjsPage.sendEvent("keypress", windowObj.pjsPage.event.key[kp], modString);
 			} else {
@@ -438,13 +532,11 @@ function focusElement(cmdObj)
 		if (result != 'selectorNotExist') {
 			cmdObj.result.code			= 200;
 			cmdObj.result.data.script	= result;
-			writeReturn(cmdObj);
-			processLoop();
 		} else {
 			cmdObj.result.error.msg		= selector + " does not exist";
-			writeReturn(cmdObj);
-			processLoop();
 		}
+		writeReturn(cmdObj);
+		processLoop();
 
 	} catch(e) {
 		cmdObj.result.error.msg		= "Failed to focus selector. Error: " + e;
@@ -476,13 +568,11 @@ function JSCallFunction(cmdObj)
 		if (result != 'FunctionDoesNotExistBLA433') {
 			cmdObj.result.code			= 200;
 			cmdObj.result.data.script	= result;
-			writeReturn(cmdObj);
-			processLoop();
 		} else {
 			cmdObj.result.error.msg		= funcName + " is not a valid function name";
-			writeReturn(cmdObj);
-			processLoop();
 		}
+		writeReturn(cmdObj);
+		processLoop();
 
 	} catch(e) {
 		cmdObj.result.error.msg		= "Failed to call JS function. Error: " + e;
@@ -502,14 +592,12 @@ function loadJS(cmdObj)
 
 		var result	= windowObj.pjsPage.injectJs(cmdObj.cmd.options.scriptPath);
 		if (result === true) {
-			cmdObj.result.code			= 200;
-			writeReturn(cmdObj);
-			processLoop();
+			cmdObj.result.code			= 200;		
 		} else {
 			cmdObj.result.error.msg		= "Script Failed to Load";
-			writeReturn(cmdObj);
-			processLoop();
 		}
+		writeReturn(cmdObj);
+		processLoop();
 
 	} catch(e) {
 		cmdObj.result.error.msg		= "Failed to load java script. Error: " + e;
@@ -522,7 +610,7 @@ function getDom(cmdObj)
 	try {
 		
 		//validate
-		var windowObj	= getWindowByCommand(cmdObj);
+		var windowObj				= getWindowByCommand(cmdObj);
 
 		cmdObj.result.data.dom		= encodeURIComponent(windowObj.pjsPage.content);
 		cmdObj.result.code			= 200;
@@ -659,83 +747,150 @@ function commandWaitForWindowLoad(cmdObj, callBackFunc)
 }
 function getWindowByCommand(cmdObj)
 {
-	//return an existing window based on the command uuid
-	//saves a ton of validations in every action function
+	try {
+		//return an existing window based on the command uuid
+		//saves a ton of validations in every action function
+		if (typeof cmdObj.cmd.window == 'undefined') {
+			throw "Window must be defined in command";
+		} else if (typeof cmdObj.cmd.window.UUID == 'undefined') {
+			throw "Window UUID must be set";
+		}
 	
-	if (typeof cmdObj.cmd.window.UUID == 'undefined') {
-		throw "Window UUID must be set";
-	}
+		var windowObj	= getWindowByUUID(cmdObj.cmd.window.UUID);
+		if (windowObj === false) {
+			windowObj	= getNewWindow(cmdObj.cmd.window.UUID);
+			configurePage(windowObj);
+		}
+		
+		//make sure the window attributes are synced with the command
+		
+		//viewport
+		var changeViewPort	= false;
+		var viewPortWidth	= windowObj.pjsPage.viewportSize.width;
+		var viewPortHeight	= windowObj.pjsPage.viewportSize.height;
+		
+		if (typeof cmdObj.cmd.window.width != 'undefined') {
+			if (cmdObj.cmd.window.width != viewPortWidth) {
+				changeViewPort	= true;
+				viewPortWidth	= cmdObj.cmd.window.width;
+			}
+		}
+		if (typeof cmdObj.cmd.window.height != 'undefined') {
+			if (cmdObj.cmd.window.height != viewPortHeight) {
+				changeViewPort	= true;
+				viewPortHeight	= cmdObj.cmd.window.height;
+			}
+		}
+		if (changeViewPort === true) {
+			if (classData.debug === true) {
+				writeDebug(arguments.callee.name, "Changing viewPort from " + windowObj.pjsPage.viewportSize.width + ":" + windowObj.pjsPage.viewportSize.height + " to " + viewPortWidth + ":" + viewPortHeight);
+			}
+			windowObj.pjsPage.viewportSize	= { width: viewPortWidth, height: viewPortHeight };
+		}
+		
+		//clipRect
+		if (typeof cmdObj.cmd.window.raster != 'undefined') {
+	
+			var changeRaster	= false;
+			var rasterTop		= windowObj.pjsPage.clipRect.top;
+			var rasterLeft		= windowObj.pjsPage.clipRect.left;
+			var rasterWidth		= windowObj.pjsPage.clipRect.width;
+			var rasterHeight	= windowObj.pjsPage.clipRect.height;
+			
+			if (typeof cmdObj.cmd.window.raster.top != 'undefined') {
+				if (cmdObj.cmd.window.raster.top != rasterTop) {
+					changeRaster	= true;
+					rasterTop		= cmdObj.cmd.window.raster.top;
+				}
+			}
+			if (typeof cmdObj.cmd.window.raster.left != 'undefined') {
+				if (cmdObj.cmd.window.raster.left != rasterLeft) {
+					changeRaster	= true;
+					rasterLeft		= cmdObj.cmd.window.raster.left;
+				}
+			}
+			if (typeof cmdObj.cmd.window.raster.width != 'undefined') {
+				if (cmdObj.cmd.window.raster.width != rasterWidth) {
+					changeRaster	= true;
+					rasterWidth		= cmdObj.cmd.window.raster.width;
+				}
+			}
+			if (typeof cmdObj.cmd.window.raster.height != 'undefined') {
+				if (cmdObj.cmd.window.raster.height != rasterHeight) {
+					changeRaster	= true;
+					rasterHeight	= cmdObj.cmd.window.raster.height;
+				}
+			}
+			if (changeRaster === true) {
+				if (classData.debug === true) {
+					writeDebug(arguments.callee.name, "Changing raster area from " + windowObj.pjsPage.clipRect.top + ":" + windowObj.pjsPage.clipRect.left + ":" + windowObj.pjsPage.clipRect.width + ":" + windowObj.pjsPage.clipRect.height + " to " +rasterTop + ":" + rasterLeft + ":" + rasterWidth + ":" + rasterHeight);
+				}
+				windowObj.pjsPage.clipRect	= { top: rasterTop, left: rasterLeft, width: rasterWidth, height: rasterHeight };
+			}
+		}
+		
+		//load images
+		if (typeof cmdObj.cmd.window.loadImages != 'undefined') {
+			var curLoadImgs	= windowObj.pjsPage.settings.loadImages;
+			var cmdLoadImgs	= true;
+			if (cmdObj.cmd.window.loadImages == 0) {
+				cmdLoadImgs	= false;
+			}
+	
+			if (cmdLoadImgs != curLoadImgs) {
+				windowObj.pjsPage.settings.loadImages = cmdLoadImgs;
+				if (classData.debug === true) {
+					writeDebug(arguments.callee.name, "Changing loading of images to: " + cmdLoadImgs);
+				}
+			}
+		}
+		
+		//user agent
+		if (typeof cmdObj.cmd.window.userAgent != 'undefined') {
+			var curUserAgent	= windowObj.pjsPage.settings.userAgent;
+			var cmdUserAgent	= cmdObj.cmd.window.userAgent;
+			
+			if (cmdUserAgent != "" && curUserAgent != cmdUserAgent) {
+				windowObj.pjsPage.settings.userAgent = cmdUserAgent;
+				if (classData.debug === true) {
+					writeDebug(arguments.callee.name, "Changing User Agent from:\n" + curUserAgent + "\nto:\n" + cmdUserAgent);
+				}
+			}
+		}
+		
+		//scrollPosition
+		if (typeof cmdObj.cmd.window.scroll != 'undefined') {
+			var changeScrollPos	= false;
+			var scrollTop		= windowObj.pjsPage.scrollPosition.top;
+			var scrollLeft		= windowObj.pjsPage.scrollPosition.left;
+			
+			if (typeof cmdObj.cmd.window.scroll.top != 'undefined') {
+				if (cmdObj.cmd.window.scroll.top != scrollTop) {
+					changeScrollPos	= true;
+					scrollTop		= cmdObj.cmd.window.scroll.top;
+				}
+			}
+			if (typeof cmdObj.cmd.window.scroll.left != 'undefined') {
+				if (cmdObj.cmd.window.scroll.left != scrollLeft) {
+					changeScrollPos	= true;
+					scrollLeft		= cmdObj.cmd.window.scroll.left;
+				}
+			}
+			if (changeScrollPos === true) {
+				if (classData.debug === true) {
+					writeDebug(arguments.callee.name, "Changing scroll position from " + windowObj.pjsPage.scrollPosition.top + ":" + windowObj.pjsPage.scrollPosition.left + " to " + scrollTop + ":" + scrollLeft);
+				}
+				windowObj.pjsPage.scrollPosition	= { top: scrollTop, left: scrollLeft };
+			}
+		}
 
-	var windowObj	= getWindowByUUID(cmdObj.cmd.window.UUID);
-	if (windowObj === false) {
-		windowObj	= getNewWindow(cmdObj.cmd.window.UUID);
-		configurePage(windowObj);
+		return windowObj;
+		
+	} catch(e) {
+		var eMsg	= "Failed to get window by command";
+		writeError(e, eMsg);
+		//dont write out the command, timeout in cmdExe() handles that
 	}
-
-	//make sure the window attributes are synced with the command
-	
-	//viewport
-	var changeViewPort	= false;
-	var viewPortWidth	= windowObj.pjsPage.viewportSize.width;
-	var viewPortHeight	= windowObj.pjsPage.viewportSize.height;
-	
-	if (typeof cmdObj.cmd.window.width != 'undefined') {
-		if (cmdObj.cmd.window.width != viewPortWidth) {
-			changeViewPort	= true;
-			viewPortWidth	= cmdObj.cmd.window.width;
-		}
-	}
-	if (typeof cmdObj.cmd.window.height != 'undefined') {
-		if (cmdObj.cmd.window.height != viewPortHeight) {
-			changeViewPort	= true;
-			viewPortHeight	= cmdObj.cmd.window.height;
-		}
-	}
-	if (changeViewPort === true) {
-		if (classData.debug === true) {
-			writeDebug(arguments.callee.name, "Changing viewPort from " + windowObj.pjsPage.viewportSize.width + ":" + windowObj.pjsPage.viewportSize.height + " to " + viewPortWidth + ":" + viewPortHeight);
-		}
-		windowObj.pjsPage.viewportSize	= { width: viewPortWidth, height: viewPortHeight };
-	}
-	
-	//clipRect
-	var changeRaster	= false;
-	var rasterTop		= windowObj.pjsPage.clipRect.top;
-	var rasterLeft		= windowObj.pjsPage.clipRect.left;
-	var rasterWidth		= windowObj.pjsPage.clipRect.width;
-	var rasterHeight	= windowObj.pjsPage.clipRect.height;
-	
-	if (typeof cmdObj.cmd.window.raster.top != 'undefined') {
-		if (cmdObj.cmd.window.raster.top != rasterTop) {
-			changeRaster	= true;
-			rasterTop		= cmdObj.cmd.window.raster.top;
-		}
-	}
-	if (typeof cmdObj.cmd.window.raster.left != 'undefined') {
-		if (cmdObj.cmd.window.raster.left != rasterLeft) {
-			changeRaster	= true;
-			rasterLeft		= cmdObj.cmd.window.raster.left;
-		}
-	}
-	if (typeof cmdObj.cmd.window.raster.width != 'undefined') {
-		if (cmdObj.cmd.window.raster.width != rasterWidth) {
-			changeRaster	= true;
-			rasterWidth		= cmdObj.cmd.window.raster.width;
-		}
-	}
-	if (typeof cmdObj.cmd.window.raster.height != 'undefined') {
-		if (cmdObj.cmd.window.raster.height != rasterHeight) {
-			changeRaster	= true;
-			rasterHeight	= cmdObj.cmd.window.raster.height;
-		}
-	}
-	if (changeRaster === true) {
-		if (classData.debug === true) {
-			writeDebug(arguments.callee.name, "Changing raster area from " + windowObj.pjsPage.clipRect.top + ":" + windowObj.pjsPage.clipRect.left + ":" + windowObj.pjsPage.clipRect.width + ":" + windowObj.pjsPage.clipRect.height + " to " +rasterTop + ":" + rasterLeft + ":" + rasterWidth + ":" + rasterHeight);
-		}
-		windowObj.pjsPage.clipRect	= { top: rasterTop, left: rasterLeft, width: rasterWidth, height: rasterHeight };
-	}
-	return windowObj;
 }
 function getWindowByUUID(uuid)
 {
@@ -771,55 +926,109 @@ function getNewWindow(uuid)
 
 function configurePage(windowObj)
 {
-	if (typeof windowObj.pjsPage == 'undefined') {
-		windowObj.pjsPage			= webpage.create();
-	}
-	if (typeof windowObj.pjsPage.uuid == 'undefined') {
-		//assign internal UUID
-		windowObj.pjsPage.uuid		= getUUID();
-	}
-
-	//set default functions
-	windowObj.pjsPage.onLoadStarted = function() {
-		windowObj.loading	= true;
-	};
-	//page completed load
-	windowObj.pjsPage.onLoadFinished = function(status) {
-		windowObj.loading = false;
-	};
-		
-		//error handling
-	windowObj.pjsPage.onResourceError = function(resourceError) {
-		windowObj.errors.resource = resourceError.errorString;
-	};
+	try {
 	
-	windowObj.pjsPage.onError = function(msg, trace) {
-		windowObj.errors.general	= msg;
-	};
+		if (typeof windowObj.pjsPage == 'undefined') {
+			windowObj.pjsPage			= webpage.create();
+		}
+		if (typeof windowObj.pjsPage.uuid == 'undefined') {
+			//assign internal UUID
+			windowObj.pjsPage.uuid		= getUUID();
+		}
 	
-	windowObj.pjsPage.onPageCreated = function(childPage) {
-
-		var childUUID					= getUUID();
+		//set default functions
+		windowObj.pjsPage.onLoadStarted = function() {
+			try {
+				windowObj.loading	= true;
+			} catch(e) {
+				var eMsg	= "Failure in onLoadStarted for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
+		//page completed load
+		windowObj.pjsPage.onLoadFinished = function(status) {
+			
+			try {
+				windowObj.loading = false;
+				
+				//make sure the scroll is corrected, it is not enough that the window is configured
+				//if scroll is set and then the page is loaded scroll will not have taken effect
+				var scrollTop						= windowObj.pjsPage.scrollPosition.top;
+				var scrollLeft						= windowObj.pjsPage.scrollPosition.left;
+				windowObj.pjsPage.scrollPosition	= { top: scrollTop, left: scrollLeft };
+			} catch(e) {
+				var eMsg	= "Failure in onLoadFinished for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
+			
+			//error handling
+		windowObj.pjsPage.onResourceError = function(resourceError) {
+			try {
+				windowObj.errors.resource = resourceError.errorString;
+			} catch(e) {
+				var eMsg	= "Failure in onResourceError for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
 		
-		var childWindowObj				= getNewWindow(childUUID);
-		childWindowObj.pjsPage			= childPage;
-		configurePage(childWindowObj);
+		windowObj.pjsPage.onError = function(msg, trace) {
+			try {
+				windowObj.errors.general	= msg;
+			} catch(e) {
+				var eMsg	= "Failure in onError for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
 		
-		childWindowObj.parent			= windowObj;
-		windowObj.children.push(childWindowObj);
+		windowObj.pjsPage.onPageCreated = function(childPage) {
+	
+			try {
+				var childUUID					= getUUID();
+				
+				var childWindowObj				= getNewWindow(childUUID);
+				childWindowObj.pjsPage			= childPage;
+				configurePage(childWindowObj);
+				
+				childWindowObj.parent			= windowObj;
+				windowObj.children.push(childWindowObj);
+				
+				if (classData.debug === true) {
+					writeDebug(arguments.callee.name, "Page: " + windowObj.uuid + ", conceived a child named: " + childWindowObj.uuid);
+				}
+			} catch(e) {
+				var eMsg	= "Failure in onPageCreated for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
+		windowObj.pjsPage.onClosing = function(closingPage) {
+			try {
+				if (classData.debug === true) {
+					writeDebug(arguments.callee.name, "Child Closed");
+				}
+			} catch(e) {
+				var eMsg	= "Failure in onClosing for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
 		
-		if (classData.debug === true) {
-			writeDebug(arguments.callee.name, "Page: " + windowObj.uuid + ", conceived a child named: " + childWindowObj.uuid);
-		}
-	};
-	windowObj.pjsPage.onClosing = function(closingPage) {
-		if (classData.debug === true) {
-			writeDebug(arguments.callee.name, "Child Closed");
-		}
-	};
-
-	//viewport and clipRect will have default values
-	//and they are dictated from control
+		windowObj.pjsPage.onResourceReceived = function(response) {
+	
+			try {
+				
+			} catch(e) {
+				var eMsg	= "Failure in onResourceReceived for UUID: " + windowObj.pjsPage.uuid;
+				writeError(e, eMsg);
+			}
+		};
+	
+		//viewport, clipRect, scrollPosition will have default values
+		//and they are dictated from control
+		
+	} catch(e) {
+		var eMsg	= "Failed to Configure Page";
+		writeError(e, eMsg);
+	}
 }
 function getCommand()
 {

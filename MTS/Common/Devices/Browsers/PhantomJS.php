@@ -89,7 +89,10 @@ class PhantomJS extends Base implements BrowserInterface
 	}
 	protected function browserCloseWindow($windowObj)
 	{
-		//needs to be completed
+		$result						= $this->getResultArray($this->browserExecute($windowObj, 'closewindow'));
+		if ($result['code'] != 200) {
+			throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+		}
 	}
 	public function getDom($windowObj)
 	{
@@ -175,6 +178,25 @@ class PhantomJS extends Base implements BrowserInterface
 			}
 		}
 	}
+	public function getDocument($windowObj)
+	{
+		try {
+	
+			$result					= $this->getResultArray($this->browserExecute($windowObj, 'getdocument'));
+			if ($result['code'] != 200) {
+				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+			} else {
+				return json_decode($result['data']['dom'], true);
+			}
+	
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
+	}
+	
 	public function sendKeyPresses($windowObj, $keys, $modifiers)
 	{
 		try {
@@ -411,15 +433,29 @@ class PhantomJS extends Base implements BrowserInterface
 				$size		= $windowObj->getSize();
 				$raster		= $windowObj->getRasterSize();
 				
-				$cmdArr['cmd']['window']			= array();
-				$cmdArr['cmd']['window']['UUID']	= $windowObj->getUUID();
-				$cmdArr['cmd']['window']['width']	= $size['width'];
-				$cmdArr['cmd']['window']['height']	= $size['height'];
+				$cmdArr['cmd']['window']						= array();
+				$cmdArr['cmd']['window']['UUID']				= $windowObj->getUUID();
+				$cmdArr['cmd']['window']['loadImages']			= 1;
+				if ($windowObj->getLoadImages() === false) {
+					$cmdArr['cmd']['window']['loadImages']		= 0;
+				}
+				$cmdArr['cmd']['window']['userAgent']			= "";
+				if ($windowObj->getUserAgent() !== null) {
+					$cmdArr['cmd']['window']['userAgent']		= $windowObj->getUserAgent();
+				}
 				
+				$cmdArr['cmd']['window']['width']				= $size['width'];
+				$cmdArr['cmd']['window']['height']				= $size['height'];
+
 				$cmdArr['cmd']['window']['raster']['top']		= $raster['top'];
 				$cmdArr['cmd']['window']['raster']['left']		= $raster['left'];
 				$cmdArr['cmd']['window']['raster']['width']		= $raster['width'];
 				$cmdArr['cmd']['window']['raster']['height']	= $raster['height'];
+				
+				$scroll	= $windowObj->getScrollPosition();
+				$cmdArr['cmd']['window']['scroll']['top']		= $scroll['top'];
+				$cmdArr['cmd']['window']['scroll']['left']		= $scroll['left'];
+
 			} else {
 				$cmdArr['cmd']['window']			= array();
 			}

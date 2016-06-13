@@ -71,6 +71,18 @@ class Base
 		}
 		
 		$this->browserCloseWindow($windowObj);
+		
+		$winObjs	= $this->getWindows();
+		foreach ($winObjs as $index => $winObj) {
+			if ($winObj->getUUID() == $windowObj->getUUID()) {
+				$parentObj	= $winObj->getParent();
+				if ($parentObj !== null) {
+					$parentObj->removeChild($winObj);
+				}
+				unset($this->_windowObjs[$index]);
+				break;
+			}
+		}
 	}
 	public function initialize()
 	{

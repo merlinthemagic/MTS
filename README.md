@@ -267,6 +267,11 @@ Take a screenshot of the window:
 $imageData	= $windowObj->screenshot();
 </pre>
 
+Close window:
+<pre>
+$imageData	= $windowObj->close();
+</pre>
+
 Get the DOM:
 <pre>
 //get the HTML of the current page:
@@ -307,7 +312,10 @@ $windowObj->clickElement($selector);
 
 Load some custom JavaScript in the window:
 <pre>
-$scriptData	= "function myHelloWorld() { return 'hello world' }";
+$script	= "function myHelloWorld() {
+		   		return 'Hello World';
+		   }";
+		   
 $windowObj->loadJS($scriptData);
 </pre>
 
@@ -322,8 +330,14 @@ $funcReturn = $windowObj->callJSFunction("myHelloWorld");
 Get details of an element i.e. value:
 <pre>
 //limited currently, will get more detail over time
-$selector		= "[id=someElementId]";
-$elementDetails	= $windowObj->getElement($selector);
+$selector	= "[id=someElementId]";
+$eleDetails	= $windowObj->getElement($selector);
+</pre>
+
+Get details of the document i.e. height and width:
+<pre>
+//limited currently, will get more detail over time
+$docDetails	= $windowObj->getDocument();
 </pre>
 
 Set the url in the window:
@@ -331,6 +345,29 @@ Set the url in the window:
 $myUrl	= "http://www.google.com";
 $windowObj->setURL($myUrl);
 </pre>
+
+Set the User Agent:
+<pre>
+$agentName	= "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0";
+$windowObj->setUserAgent($agentName);
+</pre>
+
+Set the scroll position in the window:
+<pre>
+//scroll down the page 500px
+$top	= 500;
+$left	= 0;
+$windowObj->setScrollPosition($top, $left);
+</pre>
+
+Set if images should be loaded:
+<pre>
+//default is true, but setting to false will speed up loading by omitting images
+$bool	= false;
+$windowObj->setLoadImages($bool);
+</pre>
+
+
 
 If the window spawned a popup or another window:
 <pre>
