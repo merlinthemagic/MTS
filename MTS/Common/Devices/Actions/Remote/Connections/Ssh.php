@@ -23,7 +23,6 @@ class Ssh extends Base
 		
 		if ($requestType == 'connectByUsername') {
 			
-			$success		= true;
 			$ipaddress		= $this->_classStore['ipaddress'];
 			$username		= $this->_classStore['username'];
 			$password		= $this->_classStore['password'];
@@ -34,9 +33,9 @@ class Ssh extends Base
 			unset($this->_classStore['password']);
 
 			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
-				
-				$connCmd			= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
-				
+
+				$connCmd		= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
+
 				$regExConn		= "(".$ipaddress."'s password:|No route to host|Could not resolve hostname)";
 				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn);
 				
@@ -44,17 +43,51 @@ class Ssh extends Base
 				
 				if (!isset($returnConn[1])) {
 					//let this pass through it is not handled
-					$success	= false;
-					
 				} elseif ($returnConn[1] == $ipaddress."'s password:") {
 					
-					$regExPass	= "(Permission denied|".$username."@)";
+					$regExPass	= "(MikroTik RouterOS|Permission denied|".$username."@)";
 					$passReturn	= $shellObj->exeCmd($password, $regExPass);
 					preg_match("/".$regExPass."/", $passReturn, $returnPass);
 					
 					if (!isset($returnPass[1])) {
 						//let this pass through it is not handled
 						$success	= false;
+					} elseif ($returnPass[1] == "MikroTik RouterOS") {
+						
+						//we have to log out, since we cutoff the return
+						//we have to make sure the welcome text is done
+						$shellObj->exeCmd("", "\>");
+						
+						//logged in, make sure the username includes disabling colors
+						$validLogin	= true;
+						preg_match("/(.*?)\+(.*)/", $username, $addName);
+
+						if (isset($addName[2]) === false) {
+							//username does not include any options
+							$username	= $username . "+ct";
+							$validLogin	= false;
+						} else if ($addName[2] != "ct") {
+							//username has the wrong options
+							$username	= $addName[1] . "+ct";
+							$validLogin	= false;
+						}
+
+						if ($validLogin === false) {
+							
+							$shellObj->exeCmd("/quit", false, 0);
+							$shellObj->exeCmd("");
+
+							//then back in with a properly formatted username
+							$this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);
+							return;
+							
+						} else {
+
+							$childShell			= new \MTS\Common\Devices\Shells\RouterOS();
+							$shellObj->setChildShell($childShell);
+							return;
+						}
+
 					} elseif ($returnPass[1] == $username."@") {
 						//logged in, now figure out what type of shell we got on the other side
 						$strCmd			= "ps hp $$ | awk '{print $5}'";
