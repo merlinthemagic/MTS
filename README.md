@@ -1,4 +1,4 @@
-<h3>What is this?</h3>
+### What is this?
 
 Simple, its a tool set for PHP. Currently comprised of two core components, shell and browser.
 
@@ -6,7 +6,7 @@ This project strives to give developers the tools that let them automate process
 
 My philosophy: <b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
 
-<h2>The Shell:</h2>
+## The Shell:
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
 Would it not be nice if the built in functions were more verbose. 
 
@@ -20,52 +20,52 @@ many of the security issues as possible.
 
 The goal is to have easy shell access, allowing root when needed, as securely as possible.
 
-<h3>Basic use:</h3>
+### Basic use:
 
 You start by following the installation instructions at the very bottom of this Readme, then instantiate a shell. The first argument on getShell() is the shell name (only bash for now). 
 The second argument depends on weather you choose to allow sudo access to python during the installation.
 If you choose to allow sudo on python then setting the second argument to true will return a shell logged in as root, while false will return a shell as the webserver user, i.e. apache or www-data.
 
-<pre>
+```php
 //Get a shell as the webserver user i.e. apache or www-data
 $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 
 //Sudo enabled, get a shell as root
 $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
-</pre>
+```
 
 The $shellObj variable now contains a bash shell object you can issue commands against. Here are a few examples:
 
-<pre>
+```php
   $return1  = $shellObj->exeCmd('service sshd restart');
   echo $return1;
   
   //If you got a root shell redhat <7 distributions will return:
   //Stopping sshd:                                             [  OK  ]
   //Starting sshd:                                             [  OK  ]
-</pre>
+```
 
-<pre>
+```php
   $shellObj->exeCmd('cd /var/log/');
   $return1  = $shellObj->exeCmd('ls -sho --color=none');
   echo $return1; // list files in '/var/log/'
-</pre>
+```
 
-<pre>
+```php
   $return1  = $shellObj->exeCmd('whoami');
   echo $return1; // root or apache or www-data
-</pre>
+```
 
 Read the segment 'Using commands' below for more detail. 
 
-<h3>Root access:</h3>
+### Root access:
 
 Getting a shell with root privileges is easy and there are 2 ways to obtain it.
 
 Like i mentioned above, if you allowed sudo to python during the installation then the second argument on getShell() is all you need. 
 But for those users who are not comfortable with that type of setup, there is another option. 
 
-<pre>
+```php
 //Get a shell as the webserver user i.e. apache or www-data
 $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 
@@ -74,29 +74,29 @@ $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', fa
 
 $return1  = $shellObj->exeCmd('whoami');
 echo $return1; //root
-</pre>
+```
 
 
-<h3>How It Works:</h3>
-PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
+### How It Works:
+>>>>>>> Replaced HTML elements with proper markdown syntax
 We obtain a real shell by creating a Bash shell inside an instance of screen. 
 You can then interact with it through PHP, you control the terminal environment and all variables are maintained throughout the session.
 
 In terms of security, is it safe to allow sudo to python or pass root credentials in code?
 The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now it is your choice.
 
-<h3>Remote Shells:</h3>
+### Remote Shells:
 
 <h4>SSH:</h4>
 You can also get a shell to a remote server through SSH if you like. Here is how:
-<pre>
+```php
 //Example
 $shellObj = \MTS\Factories::getDevices()->getRemoteHost('ip_address')->getShellBySsh('username', 'password');
-</pre>
+```
 
 The returned shell can be used just like a local shell
 
-<h3>Using commands:</h3>
+### Using commands:
 When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
 
 The exeCmd() method takes 3 arguments.
@@ -151,7 +151,7 @@ Structure your commands the same way you would if you sat at the console and ent
 
 Figuring out what happens when a command fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
 
-<pre>
+```php
 $errMsg	= null;
 try {
 	$localHost			= \MTS\Factories::getDevices()-&gtgetLocalHost();
@@ -172,12 +172,12 @@ echo "Start Debug&gt&gt&gt\n &ltcode&gt&ltpre&gt \n ";
 echo "Exception Message: " . $errMsg;
 print_r($shellObj-&gtdebugData);
 echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
-</pre>
+```
 
 
 
 
-<h2>The Browser:</h2>
+## The Browser:
 Ever needed to login to a webpage, navigate to a specific menu and retrive content and the page relies on AJAX?
 I have, tons of times, let me give you one example. 
 
@@ -194,19 +194,19 @@ Not a huge problem, but 15 minutes of coding and the system is truely automated.
 This component would not be possible without the awesome work done by the people who built <a href="http://phantomjs.org/">PhantomJS</a>.
 This project simply wraps their work so it is easy for you to access using PHP. 
 
-<h3>Basic use:</h3>
+### Basic use:
 
 This package creates a instance of PhantomJS, you can then open a website and execute standard functions against it through PHP.
 You start by following the installation instructions at the very bottom of this Readme, then instantiate a browser.
 
-<pre>
+```php
 //Some websites are either far away or just slow, so it is a good idea to up the allowed execution time.
 ini_set('max_execution_time', 120);
 
 //Get a new browser window:
 $myUrl			= "https://www.wikipedia.org/";
 $windowObj		= \MTS\Factories::getDevices()->getLocalHost()->getBrowser('phantomjs')->getNewWindow($myUrl);
-</pre>
+```
 
 $windowObj now contains a browser window with wikipedias website loaded.
 
@@ -214,7 +214,7 @@ Lets do a search on wikipedia. Whenever we wish to manipulate an element we do s
 if we want an element with id='mySearchBox' the selector would be: [id=mySearchBox]. Basically [attribute=value].
 For more information see this <a href="https://www.w3.org/TR/css3-selectors/#selectors">article</a>.
 
-<pre>
+```php
 //left click on the search input box (it has id=searchInput):
 $windowObj->mouseEventOnElement("[id=searchInput]", 'leftclick');
 
@@ -223,49 +223,49 @@ $windowObj->sendKeyPresses("Nikola Tesla");
 
 //Press enter. Note special keys must be inputted as an array, while characters / numbers are inputted as a string
 $windowObj->sendKeyPresses(array("Enter"));
-</pre>
+```
 
 The page is now displaying the search result. Lets do a screen shot to make sure:
 
-<pre>
+```php
 //perform a screenshot:
 $screenshotData	= $windowObj->screenshot();
 
 //render it:
-echo '&ltimg src="data:image/png;base64,' . base64_encode($screenshotData) . '" /&gt';
-</pre>
+echo '&ltimg src="data:image/jpeg;base64,' . base64_encode($screenshotData) . '" /&gt';
+```
 
 See "Window Methods" below for a complete list of examples
 
-<h3>How It Works:</h3>
+### How It Works:
 PhantomJS is executed and the stdIn / stdOut are used to send and receive JSON encoded commands.
 The JS file that is executed by PhantomJS is constantly checking its stdIn to see if any new commands have arrived.
 Once a command is received the action is completed and the result returned.
 
 You only have to worry about opening a page and manipulating it.
 
-<h3>Window Methods:</h3>
+### Window Methods:
 
 Set the size of the window:
-<pre>
+```php
 $width	= 640;
 $height	= 480;
 $windowObj->setSize($width, $height);
-</pre>
+```
 
 Set the area of the window you want to screenshot:
-<pre>
+```php
 $top	= 0;
 $left	= 0;
 $width	= 640;
 $height	= 480;
 $windowObj->setRasterSize($top, $left, $width, $height);
-</pre>
+```
 
 Take a screenshot of the window:
-<pre>
+```php
 $imageData	= $windowObj->screenshot();
-</pre>
+```
 
 Close window:
 <pre>
@@ -273,19 +273,19 @@ $imageData	= $windowObj->close();
 </pre>
 
 Get the DOM:
-<pre>
+```php
 //get the HTML of the current page:
 $domData	= $windowObj->getDom();
-</pre>
+```
 
 Place cursor in a particular input element:
-<pre>
+```php
 $selector	= "[id=someElementId]";
 $windowObj->focusElement($selector);
-</pre>
+```
 
 Type with the keyboard:
-<pre>
+```php
 $keys	= "My Search Key Words";
 $windowObj->sendKeyPresses($keys);
 
@@ -293,58 +293,49 @@ $windowObj->sendKeyPresses($keys);
 $keys		= "My Search Key Words";
 $modifiers	= array("shift").
 $windowObj->sendKeyPresses($keys, modifiers);
-</pre>
+```
 
 Perform a mouse event on an element:
-<pre>
+```php
 $selector	= "[id=someElementId]";
 $event		= "leftclick";
 $windowObj->mouseEventOnElement($selector, $event);
-</pre>
+```
 use clickElement() rather than sending a mouseEventOnElement($selector, 'leftclick') when clicking hyperlinks.
 mouseEventOnElement() can only click on elements that have 2D size, a hyperlink is just a line.
 
 Click on an element:
-<pre>
+```php
 $selector	= "[id=someElementId]";
 $windowObj->clickElement($selector);
-</pre>
+```
 
 Load some custom JavaScript in the window:
-<pre>
-$script	= "function myHelloWorld() {
-		   		return 'Hello World';
-		   }";
-		   
+```php
+$scriptData	= "function myHelloWorld() { return 'hello world' }";
 $windowObj->loadJS($scriptData);
-</pre>
+```
 
 Call a JavaScript function:
-<pre>
+```php
 //only content that can be serialize by Json can be returned, no objects.
 //$funcReturn will contain a string with the return from the function.
 $funcReturn = $windowObj->callJSFunction("myHelloWorld");
-</pre>
+```
 
 
 Get details of an element i.e. value:
-<pre>
+```php
 //limited currently, will get more detail over time
-$selector	= "[id=someElementId]";
-$eleDetails	= $windowObj->getElement($selector);
-</pre>
-
-Get details of the document i.e. height and width:
-<pre>
-//limited currently, will get more detail over time
-$docDetails	= $windowObj->getDocument();
-</pre>
+$selector		= "[id=someElementId]";
+$elementDetails	= $windowObj->getElement($selector);
+```
 
 Set the url in the window:
-<pre>
+```php
 $myUrl	= "http://www.google.com";
 $windowObj->setURL($myUrl);
-</pre>
+```
 
 Set the User Agent:
 <pre>
@@ -370,7 +361,7 @@ $windowObj->setLoadImages($bool);
 
 
 If the window spawned a popup or another window:
-<pre>
+```php
 $childWindowObjs	= $windowObj->getChildren();
 if (count(childWindowObjs) > 0) {
 	//the child window can be used just like a regular window
@@ -378,13 +369,13 @@ if (count(childWindowObjs) > 0) {
 	//i.e. you can take a screen shot
 	$childImageData		= $childWindowObj->screenshot();
 }
-</pre>
+```
 
 <h5>Debugging:</h5>
 
 Figuring out what happens when a call fails can be a challenge, but if you enable debug you can catch the exception and see all reads and writes to help debug the issue.
 
-<pre>
+```php
 $errMsg	= null;
 try {
 
@@ -412,40 +403,40 @@ echo "Start Debug&gt&gt&gt\n &ltcode&gt&ltpre&gt \n ";
 echo "Exception Message: " . $errMsg;
 print_r($browserObj-&gtdebugData);
 echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
-</pre>
+```
 
-<h2>Installation:</h2>
+## Installation:
 
-<h3>Requirements:</h3>
+### Requirements:
 Tested working against the following operating systems and versions.
-<pre>
+```php
 Centos 6, 7.
 RedHat Enterprise 6.
 Debian 8.
 Ubuntu 16.
 Arch 2016-05-01
-</pre>
+```
 
 It should work against other versions as long as they are the same flavor of Linux.
 
 Mandetory packages:
-<pre>
+```php
 php5 (or newer)
 php must allow the "exec()" function
 python
 screen
 fontconfig
-</pre>
+```
 
 Optional packages:
-<pre>
+```php
 sudo
 msttcore-fonts
-</pre>
+```
 If browser screenshots are not rendering text on buttons you are most likely missing the correct fonts. 
 
 
-<h3>Perform Install:</h3>
+### Perform Install:
 Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
 Remember the location you uploaded to, you will need it later.
