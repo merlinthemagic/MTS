@@ -4,7 +4,7 @@ namespace MTS\Factories;
 
 class Devices
 {
-	private $_classStore=array();
+	protected $_classStore=array();
 
 	public function getLocalHost()
 	{

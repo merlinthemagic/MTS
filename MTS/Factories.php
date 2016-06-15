@@ -4,7 +4,7 @@ namespace MTS;
 
 class Factories
 {
-	private static $_classStore=array();
+	protected static $_classStore=array();
 	
 	//USE: 
 	//$aFact		= \MTS\Factories::$METHOD_NAME();

@@ -37,43 +37,15 @@ class Bash extends Base
 		
 		return $this->_cmdMaxTimeout;
 	}
-	public function getTerminalWidth()
-	{
-		$strCmd		= "echo \$COLUMNS";
-		$reData		= $this->exeCmd($strCmd, null, null);
-
-		if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
-			return $rawColCount[1];
-		} else {
-			throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
-		}
-	}
-	public function setTerminalWidth($count)
-	{
-		if (preg_match("/^[0-9]+$/", $count)) {
-			$strCmd			= "stty columns " . $count;
-			$this->exeCmd($strCmd, null, null);
-			
-			if ($this->getTerminalWidth() != $count) {
-				throw new \Exception(__METHOD__ . ">> Failed to set terminal width");
-			}
-		} else {
-			throw new \Exception(__METHOD__ . ">> Terminal Width can only be an integer");
-		}
-	}
-
 	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)
 	{
 		//this method should only be called from base::exeCmd()
 		//if this method is called directly it breaks the child shell logic
 		//all commands must be executed on the furthest child
-		if ($this->getInitialized() !== true) {
-			
-			if ($this->getInitialized() === false) {
-				throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot execute anymore commands.");
-			} else {
-				$this->shellInitialize();
-			}
+		if ($this->getInitialized() === false) {
+			throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot execute anymore commands.");
+		} elseif ($this->getInitialized() !== true) {
+			$this->shellInitialize();
 		}
 		if ($delimitor === null) {
 			$delimitorProvided	= false;
@@ -83,9 +55,12 @@ class Bash extends Base
 		}
 
 		$rTimeout	= $this->getMaxExecutionTime();
-		if ($maxTimeout === null) {
+		if ($this->_terminating === true || $this->getInitialized() == 'setup') {
+			//when terminating and setting up we should be able to take a very long time
+			$maxTimeout		= 15000;
+		} elseif ($maxTimeout === null) {
 			$maxTimeout		= $rTimeout;
-		} elseif ($maxTimeout > $rTimeout) {
+		}elseif ($maxTimeout > $rTimeout) {
 			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
 		}
 
@@ -184,56 +159,34 @@ class Bash extends Base
 			$this->_initialized		= 'setup';
 			
 			try {
-				
+
 				//set the variables
 				$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
 				$this->_strCmdCommit	= chr(13);
 				$this->_cmdSigInt		= chr(3) . $this->_strCmdCommit;
 			
 				//set the prompt to a known value
-				$strCmd		= "PS1=\"".$this->_shellPrompt."\"" . $this->_strCmdCommit;
-				$wData		= $this->shellWrite($strCmd);
-				if (strlen($wData['error']) > 0) {
-					throw new \Exception(__METHOD__ . ">> Failed to write shell promt command. Error: " . $wData['error']);
-				}
-				
-				//see if it took hold
-				$strCmd		= $this->_strCmdCommit . "echo \">>>>\"\$PS1\"<<<<\" && echo $$\"MERLIN\"$$"  . $this->_strCmdCommit;
-				$wData		= $this->shellWrite($strCmd);
-				if (strlen($wData['error']) > 0) {
-					throw new \Exception(__METHOD__ . ">> Failed to write shell promt validation command. Error: " . $wData['error']);
-				}
-				
+				$strCmd		= "PS1=\"".$this->_shellPrompt."\" && echo $$\"MERLIN\"$$" . $this->_strCmdCommit;
 				$delimitor	= "[0-9]+MERLIN[0-9]+";
-				$rData		= $this->shellRead($delimitor, $this->getMaxExecutionTime());
-				if (strlen($rData['error']) > 0) {
-					throw new \Exception(__METHOD__ . ">> Failed to read shell promt validation command. Error: " . $rData['error']);
-				}
-	
-				$rLines	= array_reverse(explode("\n", $rData['data']));
-				foreach ($rLines as $index => $rLine) {
-					if (preg_match("/".$delimitor."/", $rLine)) {
-						//next line is the prompt
-						if (preg_match("/>>>>(.*?)<<<</", $rLines[$index + 1], $rawPrompt)) {
-							//got the right prompt
-							break;
-						} else {
-							throw new \Exception(__METHOD__ . ">> Failed to set shell prompt value");
-						}
-					}
-				}
-				
-				//shell is now usable
+				$this->exeCmd($strCmd, $delimitor);
+
+				//shell is now usable with the standard delimitor
 				
 				//just a tiny sleep (1 ms) to make sure the last command has completed its prompt
 				//this seems to only be needed on Arch, but i imagine that other busy servers will encounter the same issue.
 				usleep(1000);
-				$columnCount	= $this->getTerminalWidth();
+				$strCmd		= "echo \$COLUMNS";
+				$reData		= $this->exeCmd($strCmd);
+				if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
+					$columnCount	=  $rawColCount[1];
+				} else {
+					throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
+				}
 				$repeatChar		= "A";
 				$repeatCount	= $columnCount * 2;
 				
 				$strCmd			= "echo \"".str_repeat($repeatChar, $repeatCount)."\"";
-				$reData			= $this->exeCmd($strCmd, null, null);
+				$reData			= $this->exeCmd($strCmd);
 				
 				$regEx			= "echo \"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";		
 				if (preg_match("/".$regEx."/", $reData, $breakerRaw)) {
@@ -249,7 +202,7 @@ class Bash extends Base
 					//if there is no parent then this is the initial shell
 					//get the PID of the parent so we can kill that process if everything else fails.
 					$strCmd			= "(cat /proc/$$/status | grep PPid)";
-					$reData			= $this->exeCmd($strCmd, null, null);
+					$reData			= $this->exeCmd($strCmd);
 	
 					if (preg_match("/([0-9]+)/", $reData, $rawPPID)) {
 						$this->_baseShellPPID	= $rawPPID[1];
@@ -279,17 +232,10 @@ class Bash extends Base
 		
 		if ($this->_terminating === false) {
 			$this->_terminating		= true;
-				
+
 			$errObj	= null;
 			try {
-		
-		
-				if ($this->getInitialized() !== true) {
-					//in case the shell was setup, but no commands were
-					//issued, we will need to initiate before terminating
-					$this->shellInitialize();
-				}
-		
+
 				//make sure the last command is dead
 				$this->killLastProcess();
 				

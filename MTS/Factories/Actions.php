@@ -4,7 +4,7 @@ namespace MTS\Factories;
 
 class Actions
 {
-	private $_classStore=array();
+	protected $_classStore=array();
 	
 	//local actions
 	public function getLocalOperatingSystem()

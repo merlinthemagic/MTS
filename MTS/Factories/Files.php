@@ -4,7 +4,7 @@ namespace MTS\Factories;
 
 class Files
 {
-	private $_classStore=array();
+	protected $_classStore=array();
 	
 	public function getFile($strName=null, $strPath=null)
 	{

@@ -58,7 +58,10 @@ class RouterOS extends Base
 		}
 
 		$rTimeout	= $this->getMaxExecutionTime();
-		if ($maxTimeout === null) {
+		if ($this->_terminating === true || $this->getInitialized() == 'setup') {
+			//when terminating and setting up we should be able to take a very long time
+			$maxTimeout		= 15000;
+		} elseif ($maxTimeout === null) {
 			$maxTimeout		= $rTimeout;
 		} elseif ($maxTimeout > $rTimeout) {
 			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
@@ -86,19 +89,19 @@ class RouterOS extends Base
 					if (count($lines) > 0) {
 						//strip command if on line 1
 						$expectCmd			= str_replace($this->_termBreakDetail, "", $lines[0]);
-						if ($expectCmd == $rawCmdStr) {
+						
+						$lineZeroLen	= strlen($lines[0]);
+						$cmdLen			= strlen($rawCmdStr);
+						$cmdPos			= strpos($lines[0], $rawCmdStr);
+						
+						if ($cmdPos !== false && $lineZeroLen == ($cmdLen + $cmdPos)) {
 							//command as expected
 							unset($lines[0]);
-						} elseif ($expectCmd == $strCmd . chr(8)) {
-							//command ends in backspace. i think this happens when the command is one char too long to fit on a single line.
+						} elseif ($expectCmd == $rawCmdStr) {
+							//command as expected
 							unset($lines[0]);
 						} else {
-							//there is still a problem stripping the command line if the string command contains
-							//escaped chars that should not be escaped for the command to work i.e.
-							//cmd string stripped correctly: ldd "/usr/bin/ssh" | grep "=> \/" | awk '{print $3}'
-							//cmd string not stripped correctly: ldd "/usr/bin/ssh" | grep "=> /" | awk '{print $3}'
-							//bash does not care if the / is escaped, and both commands work, but this function will
-							//not strip the last one
+							
 						}
 					}
 					

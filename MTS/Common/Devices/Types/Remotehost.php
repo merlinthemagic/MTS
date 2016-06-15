@@ -5,7 +5,7 @@ use \MTS\Common\Devices\Device;
 
 class Remotehost extends Device
 {
-	private $_hostname=null;
+	protected $_hostname=null;
 	
 	public function setHostname($hostname)
 	{
