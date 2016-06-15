@@ -8,6 +8,7 @@ class Base
 	public $debugData=array();
 	protected $_keepAlive=false;
 	protected $_initialized=null;
+	protected $_terminating=false;
 	protected $_windowObjs=array();
 
 	public function __construct()
@@ -25,13 +26,13 @@ class Base
 	{
 		$this->debug	= $bool;
 	}
-	public function setKeepalive($bool)
-	{
-		$this->_keepAlive	= $bool;
-	}
 	public function addDebugData($debugData)
 	{
 		$this->debugData[]	= $debugData;
+	}
+	public function setKeepalive($bool)
+	{
+		$this->_keepAlive	= $bool;
 	}
 	public function getNewWindow($url=null, $width=null, $height=null)
 	{
@@ -90,6 +91,14 @@ class Base
 	}
 	public function terminate()
 	{
+		if ($this->debug === true && $this->_terminating === false) {
+			$runTime	= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
+			$maxRunTime	= ini_get('max_execution_time');
+			if ($maxRunTime <= $runTime) {
+				//help debug when commands fail because the "max_execution_time" was not long enough
+				$this->addDebugData("Process terminated because 'max_execution_time': ".$maxRunTime.", was reached. Run time: " . $runTime);
+			}
+		}
 		$this->browserTerminate();
 	}
 	public function getInitialized()

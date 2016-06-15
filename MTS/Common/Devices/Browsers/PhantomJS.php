@@ -5,7 +5,6 @@ namespace MTS\Common\Devices\Browsers;
 class PhantomJS extends Base implements BrowserInterface
 {
 	private $_procPipe=null;
-	private $_terminating=false;
 	private $_cmdMaxTimeout=null;
 	private $_partialReturn="";
 	private $_phantomPID=null;
@@ -383,17 +382,21 @@ class PhantomJS extends Base implements BrowserInterface
 					}
 					//will validate if the PID is even set
 					\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->_phantomPID);
-					//success problem handled
-					$this->_initialized	= false;
 					
+					//success problem handled
+					$errObj	= null;
+
 				} catch (\Exception $e) {
 					switch($e->getCode()){
 						default;
-						throw $errObj;
+						//nothing the error will be thrown
 					}
 				}
-			} else {
-				$this->_initialized	= false;
+			}
+			
+			$this->_initialized	= false;
+			if ($errObj !== null) {
+				throw $errObj;
 			}
 		}
 	}

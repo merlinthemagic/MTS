@@ -7,10 +7,10 @@ class Bash extends Base
 	private $_procPipe=null;
 	private $_shellPrompt=null;
 	private $_strCmdCommit=null;
+	private	$_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
-	private $_terminating=false;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -100,7 +100,13 @@ class Bash extends Base
 			if ($maxTimeout > 0) {
 				$rData	= $this->shellRead($delimitor, $maxTimeout);
 				if (strlen($rData['error']) > 0 && $delimitor !== false) {
-					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
+					
+					if ($rData['error'] == "timeout") {
+						throw new \Exception(__METHOD__ . ">> Read data timeout", 2500);
+					} else {
+						throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
+					}
+					
 				} else {
 					
 					$rawData			= $rData['data'];
@@ -182,6 +188,7 @@ class Bash extends Base
 				//set the variables
 				$this->_shellPrompt		= "[" . uniqid("bash.", true) . "]";
 				$this->_strCmdCommit	= chr(13);
+				$this->_cmdSigInt		= chr(3) . $this->_strCmdCommit;
 			
 				//set the prompt to a known value
 				$strCmd		= "PS1=\"".$this->_shellPrompt."\"" . $this->_strCmdCommit;
@@ -288,41 +295,45 @@ class Bash extends Base
 				
 				//issue the exit
 				$strCmd		= "exit";
-				$delimitor	= "(screen is terminating)|(logout)";
+				$delimitor	= "(screen is terminating|logout|Welcome back\!)";
 				$this->exeCmd($strCmd, $delimitor);
 		
 			} catch (\Exception $e) {
-					
 				switch($e->getCode()){
 					default;
 					$errObj	= $e;
 				}
 			}
 
-			if ($errObj !== null) {
-				//something went wrong, try force killing the process
-				try {
+			try {
+				if ($this->_baseShellPPID !== null) {
 					
-					if ($this->_baseShellPPID !== null) {
-						
+					$stillRunning	= \MTS\Factories::getActions()->getLocalProcesses()->isRunningPid($this->_baseShellPPID);
+					
+					if ($stillRunning === true) {
 						if ($this->debug === true) {
 							$this->addDebugData("Sending SIGTERM to process PID: " . $this->_baseShellPPID);
 						}
-						//if we are the base shell try to forcefully kill
+						//something went wrong, try force killing the process
 						\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->_baseShellPPID);
 						//success problem handled
-					}
-					
-					$this->_initialized	= false;
-
-				} catch (\Exception $e) {
-					switch($e->getCode()){
-						default;
-						throw $errObj;
+						$errObj	= null;
 					}
 				}
-			} else {
-				$this->_initialized	= false;
+				
+			} catch (\Exception $e) {
+					
+				switch($e->getCode()){
+					default;
+					if ($errObj === null) {
+						$errObj	= $e;
+					}
+				}
+			}
+			
+			$this->_initialized	= false;
+			if ($errObj !== null) {
+				throw $errObj;
 			}
 		}
 	}
@@ -331,7 +342,7 @@ class Bash extends Base
 		if ($this->getInitialized() !== null && $this->getInitialized() !== false) {
 	
 			//SIGINT current process and get prompt
-			$strCmd		= chr(3) . $this->_strCmdCommit;
+			$strCmd		= $this->_cmdSigInt;
 			$this->exeCmd($strCmd);
 		}
 	}

@@ -7,6 +7,7 @@ class Base
 	protected $_childShell=null;
 	protected $_parentShell=null;
 	protected $_initialized=null;
+	protected $_terminating=false;
 	public $debug=false;
 	public $debugData=array();
 	
@@ -87,6 +88,14 @@ class Base
 	}
 	public function terminate()
 	{
+		if ($this->debug === true && $this->_parentShell === null && $this->_terminating === false) {
+			$runTime	= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
+			$maxRunTime	= ini_get('max_execution_time');
+			if ($maxRunTime <= $runTime) {
+				//help debug when commands fail because the "max_execution_time" was not long enough
+				$this->addDebugData("Process terminated because 'max_execution_time': ".$maxRunTime.", was reached. Run time: " . $runTime);
+			}
+		}
 		$childError	= null;
 		$ownError	= null;
 		try {
@@ -148,6 +157,15 @@ class Base
 	public function getChildShell()
 	{
 		return $this->_childShell;
+	}
+	public function getActiveShell()
+	{
+		$childShell	= $this->getChildShell();
+		if ($childShell === null) {
+			return $this;
+		} else {
+			return $childShell->getActiveShell();
+		}
 	}
 	public function setParentShell($shellObj)
 	{

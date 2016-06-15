@@ -7,10 +7,10 @@ class RouterOS extends Base
 	private $_procPipe=null;
 	private $_shellPrompt=null;
 	private $_strCmdCommit=null;
+	private $_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
-	private $_terminating=false;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -65,9 +65,8 @@ class RouterOS extends Base
 		}
 
 		$this->getPipes()->resetReadPosition();
-		
-		$rawCmdStr	= $strCmd . $this->_strCmdCommit;
-		$wData		= $this->shellWrite($rawCmdStr);
+		$rawCmdStr		= $strCmd . $this->_strCmdCommit;
+		$wData			= $this->shellWrite($rawCmdStr);
 		if (strlen($wData['error']) > 0) {
 			throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
 		} else {
@@ -75,7 +74,11 @@ class RouterOS extends Base
 			if ($maxTimeout > 0) {
 				$rData	= $this->shellRead($delimitor, $maxTimeout);
 				if (strlen($rData['error']) > 0 && $delimitor !== false) {
-					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
+					if ($rData['error'] == "timeout") {
+						throw new \Exception(__METHOD__ . ">> Read data timeout", 2500);
+					} else {
+						throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
+					}
 				} else {
 					
 					$rawData			= $rData['data'];
@@ -156,30 +159,54 @@ class RouterOS extends Base
 				
 				//set the variables
 				
-				$this->_strCmdCommit	= chr(13);
-				$this->_shellPrompt		= trim($this->exeCmd("", "\>"));
-				
-				//shell is now usable
+				$this->_strCmdCommit			= chr(13);
+				$this->_cmdSigInt				= chr(3) . $this->_strCmdCommit;
+				$this->_termBreakDetail[]		= " \r";
+				$promptReturn					= $this->exeCmd("", "\[(.*?)\>");
 
-				$columnCount	= 80;
-				$repeatChar		= "A";
-				$repeatCount	= $columnCount * 2;
+				//prompt may carry some junk back, not sure why
+				$singlePrompts			= array_filter(explode("\n", $promptReturn));
+				foreach ($singlePrompts as $singlePrompt) {
+					$singlePrompt	= trim($singlePrompt);
+					if (preg_match("/^(\[(.*?)\>)$/", $singlePrompt) == 1) {
+						$this->_shellPrompt	= $singlePrompt;
+						break;
+					}
+				}
 				
-				$strCmd			= "\"".str_repeat($repeatChar, $repeatCount)."\"";
-				$reData			= $this->exeCmd($strCmd);
+				if ($this->_shellPrompt === null) {
+					throw new \Exception(__METHOD__ . ">> Failed to get shell prompt");
+				}
 				
-				$regEx			= "\"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";	
-
-				if (preg_match("/".$regEx."/", $reData, $breakerRaw)) {
-					//if the result for the previous command did not end in a line break, then the terminal will
-					//introduce a 200d (hex) terminal break rather than the normal 2008 (hex) break for the next command. not sure why
-					$this->_termBreakDetail[]		= $breakerRaw[2];
-					$this->_termBreakDetail[]		= " \r";
-				} else {
-					throw new \Exception(__METHOD__ . ">> Failed to determine terminal break detail.");
+				//for unknown reasons the prompt is sometimes written more than once initially
+				//that means the first real command is offset and receives no return
+				$testEnd		= (time() + 10);
+				$wDone			= false;
+				while ($wDone === false) {
+					//since there may be many extra prompts, the delimitor must be unique
+					$rosUUID		= uniqid("rosTest.", true);
+					$reData			= $this->exeCmd(":put \"" . $rosUUID . "\"");
+					$testReturns	= array_filter(explode("\n", $reData));
+					foreach ($testReturns as $testReturn) {
+						$testReturn	= trim($testReturn);
+						if (preg_match("/^".preg_quote($rosUUID)."$/", $testReturn) == 1) {
+							//we have a clean prompt
+							$wDone		= true;
+							break;
+						}
+					}
+					
+					if ($wDone === false) {
+						if ($testEnd < time()) {
+							throw new \Exception(__METHOD__ . ">> Failed to get clean shell");
+						} else {
+							//wait for output to clear
+							usleep(250000);
+						}
+					}
 				}
 
-				//reset the output so we have a clean beginning
+				//reset the output so we have a clean beginning (the test above will still leave the prompt)
 				$this->getPipes()->resetReadPosition();
 				
 				//shell is now initialized
@@ -202,8 +229,7 @@ class RouterOS extends Base
 			$this->_terminating		= true;
 				
 			try {
-		
-		
+
 				if ($this->getInitialized() !== true) {
 					//in case the shell was setup, but no commands were
 					//issued, we will need to initiate before terminating
@@ -215,7 +241,7 @@ class RouterOS extends Base
 				
 				//issue the exit
 				$strCmd		= "/quit";
-				$delimitor	= "(closed)";
+				$delimitor	= "(closed|Welcome back\!)";
 				$this->exeCmd($strCmd, $delimitor);
 				
 				$this->_initialized	= false;
@@ -234,7 +260,7 @@ class RouterOS extends Base
 		if ($this->getInitialized() !== null && $this->getInitialized() !== false) {
 	
 			//SIGINT current process and get prompt
-			$strCmd		= chr(3) . $this->_strCmdCommit;
+			$strCmd		= $this->_cmdSigInt;
 			$this->exeCmd($strCmd);
 		}
 	}
@@ -245,13 +271,11 @@ class RouterOS extends Base
 		try {
 			$this->getPipes()->strWrite($strCmd);
 		} catch (\Exception $e) {
-	
 			switch($e->getCode()){
 				default;
 				$return['errorMsg']	= $e->getMessage();
 			}
 		}
-	
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
 		if ($this->debug === true) {
@@ -272,7 +296,7 @@ class RouterOS extends Base
 		$lDataTime			= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		$return['stime']	= $lDataTime;
 		$done				= false;
-	
+
 		try {
 			while ($done === false) {
 				$newData	= $this->getPipes()->strRead();
@@ -299,6 +323,7 @@ class RouterOS extends Base
 				$return['error']	= $e->getMessage();
 			}
 		}
+		
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
 		if ($this->debug === true) {

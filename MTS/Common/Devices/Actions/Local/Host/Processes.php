@@ -57,6 +57,7 @@ class Processes extends Base
 					if ($killExe !== false) {
 						$cmdString	= $killExe->getPathAsString() . " -SIGTERM " . $pid;
 						$this->shellExec($cmdString);
+						usleep(100000);
 						$running	= $this->isRunningPid($pid);
 						
 						if ($running === false) {
