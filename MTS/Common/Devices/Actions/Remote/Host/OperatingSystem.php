@@ -27,11 +27,21 @@ class OperatingSystem extends Base
 				$osName				= null;
 				$osMajorVersion		= null;
 				
-				$osDetail			= php_uname();
-				if (preg_match("/^Linux\s/", $osDetail)) {
-					$osType			= 'linux';
+				$cmdString		= 'cat /etc/os-release';
+				$cReturn		= $shellObj->exeCmd($cmdString);
+
+				if (strlen($cReturn) == 0) {
+					$cmdString		= 'cat /etc/redhat-release';
+					$cReturn		= $shellObj->exeCmd($cmdString);
+				}
 				
-					preg_match("/(x86_64|i386|i686)/i", $osDetail, $rawArch);
+				if (preg_match("/Linux/", $cReturn)) {
+					$osType			= 'linux';
+
+					$cmdString		= 'uname -a';
+					$uReturn		= $shellObj->exeCmd($cmdString);
+
+					preg_match("/(x86_64|i386|i686)/i", $uReturn, $rawArch);
 					if (isset($rawArch[1])) {
 						$rawArch	= strtolower($rawArch[1]);
 						if ($rawArch == "x86_64") {
@@ -40,15 +50,7 @@ class OperatingSystem extends Base
 							$osArch	= 32;
 						}
 					}
-				
-					$cmdString		= 'cat /etc/os-release';
-					$cReturn		= $this->shellExec($cmdString);
-				
-					if (strlen($cReturn) == 0) {
-						$cmdString		= 'cat /etc/redhat-release';
-						$cReturn		= $this->shellExec($cmdString);
-					}
-						
+											
 					if ($cReturn !== null) {
 						preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/", $cReturn, $rawName);
 				
@@ -58,9 +60,9 @@ class OperatingSystem extends Base
 				
 						if ($osName == 'arch linux') {
 							$cmdString		= 'cat /proc/version';
-							$cReturn		= $this->shellExec($cmdString);
+							$c2Return		= $shellObj->exeCmd($cmdString);
 				
-							preg_match("/([0-9]{8})/", $cReturn, $rawMajorVersion);
+							preg_match("/([0-9]{8})/", $c2Return, $rawMajorVersion);
 				
 							if (isset($rawMajorVersion[1]) === true) {
 								$osMajorVersion		= $rawMajorVersion[1];
