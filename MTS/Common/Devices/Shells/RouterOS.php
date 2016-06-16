@@ -9,7 +9,8 @@ class RouterOS extends Base
 	private $_strCmdCommit=null;
 	private $_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
-	private $_termBreakDetail=array();
+	private $_termCmdBreak=array();
+	private $_termReturnBreak=array();
 	private $_baseShellPPID=null;
 	
 	public function setPipes($procPipeObj)
@@ -88,17 +89,16 @@ class RouterOS extends Base
 					$lines				= explode("\n", $rawData);
 					if (count($lines) > 0) {
 						//strip command if on line 1
-						$expectCmd			= str_replace($this->_termBreakDetail, "", $lines[0]);
-						
-						$lineZeroLen	= strlen($lines[0]);
-						$cmdLen			= strlen($rawCmdStr);
-						$cmdPos			= strpos($lines[0], $rawCmdStr);
-						
-						if ($cmdPos !== false && $lineZeroLen == ($cmdLen + $cmdPos)) {
+						$expectCmd			= str_replace($this->_termCmdBreak, "", $lines[0]);
+						if ($expectCmd == $rawCmdStr) {
 							//command as expected
 							unset($lines[0]);
-						} elseif ($expectCmd == $rawCmdStr) {
-							//command as expected
+						} elseif (
+							$this->getInitialized() === true
+							&& strpos($lines[0], $expectCmd) !== false
+							&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
+						) {
+							//command with junk in front of it
 							unset($lines[0]);
 						} else {
 							
@@ -127,8 +127,7 @@ class RouterOS extends Base
 									}
 									break;
 								} else {
-									//this line is before the delimitor has been reached
-									//remove it
+									//this line is after the delimitor has been reached, remove it
 									unset($lines[$linNbr]);
 								}
 							}
@@ -138,6 +137,25 @@ class RouterOS extends Base
 							//user did not want the result delimited
 							$rawData		= implode("\n", $lines);
 						}
+						
+						//remove all terminal breaks from the return
+						if (strpos(strtolower($strCmd), 'terse') !== false) {
+							//this command is in the terse format, there may be terminal breaks in the return
+							//this assumes the terminal is 80 wide (enforced by the SSH class), this coupling is bad
+							//but i left it here because the 80w parameter does not seem to have any effect on the break 
+							//for terse commands
+							$break		= substr($rawData, 80, 18);
+							if ($this->_termReturnBreak['terse'] === $break) {
+								$bLines		= explode($break, $rawData);
+								if (count($bLines) > 1) {
+									foreach ($bLines as $bKey => $bLine) {
+										$bLines[$bKey]	= substr($bLine, 1);
+									}
+									$rawData	= implode("", $bLines);
+								}
+							}
+						}
+
 					} else {
 						//no lines left
 						$rawData		= "";
@@ -161,11 +179,13 @@ class RouterOS extends Base
 			try {
 				
 				//set the variables
-				
-				$this->_strCmdCommit			= chr(13);
-				$this->_cmdSigInt				= chr(3) . $this->_strCmdCommit;
-				$this->_termBreakDetail[]		= " \r";
-				$promptReturn					= $this->exeCmd("", "\[(.*?)\>");
+				$this->_strCmdCommit				= chr(13);
+				$this->_cmdSigInt					= chr(3) . $this->_strCmdCommit;
+				$this->_termCmdBreak[]				= " \r";
+				$promptReturn						= $this->exeCmd("", "\[(.*?)\>");
+								
+				//commands using terse has this break pattern
+				$this->_termReturnBreak['terse']	= chr(13) . chr(10) . chr(27) . chr(91) . chr(55) . chr(57) . chr(67) . chr(27) . chr(91) . chr(65) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0);
 
 				//prompt may carry some junk back, not sure why
 				$singlePrompts			= array_filter(explode("\n", $promptReturn));
@@ -308,6 +328,7 @@ class RouterOS extends Base
 				if ($newData != "") {
 					$lDataTime			= $exeTime;
 					$return['data']		.= $newData;
+
 					if ($regex !== false && preg_match("/".$regex."/", $return['data'])) {
 						//found pattern match
 						$done	= true;

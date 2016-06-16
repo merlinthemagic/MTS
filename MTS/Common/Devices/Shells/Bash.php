@@ -95,6 +95,15 @@ class Bash extends Base
 						} elseif ($expectCmd == $strCmd . chr(8)) {
 							//command ends in backspace. i think this happens when the command is one char too long to fit on a single line.
 							unset($lines[0]);
+						} elseif (
+							$this->getInitialized() === true 
+							&& strpos($lines[0], $expectCmd) !== false
+							&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
+						) {
+							//we need to be initialized before we can use this as determining the terminal Break Detail
+							//depends on getting the command back as part of the return
+							//command with junk in front of it
+							unset($lines[0]);
 						} else {
 							//there is still a problem stripping the command line if the string command contains
 							//escaped chars that should not be escaped for the command to work i.e.
@@ -102,6 +111,7 @@ class Bash extends Base
 							//cmd string not stripped correctly: ldd "/usr/bin/ssh" | grep "=> /" | awk '{print $3}'
 							//bash does not care if the / is escaped, and both commands work, but this function will
 							//not strip the last one
+							//we cannot simply remove the first line since entering passwords does not show in the output
 						}
 					}
 					
@@ -127,8 +137,7 @@ class Bash extends Base
 									}
 									break;
 								} else {
-									//this line is before the delimitor has been reached
-									//remove it
+									//this line is after the delimitor has been reached, remove it
 									unset($lines[$linNbr]);
 								}
 							}

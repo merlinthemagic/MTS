@@ -87,11 +87,11 @@ class Ssh extends Base
 
 						if (isset($addName[2]) === false) {
 							//username does not include any options
-							$username	= $username . "+ct";
+							$username	= $username . "+" . $this->getMtTermOptions();
 							$validLogin	= false;
-						} else if ($addName[2] != "ct") {
+						} else if ($addName[2] != $this->getMtTermOptions()) {
 							//username has the wrong options
-							$username	= $addName[1] . "+ct";
+							$username	= $addName[1] . "+" . $this->getMtTermOptions();
 							$validLogin	= false;
 						}
 
@@ -193,11 +193,11 @@ class Ssh extends Base
 
 						if (isset($addName[2]) === false) {
 							//username does not include any options
-							$username	= $username . "+ct";
+							$username	= $username . "+" . $this->getMtTermOptions();
 							$validLogin	= false;
-						} else if ($addName[2] != "ct") {
+						} else if ($addName[2] != $this->getMtTermOptions()) {
 							//username has the wrong options
-							$username	= $addName[1] . "+ct";
+							$username	= $addName[1] . "+" . $this->getMtTermOptions();
 							$validLogin	= false;
 						}
 
@@ -247,5 +247,11 @@ class Ssh extends Base
 		}
 
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
+	}
+	
+	public function getMtTermOptions()
+	{
+		//default terminal options for all Mikrotik SSH connections. We need the terminal without colors and a standard width
+		return "ct80w";
 	}
 }
