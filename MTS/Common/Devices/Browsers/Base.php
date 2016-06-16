@@ -4,13 +4,13 @@ namespace MTS\Common\Devices\Browsers;
 
 class Base
 {
-	public $debug=false;
-	public $debugData=array();
 	protected $_keepAlive=false;
 	protected $_initialized=null;
 	protected $_terminating=false;
 	protected $_windowObjs=array();
-
+	public $debug=false;
+	public $debugData=array();
+	
 	public function __construct()
 	{
 		//on uncaught exception __destruct is not called, this might leave the browser as a zombie running on the system we cant have that.
@@ -29,6 +29,10 @@ class Base
 	public function addDebugData($debugData)
 	{
 		$this->debugData[]	= $debugData;
+	}
+	public function getDebugData()
+	{
+		return $this->debugData;
 	}
 	public function setKeepalive($bool)
 	{

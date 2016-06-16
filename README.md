@@ -170,7 +170,7 @@ try {
 }
 echo "Start Debug&gt&gt&gt\n &ltcode&gt&ltpre&gt \n ";
 echo "Exception Message: " . $errMsg;
-print_r($shellObj-&gtdebugData);
+print_r($shellObj-&gtgetDebugData());
 echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
 </pre>
 
@@ -410,7 +410,7 @@ try {
 
 echo "Start Debug&gt&gt&gt\n &ltcode&gt&ltpre&gt \n ";
 echo "Exception Message: " . $errMsg;
-print_r($browserObj-&gtdebugData);
+print_r($browserObj-&gtgetDebugData());
 echo "\n &lt/pre&gt&lt/code&gt \n &lt&lt&ltEnd Debug";
 </pre>
 

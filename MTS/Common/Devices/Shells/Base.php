@@ -42,6 +42,15 @@ class Base
 			$parentShell->addDebugData($debugData);
 		}
 	}
+	public function getDebugData()
+	{
+		$parentShell		= $this->getParentShell();
+		if ($parentShell === null) {
+			return $this->debugData;
+		} else {
+			return $parentShell->getDebugData();
+		}
+	}
 	
 	public function exeCmd($strCmd, $delimitor=null, $timeout=null)
 	{

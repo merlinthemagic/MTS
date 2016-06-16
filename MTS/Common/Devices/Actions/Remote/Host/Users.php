@@ -93,7 +93,7 @@ class Users extends Base
 						return $childShell;
 					} else {
 						//wrong user, get out
-						$shellObj->exeCmd("exit", false, 0);
+						$shellObj->exeCmd("exit", false, 100);
 						$shellObj->exeCmd("");
 						throw new \Exception(__METHOD__ . ">> Error: Changing user to: ".$username.", got logged in as: " . $newUser);
 					}
