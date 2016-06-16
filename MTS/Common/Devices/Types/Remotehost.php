@@ -35,8 +35,8 @@ class Remotehost extends Device
 		} else {
 			//you have already connected to another host and want to make the connection from that host
 		}
-		\MTS\Factories::getActions()->getRemoteConnectionsSsh()->connectByUsername($shellObj, $username, $password, $this->getHostname(), $port);
+		$newShell	= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->connectByUsername($shellObj, $username, $password, $this->getHostname(), $port);
 		
-		return $shellObj;
+		return $newShell;
 	}
 }

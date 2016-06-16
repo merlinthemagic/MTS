@@ -104,14 +104,14 @@ class Ssh extends Base
 							$shellObj->exeCmd("");
 
 							//then back in with a properly formatted username
-							$this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);
-							return;
+							$newShell	= $this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);
+							return $newShell;
 							
 						} else {
 
 							$childShell			= new \MTS\Common\Devices\Shells\RouterOS();
 							$shellObj->setChildShell($childShell);
-							return;
+							return $childShell;
 						}
 
 					} elseif ($returnPass[1] == $username."@") {
@@ -124,7 +124,7 @@ class Ssh extends Base
 							
 							$childShell			= new \MTS\Common\Devices\Shells\Bash();
 							$shellObj->setChildShell($childShell);
-							return;
+							return $childShell;
 						} else {
 							//let this pass through it is not handled
 						}
@@ -210,14 +210,14 @@ class Ssh extends Base
 							$shellObj->exeCmd("");
 
 							//then back in with a properly formatted username
-							$this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);
-							return;
+							$newShell	= $this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);
+							return $newShell;
 							
 						} else {
 
 							$childShell			= new \MTS\Common\Devices\Shells\RouterOS();
 							$shellObj->setChildShell($childShell);
-							return;
+							return $childShell;
 						}
 
 					} elseif ($returnPass[1] == $username."@") {
@@ -230,7 +230,7 @@ class Ssh extends Base
 							
 							$childShell			= new \MTS\Common\Devices\Shells\Bash();
 							$shellObj->setChildShell($childShell);
-							return;
+							return $childShell;
 						} else {
 							//let this pass through it is not handled
 							
