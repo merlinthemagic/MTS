@@ -1,5 +1,5 @@
 <phpunit backupGlobals="false"
-   		 bootstrap="Bootstrap.php"
+   		 bootstrap="MtsBootstrap.php"
          backupStaticAttributes="false"
          syntaxCheck="false"
          colors="true">

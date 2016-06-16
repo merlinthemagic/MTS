@@ -11,4 +11,4 @@ $mtsEnablePath	= DIRECTORY_SEPARATOR . $mtsPath . DIRECTORY_SEPARATOR . "MTS" . 
 require_once $mtsEnablePath;
 
 //to run all tests execute:
-//phpunit -c phpunit.xml
+//phpunit -c MtsPhpUnit.xml
