@@ -11,6 +11,7 @@ class Bash extends Base
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
+	private	$_columnCount=null;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -24,6 +25,19 @@ class Bash extends Base
 		} else {
 			return $parentShell->getPipes();
 		}
+	}
+	public function getTerminalWidth()
+	{
+		if ($this->_columnCount === null) {
+			$strCmd		= "echo \$COLUMNS";
+			$reData		= $this->exeCmd($strCmd);
+			if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
+				$this->_columnCount	=  $rawColCount[1];
+			} else {
+				throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
+			}
+		}
+		return $this->_columnCount;
 	}
 	public function getMaxExecutionTime()
 	{
@@ -184,15 +198,9 @@ class Bash extends Base
 				//just a tiny sleep (1 ms) to make sure the last command has completed its prompt
 				//this seems to only be needed on Arch, but i imagine that other busy servers will encounter the same issue.
 				usleep(1000);
-				$strCmd		= "echo \$COLUMNS";
-				$reData		= $this->exeCmd($strCmd);
-				if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
-					$columnCount	=  $rawColCount[1];
-				} else {
-					throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
-				}
+				
 				$repeatChar		= "A";
-				$repeatCount	= $columnCount * 2;
+				$repeatCount	= $this->getTerminalWidth() * 2;
 				
 				$strCmd			= "echo \"".str_repeat($repeatChar, $repeatCount)."\"";
 				$reData			= $this->exeCmd($strCmd);

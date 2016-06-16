@@ -9,9 +9,9 @@ class RouterOS extends Base
 	private $_strCmdCommit=null;
 	private $_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
-	private $_termCmdBreak=array();
 	private $_termReturnBreak=array();
 	private $_baseShellPPID=null;
+	private $_columnCount=80;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -25,6 +25,10 @@ class RouterOS extends Base
 		} else {
 			return $parentShell->getPipes();
 		}
+	}
+	public function getTerminalWidth()
+	{
+		return $this->_columnCount;
 	}
 	public function getMaxExecutionTime()
 	{
@@ -137,24 +141,6 @@ class RouterOS extends Base
 							//user did not want the result delimited
 							$rawData		= implode("\n", $lines);
 						}
-						
-						//remove all terminal breaks from the return
-						if (strpos(strtolower($strCmd), 'terse') !== false) {
-							//this command is in the terse format, there may be terminal breaks in the return
-							//this assumes the terminal is 80 wide (enforced by the SSH class), this coupling is bad
-							//but i left it here because the 80w parameter does not seem to have any effect on the break 
-							//for terse commands
-							$break		= substr($rawData, 80, 18);
-							if ($this->_termReturnBreak['terse'] === $break) {
-								$bLines		= explode($break, $rawData);
-								if (count($bLines) > 1) {
-									foreach ($bLines as $bKey => $bLine) {
-										$bLines[$bKey]	= substr($bLine, 1);
-									}
-									$rawData	= implode("", $bLines);
-								}
-							}
-						}
 
 					} else {
 						//no lines left
@@ -184,9 +170,6 @@ class RouterOS extends Base
 				$this->_termCmdBreak[]				= " \r";
 				$promptReturn						= $this->exeCmd("", "\[(.*?)\>");
 								
-				//commands using terse has this break pattern
-				$this->_termReturnBreak['terse']	= chr(13) . chr(10) . chr(27) . chr(91) . chr(55) . chr(57) . chr(67) . chr(27) . chr(91) . chr(65) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0) . chr(0);
-
 				//prompt may carry some junk back, not sure why
 				$singlePrompts			= array_filter(explode("\n", $promptReturn));
 				foreach ($singlePrompts as $singlePrompt) {
