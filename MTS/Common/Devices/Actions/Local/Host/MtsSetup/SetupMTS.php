@@ -376,8 +376,9 @@ class SetupMTS
 		$result		= $this->getReturnArray();
 	
 		try {
-			$shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
-			$username		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getUsername($shellObj);
+			$shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell();
+			$username		= \MTS\Factories::getActions()->getRemoteUsers()->getShellUsername($shellObj);
+
 		} catch (\Exception $e) {
 			switch($e->getCode()){
 				default;

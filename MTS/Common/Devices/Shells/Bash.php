@@ -5,14 +5,13 @@ namespace MTS\Common\Devices\Shells;
 class Bash extends Base
 {
 	private $_procPipe=null;
-	private $_shellPrompt=null;
 	private $_strCmdCommit=null;
 	private	$_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
 	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
 	private	$_columnCount=null;
-	
+
 	public function setPipes($procPipeObj)
 	{
 		$this->_procPipe		= $procPipeObj;
@@ -103,29 +102,32 @@ class Bash extends Base
 					if (count($lines) > 0) {
 						//strip command if on line 1
 						$expectCmd			= str_replace($this->_termBreakDetail, "", $lines[0]);
-						if ($expectCmd == $rawCmdStr) {
-							//command as expected
-							unset($lines[0]);
-						} elseif ($expectCmd == $strCmd . chr(8)) {
-							//command ends in backspace. i think this happens when the command is one char too long to fit on a single line.
-							unset($lines[0]);
-						} elseif (
-							$this->getInitialized() === true 
-							&& strpos($lines[0], $expectCmd) !== false
-							&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
-						) {
-							//we need to be initialized before we can use this as determining the terminal Break Detail
-							//depends on getting the command back as part of the return
-							//command with junk in front of it
-							unset($lines[0]);
-						} else {
-							//there is still a problem stripping the command line if the string command contains
-							//escaped chars that should not be escaped for the command to work i.e.
-							//cmd string stripped correctly: ldd "/usr/bin/ssh" | grep "=> \/" | awk '{print $3}'
-							//cmd string not stripped correctly: ldd "/usr/bin/ssh" | grep "=> /" | awk '{print $3}'
-							//bash does not care if the / is escaped, and both commands work, but this function will
-							//not strip the last one
-							//we cannot simply remove the first line since entering passwords does not show in the output
+						$expectCmdLen		= strlen($expectCmd);
+						if ($expectCmdLen > 0) {
+							if ($expectCmd == $rawCmdStr) {
+								//command as expected
+								unset($lines[0]);
+							} elseif ($expectCmd == $strCmd . chr(8)) {
+								//command ends in backspace. i think this happens when the command is one char too long to fit on a single line.
+								unset($lines[0]);
+							} elseif (
+								$this->getInitialized() === true 
+								&& strpos($lines[0], $expectCmd) !== false
+								&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
+							) {
+								//we need to be initialized before we can use this as determining the terminal Break Detail
+								//depends on getting the command back as part of the return
+								//command with junk in front of it
+								unset($lines[0]);
+							} else {
+								//there is still a problem stripping the command line if the string command contains
+								//escaped chars that should not be escaped for the command to work i.e.
+								//cmd string stripped correctly: ldd "/usr/bin/ssh" | grep "=> \/" | awk '{print $3}'
+								//cmd string not stripped correctly: ldd "/usr/bin/ssh" | grep "=> /" | awk '{print $3}'
+								//bash does not care if the / is escaped, and both commands work, but this function will
+								//not strip the last one
+								//we cannot simply remove the first line since entering passwords does not show in the output
+							}
 						}
 					}
 					
@@ -238,7 +240,7 @@ class Bash extends Base
 				switch($e->getCode()){
 					default;
 					//cleanup then throw
-					$this->shellTerminate();
+					$this->terminate();
 					throw $e;
 				}
 			}
@@ -255,12 +257,19 @@ class Bash extends Base
 
 				//make sure the last command is dead
 				$this->killLastProcess();
-				
+
 				//issue the exit
 				$strCmd		= "exit";
-				$delimitor	= "(screen is terminating|logout|Welcome back\!)";
+				
+				$parentObj	= $this->getParentShell();
+				if ($parentObj === null) {
+					$delimitor	= "(screen is terminating)";
+				} else {
+					$delimitor	= "(".preg_quote($parentObj->getPrompt()).")";
+				}
+				
 				$this->exeCmd($strCmd, $delimitor);
-		
+				
 			} catch (\Exception $e) {
 				switch($e->getCode()){
 					default;

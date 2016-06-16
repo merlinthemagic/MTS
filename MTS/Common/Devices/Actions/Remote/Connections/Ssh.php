@@ -35,9 +35,7 @@ class Ssh extends Base
 			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
 
 				try {
-				
 						$connCmd		= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
-		
 						$regExConn		= "(".$ipaddress."'s password:|No route to host|Could not resolve hostname)";
 						$connReturn		= $shellObj->exeCmd($connCmd, $regExConn);
 						

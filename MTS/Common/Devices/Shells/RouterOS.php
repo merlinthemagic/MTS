@@ -5,7 +5,6 @@ namespace MTS\Common\Devices\Shells;
 class RouterOS extends Base
 {
 	private $_procPipe=null;
-	private $_shellPrompt=null;
 	private $_strCmdCommit=null;
 	private $_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
@@ -94,18 +93,21 @@ class RouterOS extends Base
 					if (count($lines) > 0) {
 						//strip command if on line 1
 						$expectCmd			= str_replace($this->_termCmdBreak, "", $lines[0]);
-						if ($expectCmd == $rawCmdStr) {
-							//command as expected
-							unset($lines[0]);
-						} elseif (
-							$this->getInitialized() === true
-							&& strpos($lines[0], $expectCmd) !== false
-							&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
-						) {
-							//command with junk in front of it
-							unset($lines[0]);
-						} else {
-							
+						$expectCmdLen		= strlen($expectCmd);
+						if ($expectCmdLen > 0) {
+							if ($expectCmd == $rawCmdStr) {
+								//command as expected
+								unset($lines[0]);
+							} elseif (
+								$this->getInitialized() === true
+								&& strpos($lines[0], $expectCmd) !== false
+								&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
+							) {
+								//command with junk in front of it
+								unset($lines[0]);
+							} else {
+								
+							}
 						}
 					}
 					

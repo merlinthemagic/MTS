@@ -53,7 +53,7 @@ The $shellObj variable now contains a bash shell object you can issue commands a
 
 <pre>
   $return1  = $shellObj->exeCmd('whoami');
-  echo $return1; // root or apache or www-data
+  echo $return1; // root or apache or www-data or http
 </pre>
 
 Read the segment 'Using commands' below for more detail. 
@@ -67,12 +67,12 @@ But for those users who are not comfortable with that type of setup, there is an
 
 <pre>
 //Get a shell as the webserver user i.e. apache or www-data
-$shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
+$shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 
-//Pass that shell to the following function with root credentials.
+//Pass localhost to the following function with root credentials.
 \MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shellObj, 'root', 'rootPassword');
 
-$return1  = $shellObj->exeCmd('whoami');
+$return1 	= $shellObj->exeCmd('whoami');
 echo $return1; //root
 </pre>
 
@@ -91,7 +91,7 @@ The answer is of course not, but if you need root access it has inherent risk. T
 You can also get a shell to a remote server through SSH if you like. Here is how:
 <pre>
 //Example
-$shellObj = \MTS\Factories::getDevices()->getRemoteHost('ip_address')->getShellBySsh('username', 'password');
+$shellObj		= \MTS\Factories::getDevices()->getRemoteHost('ip_address')->setConnectionDetail('username', 'password')->getShell();
 </pre>
 
 The returned shell can be used just like a local shell

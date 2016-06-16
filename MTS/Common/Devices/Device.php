@@ -4,9 +4,8 @@ namespace MTS\Common\Devices;
 
 class Device
 {
-	protected function getAF()
-	{
-		//get the action factory
-		return \MTS\Factories::getActions();
-	}
+	public $debug=false;
+	protected $_classStore=array();
+	protected $_shellObj=null;
+	protected $_browserObj=null;
 }

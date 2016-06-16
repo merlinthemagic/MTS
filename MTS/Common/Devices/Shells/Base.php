@@ -8,6 +8,7 @@ class Base
 	protected $_parentShell=null;
 	protected $_initialized=null;
 	protected $_terminating=false;
+	protected $_shellPrompt=null;
 	public $debug=false;
 	public $debugData=array();
 	
@@ -125,6 +126,7 @@ class Base
 		$parentShell	= $this->getParentShell();
 		if ($parentShell !== null) {
 			$parentShell->setChildShell(null);
+			//clean up
 			$parentShell->exeCmd("");
 		}
 		
@@ -179,5 +181,10 @@ class Base
 	public function getInitialized()
 	{
 		return $this->_initialized;
+	}
+	public function getPrompt()
+	{
+		//needed on exit from child shell
+		return $this->_shellPrompt;
 	}
 }
