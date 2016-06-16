@@ -8,7 +8,6 @@ class RouterOS extends Base
 	private $_strCmdCommit=null;
 	private $_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
-	private $_termReturnBreak=array();
 	private $_baseShellPPID=null;
 	private $_columnCount=80;
 	
@@ -89,28 +88,25 @@ class RouterOS extends Base
 				} else {
 					
 					$rawData			= $rData['data'];
-					$lines				= explode("\n", $rawData);
-					if (count($lines) > 0) {
-						//strip command if on line 1
-						$expectCmd			= str_replace($this->_termCmdBreak, "", $lines[0]);
-						$expectCmdLen		= strlen($expectCmd);
-						if ($expectCmdLen > 0) {
-							if ($expectCmd == $rawCmdStr) {
-								//command as expected
-								unset($lines[0]);
-							} elseif (
-								$this->getInitialized() === true
-								&& strpos($lines[0], $expectCmd) !== false
-								&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
-							) {
-								//command with junk in front of it
-								unset($lines[0]);
-							} else {
-								
+					$lines				= explode("\r\n", $rawData);
+					if ($this->getInitialized() === true && count($lines) > 0) {
+						//strip command if it exists anywhere at the top
+						$strCmdLen		= strlen($strCmd);
+						$strCmdmaxLen	= ($strCmdLen * 2);
+						$cmdLine		= "";
+						foreach ($lines as $lKey => $line) {
+							$cmdLine	.= trim($line);
+							$cmdLineLen	= strlen($cmdLine);
+							if ($cmdLineLen == ($strCmdLen + strpos($cmdLine, $strCmd))) {
+								//found a match
+								$lines	= array_slice($lines, ($lKey + 1));
+								break;	
+							} elseif ($cmdLineLen > $strCmdmaxLen) {
+								break;
 							}
 						}
 					}
-					
+
 					if (count($lines) > 0) {
 						if ($delimitor !== false) {
 							$lines		= array_reverse($lines);
@@ -137,11 +133,11 @@ class RouterOS extends Base
 									unset($lines[$linNbr]);
 								}
 							}
-							$rawData		= implode("\n", array_reverse($lines));
+							$rawData		= implode("\r\n", array_reverse($lines));
 							
 						} else {
 							//user did not want the result delimited
-							$rawData		= implode("\n", $lines);
+							$rawData		= implode("\r\n", $lines);
 						}
 
 					} else {
@@ -169,7 +165,6 @@ class RouterOS extends Base
 				//set the variables
 				$this->_strCmdCommit				= chr(13);
 				$this->_cmdSigInt					= chr(3) . $this->_strCmdCommit;
-				$this->_termCmdBreak[]				= " \r";
 				$promptReturn						= $this->exeCmd("", "\[(.*?)\>");
 								
 				//prompt may carry some junk back, not sure why
