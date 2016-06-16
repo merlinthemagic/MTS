@@ -17,16 +17,18 @@ class OperatingSystem extends Base
 		$shellObj			= $this->_classStore['shellObj']->getActiveShell();
 
 		if ($requestType == 'getOsObj') {
+			
+			$osObj				= null;
+			
+			//we need 4 things to determine the correct class of OS
+			$osArch				= null;
+			$osType				= null;
+			$osName				= null;
+			$osMajorVersion		= null;
+			
 
 			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
-				$osObj				= null;
-				
-				//we need 4 things to determine the correct class of OS
-				$osArch				= null;
-				$osType				= null;
-				$osName				= null;
-				$osMajorVersion		= null;
-				
+
 				$cmdString		= 'cat /etc/os-release';
 				$cReturn		= $shellObj->exeCmd($cmdString);
 
@@ -78,35 +80,52 @@ class OperatingSystem extends Base
 					}
 				}
 				
-				if (
-				$osType !== null
-				&& $osName !== null
-				&& $osMajorVersion !== null
-				&& $osArch !== null
-				) {
-					$osObj	= null;
-					if ($osType == 'linux') {
-						if ($osName == 'centos linux') {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOSBase();
-						} elseif ($osName == 'red hat enterprise linux') {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\RHELBase();
-						} elseif ($osName == 'debian gnu/linux') {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\DebianBase();
-						} elseif ($osName == 'ubuntu') {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\UbuntuBase();
-						} elseif ($osName == 'arch linux') {
-							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\ArchBase();
-						}
-					}
-				
-					if ($osObj !== null) {
-						$osObj->setMajorVersion($osMajorVersion);
-						$osObj->setArchitecture($osArch);
-						return $osObj;
-					}
-				}
 			} elseif ($shellObj instanceof \MTS\Common\Devices\Shells\RouterOS) {
 				
+				$osType				= 'mikrotik';
+				$osName				= 'routeros';
+				
+				$cmdString		= '/system resource print';
+				$reData			= $shellObj->exeCmd($cmdString);
+				
+				if (preg_match("/architecture-name:(.*)/", $reData, $rawAttr) == 1) {
+					$osArch				= trim($rawAttr[1]);
+				}
+				if (preg_match("/version:\s([0-9]+)(\.[0-9]+)?/", $reData, $rawAttr) == 1) {
+					$osMajorVersion			= trim($rawAttr[1]);
+				}
+			}
+			
+			if (
+			$osType !== null
+			&& $osName !== null
+			&& $osMajorVersion !== null
+			&& $osArch !== null
+			) {
+				$osObj	= null;
+				if ($osType == 'linux') {
+					if ($osName == 'centos linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOSBase();
+					} elseif ($osName == 'red hat enterprise linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\RHELBase();
+					} elseif ($osName == 'debian gnu/linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\DebianBase();
+					} elseif ($osName == 'ubuntu') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\UbuntuBase();
+					} elseif ($osName == 'arch linux') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\ArchBase();
+					}
+				} elseif ($osType == 'mikrotik') {
+					if ($osName == 'routeros') {
+						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Mikrotik\RouterOSBase();
+					}
+				}
+			
+				if ($osObj !== null) {
+					$osObj->setMajorVersion($osMajorVersion);
+					$osObj->setArchitecture($osArch);
+					return $osObj;
+				}
 			}
 		}
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);

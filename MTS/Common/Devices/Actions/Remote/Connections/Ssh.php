@@ -96,7 +96,7 @@ class Ssh extends Base
 						if ($validLogin === false) {
 							
 							//since we cutoff the return, we have to make sure the welcome text is done
-							$shellObj->exeCmd("", "\>");
+							$shellObj->exeCmd("", "\[(.*?)\>");
 							//then we can quit
 							$shellObj->exeCmd("/quit", false, 0);
 							$shellObj->exeCmd("");
@@ -202,7 +202,7 @@ class Ssh extends Base
 						if ($validLogin === false) {
 							
 							//since we cutoff the return, /we have to make sure the welcome text is done
-							$shellObj->exeCmd("", "\>");
+							$shellObj->exeCmd("", "\[(.*?)\>");
 							//then we can quit
 							$shellObj->exeCmd("/quit", false, 0);
 							$shellObj->exeCmd("");

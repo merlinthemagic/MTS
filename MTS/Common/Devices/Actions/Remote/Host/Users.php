@@ -110,6 +110,12 @@ class Users extends Base
 				if (strlen($username) > 0) {
 					return $username;
 				}
+			} elseif ($shellObj instanceof \MTS\Common\Devices\Shells\RouterOS) {
+				
+				$reData		= $shellObj->exeCmd("", "\[(.*?)\>");
+				if (preg_match("/\[(.*?)\@(.*?)\]\s\>/", $reData, $rawUser) == 1) {
+					return trim($rawUser[1]);
+				}
 			}
 		}
 

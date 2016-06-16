@@ -67,8 +67,9 @@ class Remotehost extends Device
 							//you have already connected to another host and want to make the connection from that host
 						}
 						
-						if (is_subclass_of($this, '\MTS\Common\Devices\Types\Mikrotik')) {
-							//this is a ROS device (only available when adding DeviceCtrl package), its faster to apply default terminal options to the username
+						if (strtolower(get_class($this)) == 'mts\common\devices\types\mikrotik') {
+							//its faster to apply default terminal options to the username
+							//this is a ROS device (only available DeviceCtrl package is installed)
 							$termOptions	= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->getMtTermOptions();
 							preg_match("/(.*?)\+(.*)/", $username, $addName);
 							if (isset($addName[2]) === false) {
