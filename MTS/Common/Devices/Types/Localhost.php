@@ -8,7 +8,7 @@ class Localhost extends Device
 	public function getBrowser($browserName='phantomjs')
 	{
 		if ($this->_browserObj === null) {
-			$this->_browserObj	= \MTS\Factories::getActions()->getLocalBrowser()->getBrowser($browserName, $this->debug);
+			$this->_browserObj	= \MTS\Factories::getActions()->getLocalBrowser()->getBrowser($browserName, $this->getDebug());
 		}
 		return $this->_browserObj;
 	}
@@ -23,7 +23,7 @@ class Localhost extends Device
 		//if you do not have sudo setup you can still get a root shell by running the unpriviliged shellObj through this function later:
 		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
 		if ($this->_shellObj === null) {
-			$this->_shellObj		= \MTS\Factories::getActions()->getLocalShell()->getShell($shellType, $asRoot, $this->debug);
+			$this->_shellObj		= \MTS\Factories::getActions()->getLocalShell()->getShell($shellType, $asRoot, $this->getDebug());
 		}
 		return $this->_shellObj;
 	}
@@ -33,9 +33,5 @@ class Localhost extends Device
 			$this->_classStore[__METHOD__]	= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 		}
 		return $this->_classStore[__METHOD__];
-	}
-	public function setDebug($bool)
-	{
-		$this->debug	= $bool;
 	}
 }

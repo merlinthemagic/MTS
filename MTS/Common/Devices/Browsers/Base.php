@@ -8,8 +8,8 @@ class Base
 	protected $_initialized=null;
 	protected $_terminating=false;
 	protected $_windowObjs=array();
-	public $debug=false;
-	public $debugData=array();
+	protected $_debug=false;
+	protected $_debugData=array();
 	
 	public function __construct()
 	{
@@ -24,15 +24,18 @@ class Base
 	}
 	public function setDebug($bool)
 	{
-		$this->debug	= $bool;
+		if ($this->_debug != $bool) {
+			$this->_debug	= $bool;
+			$this->browserSetDebug();
+		}
 	}
 	public function addDebugData($debugData)
 	{
-		$this->debugData[]	= $debugData;
+		$this->_debugData[]	= $debugData;
 	}
 	public function getDebugData()
 	{
-		return $this->debugData;
+		return $this->_debugData;
 	}
 	public function setKeepalive($bool)
 	{
@@ -95,7 +98,7 @@ class Base
 	}
 	public function terminate()
 	{
-		if ($this->debug === true && $this->_terminating === false) {
+		if ($this->_debug === true && $this->_terminating === false) {
 			$runTime	= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
 			$maxRunTime	= ini_get('max_execution_time');
 			if ($maxRunTime <= $runTime) {

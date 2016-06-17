@@ -5,14 +5,14 @@ use MTS\Common\Devices\Actions\Remote\Base;
 
 class Users extends Base
 {
-	public function getShellUsername($shellObj)
+	public function getUsername($shellObj)
 	{
 		//return the name of the user php is executed as
 		$this->_classStore['requestType']	= __FUNCTION__;
 		$this->_classStore['shellObj']		= $shellObj;
 		return $this->execute();
 	}
-	public function changeShellUser($shellObj, $username, $password=null)
+	public function changeUser($shellObj, $username, $password=null)
 	{
 		//return the name of the user php is executed as
 		$this->_classStore['requestType']	= __FUNCTION__;
@@ -28,7 +28,7 @@ class Users extends Base
 		
 		if ($requestType == 'changeShellUser') {
 
-			$currentUser	= $this->getShellUsername($shellObj);
+			$currentUser	= $this->getUsername($shellObj);
 			$username		= $this->_classStore['username'];
 			$password		= $this->_classStore['password'];
 			
@@ -86,7 +86,7 @@ class Users extends Base
 				if ($childShell !== null) {
 				
 					$shellObj->setChildShell($childShell);
-					$newUser	= $this->getShellUsername($childShell);
+					$newUser	= $this->getUsername($childShell);
 
 					if (strtolower($username) == strtolower($newUser)) {
 						//user was successfully changed
@@ -104,7 +104,7 @@ class Users extends Base
 				return $shellObj;
 			}
 			
-		} elseif ($requestType == 'getShellUsername') {
+		} elseif ($requestType == 'getUsername') {
 			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
 				$username			= trim($shellObj->exeCmd("whoami"));
 				if (strlen($username) > 0) {

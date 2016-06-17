@@ -49,6 +49,13 @@ class Actions
 		}
 		return $this->_classStore[__METHOD__];
 	}
+	public function getLocalUsers()
+	{
+		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
+			$this->_classStore[__METHOD__]	= new \MTS\Common\Devices\Actions\Local\Host\Users();
+		}
+		return $this->_classStore[__METHOD__];
+	}
 	
 	
 	//remote actions

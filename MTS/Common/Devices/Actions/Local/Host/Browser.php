@@ -27,7 +27,6 @@ class Browser extends Base
 					$fileFact		= \MTS\Factories::getFiles();
 					$pipeUuid		= uniqid();
 					$workPath		= $fileFact->getDirectory(MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHB_" . $pipeUuid);
-					$vendorPath		= $fileFact->getDirectory(MTS_BASE_PATH . DIRECTORY_SEPARATOR . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
 						
 					if ($osObj->getArchitecture() == 64) {
 						$pjsBin			= $fileFact->getVendorFile("pjslinux64");
@@ -99,6 +98,8 @@ class Browser extends Base
 							
 						$pjsBrowser	= new \MTS\Common\Devices\Browsers\PhantomJS();
 						$pjsBrowser->setPipes($stdPipe);
+						
+						//this will init the browser if true
 						$pjsBrowser->setDebug($enableDebug);
 					
 						return $pjsBrowser;

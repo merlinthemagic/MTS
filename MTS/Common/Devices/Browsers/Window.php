@@ -133,6 +133,10 @@ class Window
 		//can click hidden buttons and links
 		return $this->getBrowser()->clickElement($this, $selector);
 	}
+	public function getSelectorExists($selector)
+	{
+		return $this->getBrowser()->getSelectorExists($this, $selector);
+	}
 	public function getElement($selector)
 	{
 		return $this->getBrowser()->getElement($this, $selector);

@@ -6,7 +6,6 @@ use \MTS\Common\Devices\Device;
 class Remotehost extends Device
 {
 	protected $_hostname=null;
-	
 	protected $_shellUsername=null;
 	protected $_shellPassword=null;
 	protected $_shellType=null;
@@ -55,12 +54,14 @@ class Remotehost extends Device
 					if ($username !== null ) {
 						if ($shellObj === null) {
 							//will build a new ssh connection from a local shell
+							$localHost		= \MTS\Factories::getDevices()->getLocalHost();
+							$localHost->setDebug($this->getDebug());
 							$sudoEnabled	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getSudoEnabled('python');
 							if ($sudoEnabled === true) {
 								//root is more likely to have SSH privilige
-								$shellObj	= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+								$shellObj	= $localHost->getShell('bash', true);
 							} else {
-								$shellObj	= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
+								$shellObj	= $localHost->getShell('bash', false);
 							}
 								
 						} else {

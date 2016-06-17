@@ -8,7 +8,9 @@
 			<directory suffix=".php">Factories</directory>
 		</testsuite>
 		<testsuite name="LocalHost">
-			<directory suffix=".php">Common/Devices/Local/Host</directory>
+			<directory suffix=".php">Common/Devices/Actions/Host</directory>
+			<directory suffix=".php">Common/Devices/Types</directory>
+			<directory suffix=".php">Common/Devices/Browsers</directory>
 		</testsuite>
 	</testsuites>
 </phpunit>

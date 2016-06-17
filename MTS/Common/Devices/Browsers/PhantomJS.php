@@ -8,7 +8,7 @@ class PhantomJS extends Base implements BrowserInterface
 	private $_cmdMaxTimeout=null;
 	private $_partialReturn="";
 	private $_phantomPID=null;
-	public $debugFile=null;
+	private $_debugFile=null;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -67,8 +67,8 @@ class PhantomJS extends Base implements BrowserInterface
 			$options					= array();
 			$options['imgFormat']		= strtolower($format);
 			
-			if (preg_match("/(png|jpeg|gif)/", $format) == 0) {
-				throw new \Exception(__METHOD__ . ">> Invalid image format: " . $format . ". Allowed: png|jpeg|gif|pdf");
+			if (preg_match("/(png|jpeg)/", $format) == 0) {
+				throw new \Exception(__METHOD__ . ">> Invalid image format: " . $format . ". Allowed: png|jpeg");
 			}
 
 			$result						= $this->getResultArray($this->browserExecute($windowObj, 'screenshot', $options));
@@ -168,6 +168,31 @@ class PhantomJS extends Base implements BrowserInterface
 				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
 			} else {
 				return json_decode($result['data']['dom'], true);
+			}
+	
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
+	}
+	public function getSelectorExists($windowObj, $selector)
+	{
+		try {
+	
+			$options				= array();
+			$options['selector']	= $selector;
+	
+			$result					= $this->getResultArray($this->browserExecute($windowObj, 'getselectorexists', $options));
+			if ($result['code'] != 200) {
+				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+			} else {
+				if ($result['data']['dom'] == 1) {
+					return true;
+				} else {
+					return false;
+				}
 			}
 	
 		} catch (\Exception $e) {
@@ -292,6 +317,39 @@ class PhantomJS extends Base implements BrowserInterface
 			}
 		}
 	}
+	protected function browserSetDebug()
+	{
+		try {
+			$options					= array();
+			$options['debug']			= 0;
+			if ($this->_debug === true) {
+				if ($this->_debugFile === null) {
+					$this->_debugFile		= \MTS\Factories::getFiles()->getFile("debug", $this->getPipes()->getOutputFile()->getDirectory()->getPathAsString());
+					\MTS\Factories::getFiles()->getFilesTool()->create($this->_debugFile);
+				}
+				
+				$options['debug']		= 1;
+				$options['debugPath']	= $this->_debugFile->getPathAsString();
+			}
+		
+			$result						= $this->getResultArray($this->browserExecute(null, 'setdebug', $options));
+			if ($result['code'] != 200) {
+				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+			} else {
+				//if we had a debug file delete it
+				if ($this->_debug === false && $this->_debugFile !== null) {
+					\MTS\Factories::getFiles()->getFilesTool()->delete($this->_debugFile);
+					$this->_debugFile	= null;
+				}
+			}
+		
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
+	}
 	protected function browserInitialize()
 	{
 		if ($this->getInitialized() === null) {
@@ -306,17 +364,7 @@ class PhantomJS extends Base implements BrowserInterface
 				
 				//+ 2 so we can get return from successful termination
 				$options['terminationSecs']	= (ini_get('max_execution_time') + 2);
-				$options['debug']			= 0;
-				if ($this->debug === true) {
-						
-					//create a debug file
-					$this->debugFile		= \MTS\Factories::getFiles()->getFile("debug", $this->getPipes()->getOutputFile()->getDirectory()->getPathAsString());
-					\MTS\Factories::getFiles()->getFilesTool()->create($this->debugFile);
-						
-					$options['debugPath']	= $this->debugFile->getPathAsString();
-					$options['debug']		= 1;
-				}
-	
+
 				//use the result
 				$result				= $this->getResultArray($this->browserExecute(null, 'initialize', $options));
 				if ($result['code'] != 200) {
@@ -367,17 +415,17 @@ class PhantomJS extends Base implements BrowserInterface
 				}
 			}
 				
-			if ($this->debug === true) {
+			if ($this->_debug === true) {
 				//read the debug file content into the file, the phantom JS process waits a bit before really exiting
-				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->debugFile);
-				$this->addDebugData("Debug File Start>>>\n" . $this->debugFile->getContent() . "\n<<<Debug File End");
+				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->_debugFile);
+				$this->addDebugData("Debug File Start>>>\n" . $this->_debugFile->getContent() . "\n<<<Debug File End");
 			}
 				
 			if ($errObj !== null) {
 				//something went wrong, try force killing the process
 				try {
 						
-					if ($this->debug === true) {
+					if ($this->_debug === true) {
 						$this->addDebugData("Sending SIGTERM to process PID: " . $this->_phantomPID);
 					}
 					//will validate if the PID is even set
@@ -598,7 +646,7 @@ class PhantomJS extends Base implements BrowserInterface
 	
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 	
-		if ($this->debug === true) {
+		if ($this->_debug === true) {
 				
 			$debugData				= $return;
 			$debugData['cmdJson']	= $cmdJson;
@@ -696,7 +744,7 @@ class PhantomJS extends Base implements BrowserInterface
 		
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 	
-		if ($this->debug === true) {
+		if ($this->_debug === true) {
 			$debugData				= $return;
 			$debugData['cmdJson']	= $cmdJson;
 			$debugData['timeout']	= ($maxWait * 1000); //we want a milisec value

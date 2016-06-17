@@ -21,6 +21,11 @@ class PhpEnvironment extends Base
 		$this->_classStore['functionName']	= $functionName;
 		return $this->execute();
 	}
+	public function isConnectedToInternet()
+	{
+		$this->_classStore['requestType']	= __FUNCTION__;
+		return $this->execute();
+	}
 	private function execute()
 	{
 		$requestType		= $this->_classStore['requestType'];
@@ -39,6 +44,24 @@ class PhpEnvironment extends Base
 			$exePath		= implode(DIRECTORY_SEPARATOR, $dirs);
 			
 			return \MTS\Factories::getFiles()->getFile($fileName, $exePath);
+		} elseif ($requestType == 'isConnectedToInternet') {
+			
+			//expand so we first check if we can resolve domains, or we get a false positive
+			
+			$fp1 = @fsockopen("www.google.com", 80, $errno, $errstr, 4);
+			if ($fp1 === false){
+				//maybe we are in China or Cuba
+				$fp2 = @fsockopen("www.wikipedia.org", 80, $errno, $errstr, 4);
+				if ($fp2 === false) {
+					return false;
+				} else {
+					fclose($fp2);
+					return true;
+				}
+			} else {
+				fclose($fp1);
+				return true;
+			}
 		} elseif ($requestType == 'getFunctionEnabled') {
 			
 			$functionName	= $this->_classStore['functionName'];

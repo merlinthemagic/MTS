@@ -80,13 +80,20 @@ function exeCmd(cmdObj)
 				commandWaitForWindowLoad(cmdObj, clickElement);
 			} else if (cmdObj.cmd.name == "mouseeventonelement") {
 				commandWaitForWindowLoad(cmdObj, mouseEventOnElement);
+			} else if (cmdObj.cmd.name == "getselectorexists") {
+				commandWaitForWindowLoad(cmdObj, getSelectorExists);
 			} else if (cmdObj.cmd.name == "closewindow") {
 				//no need to wait for load
 				closeWindow(cmdObj);
+			} else if (cmdObj.cmd.name == "setdebug") {
+				//no need to wait for load
+				setDebug(cmdObj);
 			} else {
 				var eMsg	= "Unknown command: " + cmdObj.cmd.name;
 				writeError(null, eMsg);
 			}
+			
+			
 
 		} else if (cmdObj.cmd.name == "initialize") {
 			initialize(cmdObj);
@@ -179,6 +186,49 @@ function closeWindow(cmdObj)
 		processLoop();
 	}
 }
+
+
+function getSelectorExists(cmdObj)
+{
+	try {
+
+		//validate
+		var windowObj	= getWindowByCommand(cmdObj);
+		if (typeof cmdObj.cmd.options.selector == 'undefined') {
+			throw "Selector must be set";
+		}
+
+		var selector	= cmdObj.cmd.options.selector;
+		var result		= windowObj.pjsPage.evaluate(function(selector){
+	        var element = document.querySelector(selector);
+	        
+	        if (element === null) {
+	        	return 'selectorNotExist';
+	        } else {
+	        	return 'selectorExist';
+	        }
+	       
+	    }, selector);
+		
+		if (result == 'selectorExist') {
+			cmdObj.result.code			= 200;
+			cmdObj.result.data.dom		= 1;
+		} else if (result == 'selectorNotExist') {
+			cmdObj.result.code			= 200;
+			cmdObj.result.data.dom		= 0;
+		}  else {
+			throw "Invalid Return: " + result;
+		}
+		writeReturn(cmdObj);
+		processLoop();
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to get selector exists. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
+
 function getElement(cmdObj)
 {
 	try {
@@ -634,7 +684,6 @@ function screenshot(cmdObj)
 		} else if (
 			cmdObj.cmd.options.imgFormat != 'png'
 			&& cmdObj.cmd.options.imgFormat != 'jpeg'
-			&& cmdObj.cmd.options.imgFormat != 'gif'
 		) {
 			throw "Invalid image format: " + cmdObj.cmd.options.imgFormat;
 		}
@@ -650,23 +699,53 @@ function screenshot(cmdObj)
 		processLoop();
 	}
 }
+function setDebug(cmdObj)
+{
+	try {
+		//this command does not need a window
+		
+		//validate
+		if (typeof cmdObj.cmd.options.debug == 'undefined') {
+			throw "debug must be set";
+		} else {
+			if (cmdObj.cmd.options.debug == 1) {
+				if (typeof cmdObj.cmd.options.debugPath == 'undefined') {
+					throw "When debug is enabled, a debug path must be set";
+				}
+			}
+		}
+		
+		//configure class
+		if (cmdObj.cmd.options.debug == 1) {
+			classData.debug			= true;
+			classData.debugPath		= cmdObj.cmd.options.debugPath;
+			writeDebug(arguments.callee.name, "Debug Enabled");
+			
+		} else {
+			if (classData.debug === true) {
+				writeDebug(arguments.callee.name, "Disabling Debug");
+			}
+			classData.debug			= false;
+			classData.debugPath		= "";
+		}
+
+		//return the command
+		cmdObj.result.code		= 200;
+		writeReturn(cmdObj);
+		processLoop();
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to set debug. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
 function initialize(cmdObj)
 {
 	try {
 		//this command does not need a window
 		
 		//validate
-		if (typeof cmdObj.cmd.options.debug != 'undefined') {
-			if (cmdObj.cmd.options.debug == 1) {
-				if (typeof cmdObj.cmd.options.debugPath != 'undefined') {
-					classData.debug			= true;
-					classData.debugPath		= cmdObj.cmd.options.debugPath;
-				} else {
-					throw "When debug is enabled, a debug path must be set";
-				}
-			}
-		} 
-		
 		if (typeof cmdObj.cmd.options.stdInPath == 'undefined') {
 			throw "stdIn path must be set";
 		} else {
@@ -685,13 +764,6 @@ function initialize(cmdObj)
 
 		classData.initialized	= true;
 		
-		if (classData.debug === true) {
-			//need seperate debug message since this process
-			//determines if debug is enabled. on exception the writeError() method
-			//will include the debugger automatically
-			writeDebug(arguments.callee.name, "Initialize Success");
-		}
-
 	} catch(e) {
 		classData.initialized	= false;
 		var eMsg	= "Failed to initialize";

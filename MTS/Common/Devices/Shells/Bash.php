@@ -221,9 +221,9 @@ class Bash extends Base
 					//if there is no parent then this is the initial shell
 					//get the PID of the parent so we can kill that process if everything else fails.
 					$strCmd			= "(cat /proc/$$/status | grep PPid)";
-					$reData			= $this->exeCmd($strCmd);
-	
-					if (preg_match("/([0-9]+)/", $reData, $rawPPID)) {
+					$ppData			= $this->exeCmd($strCmd);
+
+					if (preg_match("/\s([0-9]+)/", $ppData, $rawPPID) == 1) {
 						$this->_baseShellPPID	= $rawPPID[1];
 					} else {
 						throw new \Exception(__METHOD__ . ">> Failed to get parent process id");

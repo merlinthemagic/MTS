@@ -356,7 +356,7 @@ class SetupMTS
 				$result['msgHead']		= "The current user is not allowed to sudo python. This is optional";
 				$result['msgLines'][]	= "You will still be able to instantiate non-root shells.";
 				$result['msgLines'][]	= "You can then elevate the non-root shell with the following function:";
-				$result['msgLines'][]	= "\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser(\$shell, 'root', 'rootPassword')";
+				$result['msgLines'][]	= "\MTS\Factories::getActions()->getRemoteUsers()->changeUser(\$shellObj, 'root', 'rootPassword')";
 				$result['msgLines'][]	= "";
 				$result['msgLines'][]	= "Warning: Giving Sudo access to the webserver user is a security risk.";
 				$result['msgLines'][]	= "If you want to enable sudo for python follow the steps below";
@@ -377,7 +377,7 @@ class SetupMTS
 	
 		try {
 			$shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell();
-			$username		= \MTS\Factories::getActions()->getRemoteUsers()->getShellUsername($shellObj);
+			$username		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
 
 		} catch (\Exception $e) {
 			switch($e->getCode()){

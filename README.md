@@ -70,7 +70,7 @@ But for those users who are not comfortable with that type of setup, there is an
 $shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 
 //Pass localhost to the following function with root credentials.
-\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shellObj, 'root', 'rootPassword');
+\MTS\Factories::getActions()->getRemoteUsers()->changeUser($shellObj, 'root', 'rootPassword');
 
 $return1 	= $shellObj->exeCmd('whoami');
 echo $return1; //root
@@ -283,6 +283,13 @@ Place cursor in a particular input element:
 $selector	= "[id=someElementId]";
 $windowObj->focusElement($selector);
 </pre>
+
+Does a particular selector exist:
+<pre>
+$selector	= "[id=someElementId]";
+$exists		= $windowObj->getSelectorExists($selector);
+</pre>
+true if exists, else false
 
 Type with the keyboard:
 <pre>

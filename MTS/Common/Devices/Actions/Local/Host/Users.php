@@ -14,9 +14,6 @@ class Users extends Base
 	private function execute()
 	{
 		$requestType		= $this->_classStore['requestType'];
-		$deviceObj			= $this->_classStore['deviceObj'];
-		$shellObj			= $deviceObj->getShell()->getActiveShell();
-		
 		 if ($requestType == 'getUsername') {
 			$osType		= $this->getLocalOsObj()->getType();
 			if ($osType == 'Linux') {
