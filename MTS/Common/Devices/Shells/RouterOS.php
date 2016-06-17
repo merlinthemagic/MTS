@@ -187,9 +187,11 @@ class RouterOS extends Base
 				
 				//for unknown reasons the prompt is sometimes written more than once initially
 				//that means the first real command is offset and receives no return
-				$testEnd		= (time() + 10);
+				$testEnd		= (time() + 20);
 				$wDone			= false;
+				$i=0;
 				while ($wDone === false) {
+					$i++;
 					//since there may be many extra prompts, the delimitor must be unique
 					$rosUUID		= uniqid("rosTest.", true);
 					$reData			= $this->exeCmd(":put \"" . $rosUUID . "\"");
@@ -208,7 +210,16 @@ class RouterOS extends Base
 							throw new \Exception(__METHOD__ . ">> Failed to get clean shell");
 						} else {
 							//wait for output to clear
-							usleep(250000);
+							//sleep longer and longer or we just clutter the pipe
+							if ($i == 1) {
+								usleep(250000);
+							} elseif ($i == 2) {
+								usleep(500000);
+							} elseif ($i == 3) {
+								usleep(750000);
+							} else {
+								sleep(1);
+							}
 						}
 					}
 				}
