@@ -177,6 +177,24 @@ class PhantomJS extends Base implements BrowserInterface
 			}
 		}
 	}
+	public function getCookies($windowObj)
+	{
+		try {
+
+			$result					= $this->getResultArray($this->browserExecute($windowObj, 'getcookies'));
+			if ($result['code'] != 200) {
+				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+			} else {
+				return json_decode($result['data']['dom'], true);
+			}
+	
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
+	}
 	public function getSelectorExists($windowObj, $selector)
 	{
 		try {

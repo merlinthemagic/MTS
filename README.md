@@ -333,6 +333,10 @@ Call a JavaScript function:
 $funcReturn = $windowObj->callJSFunction("myHelloWorld");
 </pre>
 
+Get all cookies from a page:
+<pre>
+$cookies	= $windowObj->getCookies();
+</pre>
 
 Get details of an element i.e. value:
 <pre>
@@ -373,7 +377,6 @@ Set if images should be loaded:
 $bool	= false;
 $windowObj->setLoadImages($bool);
 </pre>
-
 
 
 If the window spawned a popup or another window:

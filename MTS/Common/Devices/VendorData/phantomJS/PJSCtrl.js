@@ -78,6 +78,8 @@ function exeCmd(cmdObj)
 				commandWaitForWindowLoad(cmdObj, sendKeyPresses);
 			} else if (cmdObj.cmd.name == "clickelement") {
 				commandWaitForWindowLoad(cmdObj, clickElement);
+			} else if (cmdObj.cmd.name == "getcookies") {
+				commandWaitForWindowLoad(cmdObj, getCookies);
 			} else if (cmdObj.cmd.name == "mouseeventonelement") {
 				commandWaitForWindowLoad(cmdObj, mouseEventOnElement);
 			} else if (cmdObj.cmd.name == "getselectorexists") {
@@ -350,6 +352,24 @@ function getDocument(cmdObj)
 
 	} catch(e) {
 		cmdObj.result.error.msg		= "Failed to get document. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
+function getCookies(cmdObj)
+{
+	try {
+		//validate
+		var windowObj	= getWindowByCommand(cmdObj);
+		var result		= windowObj.pjsPage.cookies;
+
+		cmdObj.result.code			= 200;
+		cmdObj.result.data.dom		= JSON.stringify(result);
+		writeReturn(cmdObj);
+		processLoop();
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to get cookies. Error: " + e;
 		writeReturn(cmdObj);
 		processLoop();
 	}

@@ -85,6 +85,9 @@ class PhantomJSTest extends PHPUnit_Framework_TestCase
 			$result			= $windowObj->getDocument();
 			$this->assertInternalType("array", $result);
 			
+			$result			= $windowObj->getCookies();
+			$this->assertInternalType("array", $result);
+			
 			$funcName		= "myHelloWorld";
 			$scriptReturn	= "HelloWorld";
 			$script = "function ".$funcName."() {

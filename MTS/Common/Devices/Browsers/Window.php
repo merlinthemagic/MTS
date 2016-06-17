@@ -119,6 +119,10 @@ class Window
 	{
 		return $this->getBrowser()->getDom($this);
 	}
+	public function getCookies()
+	{
+		return $this->getBrowser()->getCookies($this);
+	}
 	public function focusElement($selector)
 	{
 		return $this->getBrowser()->focusElement($this, $selector);
