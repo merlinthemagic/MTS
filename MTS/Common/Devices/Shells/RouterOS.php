@@ -92,17 +92,21 @@ class RouterOS extends Base
 					if ($this->getInitialized() === true && count($lines) > 0) {
 						//strip command if it exists anywhere at the top
 						$strCmdLen		= strlen($strCmd);
-						$strCmdmaxLen	= ($strCmdLen * 2);
-						$cmdLine		= "";
-						foreach ($lines as $lKey => $line) {
-							$cmdLine	.= trim($line);
-							$cmdLineLen	= strlen($cmdLine);
-							if ($cmdLineLen == ($strCmdLen + strpos($cmdLine, $strCmd))) {
-								//found a match
-								$lines	= array_slice($lines, ($lKey + 1));
-								break;	
-							} elseif ($cmdLineLen > $strCmdmaxLen) {
-								break;
+						if ($strCmdLen > 0) {
+							$strCmdmaxLen	= ($strCmdLen * 2);
+							$cmdLine		= "";
+							foreach ($lines as $lKey => $line) {
+								$cmdLine	.= trim($line);
+								$cmdLineLen	= strlen($cmdLine);
+								if ($cmdLineLen > 0) {
+									if ($cmdLineLen == ($strCmdLen + strpos($cmdLine, $strCmd))) {
+										//found a match
+										$lines	= array_slice($lines, ($lKey + 1));
+										break;
+									} elseif ($cmdLineLen > $strCmdmaxLen) {
+										break;
+									}
+								}
 							}
 						}
 					}

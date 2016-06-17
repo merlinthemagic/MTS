@@ -37,7 +37,7 @@ class OperatingSystem extends Base
 					$cReturn		= $shellObj->exeCmd($cmdString);
 				}
 				
-				if (preg_match("/Linux/", $cReturn)) {
+				if (preg_match("/(Linux|Ubuntu|Debian)/", $cReturn)) {
 					$osType			= 'linux';
 
 					$cmdString		= 'uname -a';

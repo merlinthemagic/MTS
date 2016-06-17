@@ -440,7 +440,7 @@ It should work against other versions as long as they are the same flavor of Lin
 
 Mandetory packages:
 <pre>
-php5 (or newer)
+php 5.3 (or newer)
 php must allow the "exec()" function
 python
 screen
