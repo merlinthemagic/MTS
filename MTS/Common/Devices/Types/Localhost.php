@@ -13,7 +13,7 @@ class Localhost extends Device
 		return $this->_browserObj;
 	}
 	
-	public function getShell($shellType='bash', $asRoot=false)
+	public function getShell($shellType='bash', $asRoot=false, $width=80, $height=24)
 	{
 		//$asRoot
 		//setting this to true will return a shell where commands are executed as root if sudo is available.
@@ -23,7 +23,7 @@ class Localhost extends Device
 		//if you do not have sudo setup you can still get a root shell by running the unpriviliged shellObj through this function later:
 		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
 		if ($this->_shellObj === null) {
-			$this->_shellObj		= \MTS\Factories::getActions()->getLocalShell()->getShell($shellType, $asRoot, $this->getDebug());
+			$this->_shellObj		= \MTS\Factories::getActions()->getLocalShell()->getShell($shellType, $asRoot, $this->getDebug(), $width, $height);
 		}
 		return $this->_shellObj;
 	}

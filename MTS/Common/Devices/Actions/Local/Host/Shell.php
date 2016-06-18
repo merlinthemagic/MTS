@@ -5,12 +5,14 @@ use MTS\Common\Devices\Actions\Local\Base;
 
 class Shell extends Base
 {
-	public function getShell($shellType, $asRoot=false, $enableDebug=false)
+	public function getShell($shellType, $asRoot=false, $enableDebug=false, $width=80, $height=24)
 	{
 		$this->_classStore['requestType']	= __FUNCTION__;
 		$this->_classStore['shellType']		= $shellType;
 		$this->_classStore['asRoot']		= $asRoot;
 		$this->_classStore['enableDebug']	= $enableDebug;
+		$this->_classStore['width']			= $width;
+		$this->_classStore['height']		= $height;
 		return $this->execute();
 	}
 	private function execute()
@@ -21,6 +23,8 @@ class Shell extends Base
 			$shellType		= strtolower($this->_classStore['shellType']);
 			$asRoot			= $this->_classStore['asRoot'];
 			$enableDebug	= $this->_classStore['enableDebug'];
+			$width			= $this->_classStore['width'];
+			$height			= $this->_classStore['height'];
 			$osObj			= $this->getLocalOsObj();
 			
 			if ($osObj->getType() == 'Linux') {
@@ -47,19 +51,20 @@ class Shell extends Base
 					
 						if ($screenExe !== false || $pythonExe !== false) {
 							
+							$exeCmd		= "";
+							
 							if ($asRoot === true) {
 								$sudoEnabled	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getSudoEnabled('python');
 								if ($sudoEnabled === true) {
-									$exeCmd		= "sudo ".$pythonExe->getPathAsString()." -c \"import pty,os; pty.spawn(['".$screenExe->getPathAsString()."', '-s', '".$bashExe->getPathAsString()."', '-h', '5000', '-S', '" . $pipeUuid . "_screen']);\"";
+									$exeCmd		.= "sudo ";
 								} else {
-									$username	= \MTS\Factories::getActions()->getLocalOperatingSystem()->getUsername();
+									$username	= \MTS\Factories::getActions()->getLocalUsers()->getUsername();
 									throw new \Exception(__METHOD__ . ">> Cannot obtain root shell access. ".$username." does not have rights to sudo python");
 								}
-									
-							} else {
-								$exeCmd		= "".$pythonExe->getPathAsString()." -c \"import pty,os; pty.spawn(['".$screenExe->getPathAsString()."', '-s', '".$bashExe->getPathAsString()."', '-h', '5000', '-S', '" . $pipeUuid . "_screen']);\"";
 							}
-						
+							
+							$exeCmd		.= "".$pythonExe->getPathAsString()." -c \"import pty,os; os.environ['LINES'] = '".$height."'; os.environ['COLUMNS'] = '".$width."'; pty.spawn(['".$screenExe->getPathAsString()."', '-s', '".$bashExe->getPathAsString()."', '-h', '5000', '-S', '" . $pipeUuid . "_screen', '-T', 'xterm']);\"";
+
 							//on RHEL 7 the xterm TERm will show a duplicate PS1 command that cannot be removed, also added a sleep 2s before deleting the std files, that way the files exist on the termination read / write
 							$term		= 'vt100';
 							$strCmd		= "mkfifo ".$stdIn->getPathAsString()."; ( sleep 1000d > ".$stdIn->getPathAsString()." & ( export TERM=".$term."; SLEEP_PID=$! ; " . $exeCmd." < ".$stdIn->getPathAsString()." > ".$stdOut->getPathAsString()." 2> ".$stdErr->getPathAsString()."; sleep 2s; rm -rf ".$stdIn->getPathAsString()."; rm -rf ".$stdOut->getPathAsString()."; rm -rf ".$stdErr->getPathAsString()."; rm -rf ".$workPath->getPathAsString()."; kill -s TERM \$SLEEP_PID & ) & ) > /dev/null 2>&1";
