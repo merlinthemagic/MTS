@@ -31,9 +31,6 @@ class UsersTest extends PHPUnit_Framework_TestCase
 		if ($deviceObj !== null) {
 			$shellObj	= $deviceObj->getShell();
 			$result		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
-			if (\MtsUnitTestDevices::$genericCache === false) {
-				$shellObj->terminate();
-			}
 			$this->assertInternalType("string", $result);
 		}
 	}
@@ -43,9 +40,6 @@ class UsersTest extends PHPUnit_Framework_TestCase
 		if ($deviceObj !== null) {
 			$shellObj	= $deviceObj->getShell();
 			$result		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
-			if (\MtsUnitTestDevices::$rosCache === false) {
-				$shellObj->terminate();
-			}
 			$this->assertInternalType("string", $result);
 		}
 	}

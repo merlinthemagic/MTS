@@ -26,9 +26,6 @@ class OperatingSystemTest extends PHPUnit_Framework_TestCase
 		if ($deviceObj !== null) {
 			$shellObj	= $deviceObj->getShell();
 			$result		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
-			if (\MtsUnitTestDevices::$genericCache === false) {
-				$shellObj->terminate();
-			}
 			$this->assertInternalType("object", $result);
 		}
 	}
@@ -38,9 +35,6 @@ class OperatingSystemTest extends PHPUnit_Framework_TestCase
 		if ($deviceObj !== null) {
 			$shellObj	= $deviceObj->getShell();
 			$result		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
-			if (\MtsUnitTestDevices::$rosCache === false) {
-				$shellObj->terminate();
-			}
 			$this->assertInternalType("object", $result);
 		}
 	}

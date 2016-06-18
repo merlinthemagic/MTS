@@ -23,7 +23,14 @@ class MtsUnitTestDevices
 	
 	public static function getGenericDevice()
 	{
-		//the device running ROS that you wish to test against
+		if (self::$genericCache === false) {
+			if (array_key_exists(__METHOD__, self::$_classStore) === true) {
+				//always return a fresh instance
+				self::$_classStore[__METHOD__]->getShell()->terminate();
+				unset(self::$_classStore[__METHOD__]);
+			}
+		}
+		
 		if (array_key_exists(__METHOD__, self::$_classStore) === false) {
 	
 			//password may be empty
@@ -38,25 +45,28 @@ class MtsUnitTestDevices
 				$deviceObj	= null;
 			}
 				
-			if (self::$genericCache === true) {
-				self::$_classStore[__METHOD__]	= $deviceObj;
-			} else {
-				return $deviceObj;
-			}
+			self::$_classStore[__METHOD__]	= $deviceObj;
 		}
 		return self::$_classStore[__METHOD__];
 	}
 	public static function getROSDevice()
 	{
-		//the device running ROS that you wish to test against
+		if (self::$rosCache === false) {
+			if (array_key_exists(__METHOD__, self::$_classStore) === true) {
+				//always return a fresh instance
+				self::$_classStore[__METHOD__]->getShell()->terminate();
+				unset(self::$_classStore[__METHOD__]);
+			}
+		}
+		
 		if (array_key_exists(__METHOD__, self::$_classStore) === false) {
 	
 			//password may be empty
 			if (
-			self::$rosHostname != ""
-					&& self::$rosUsername != ""
-							&& self::$rosConnType != ""
-									&& self::$rosConnPort != ""
+				self::$rosHostname != ""
+				&& self::$rosUsername != ""
+				&& self::$rosConnType != ""
+				&& self::$rosConnPort != ""
 											) {
 				$username	= self::$rosUsername;
 				if (self::$rosConnType == "ssh") {
@@ -70,11 +80,7 @@ class MtsUnitTestDevices
 				$deviceObj	= null;
 			}
 				
-			if (self::$rosCache === true) {
-				self::$_classStore[__METHOD__]	= $deviceObj;
-			} else {
-				return $deviceObj;
-			}
+			self::$_classStore[__METHOD__]	= $deviceObj;
 		}
 		return self::$_classStore[__METHOD__];
 	}
