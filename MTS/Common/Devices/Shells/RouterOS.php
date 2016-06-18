@@ -61,7 +61,7 @@ class RouterOS extends Base
 		}
 
 		$rTimeout	= $this->getMaxExecutionTime();
-		if ($this->_terminating === true || $this->getInitialized() == 'setup') {
+		if ($this->_terminating === true || $this->getInitialized() === 'setup') {
 			//when terminating and setting up we should be able to take a very long time
 			$maxTimeout		= 15000;
 		} elseif ($maxTimeout === null) {

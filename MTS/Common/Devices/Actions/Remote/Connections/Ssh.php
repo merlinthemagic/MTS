@@ -251,6 +251,7 @@ class Ssh extends Base
 	{
 		//default terminal options for all Mikrotik SSH connections. We need the terminal without colors and a standard width
 		//picked 300 because putty in a 1920x1080 window maximized is 237 columns
+		//the when building on a shell the parent must support at least 300 wide  
 		return "ct300w";
 	}
 }
