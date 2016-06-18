@@ -13,12 +13,20 @@ class Localhost extends Device
 		return $this->_browserObj;
 	}
 	
-	public function getShell($shellType='bash', $asRoot=false, $width=80, $height=24)
+	public function getShell($shellType='bash', $asRoot=false, $width=1000, $height=1000)
 	{
 		//$asRoot
 		//setting this to true will return a shell where commands are executed as root if sudo is available.
 		//a false setting will return a shell where you execute as the php execution user, most likely apache or www-data
 		//you cannot change this after the shell has been returned, you would have to call a new instance of localhost to change
+		
+		//$width 
+		//the terminal $COLUMNS count
+		
+		//$height
+		//the terminal $LINES count
+		
+		//by default a very large terminal to avoid most terminal breaks
 		
 		//if you do not have sudo setup you can still get a root shell by running the unpriviliged shellObj through this function later:
 		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
