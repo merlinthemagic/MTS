@@ -24,7 +24,7 @@ class MtsUnitTestDevices
 	public static function getGenericDevice()
 	{
 		if (self::$genericCache === false) {
-			if (array_key_exists(__METHOD__, self::$_classStore) === true) {
+			if (array_key_exists(__METHOD__, self::$_classStore) === true && self::$_classStore[__METHOD__] !== null) {
 				//always return a fresh instance
 				self::$_classStore[__METHOD__]->getShell()->terminate();
 				unset(self::$_classStore[__METHOD__]);
@@ -52,7 +52,7 @@ class MtsUnitTestDevices
 	public static function getROSDevice()
 	{
 		if (self::$rosCache === false) {
-			if (array_key_exists(__METHOD__, self::$_classStore) === true) {
+			if (array_key_exists(__METHOD__, self::$_classStore) === true && self::$_classStore[__METHOD__] !== null) {
 				//always return a fresh instance
 				self::$_classStore[__METHOD__]->getShell()->terminate();
 				unset(self::$_classStore[__METHOD__]);
