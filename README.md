@@ -150,7 +150,9 @@ If you have a command that runs for a long time and you just want the first 5 se
 Be careful with commands you timeout rather than delimit, you want to make sure they have completed before you issue the next one.
 Here is an example:
 
+```php
 $data  = $shellObj->exeCmd('ping www.google.com', false, 5000);
+```
 
 The standard ping command in bash will just keep going forever. You would get data back after 5 seconds, but the command is still running in the shell.
 To stop the ping command above, you would have to call the 'killLastProcess()' method (the equivilent of hitting ^C), before issuing the next command or your next command will
@@ -158,7 +160,9 @@ never be executed and will timeout.
 
 A much better command would be:
 
+```php
 $data  = $shellObj->exeCmd('ping -c5 www.google.com');
+```
 
 This time the ping runs for 5 seconds and returns to the prompt.
 
