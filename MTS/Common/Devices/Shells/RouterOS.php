@@ -53,13 +53,13 @@ class RouterOS extends Base
 				$this->shellInitialize();
 			}
 		}
+		
+		$stdDelimitor	= false;
 		if ($delimitor === null) {
-			$delimitorProvided	= false;
-			$delimitor			= preg_quote($this->_shellPrompt);
-		} else {
-			$delimitorProvided	= true;
+			$stdDelimitor	= true;
+			$delimitor		= preg_quote($this->_shellPrompt);
 		}
-
+		
 		$rTimeout	= $this->getMaxExecutionTime();
 		if ($this->_terminating === true || $this->getInitialized() === 'setup') {
 			//when terminating and setting up we should be able to take a very long time
@@ -69,93 +69,106 @@ class RouterOS extends Base
 		} elseif ($maxTimeout > $rTimeout) {
 			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
 		}
-
-		$this->getPipes()->resetReadPosition();
-		$rawCmdStr		= $strCmd . $this->_strCmdCommit;
-		$wData			= $this->shellWrite($rawCmdStr);
-		if (strlen($wData['error']) > 0) {
-			throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
+		
+		
+		if ($strCmd === false) {
+			//we only want to read
 		} else {
-			
-			if ($maxTimeout > 0) {
-				$rData	= $this->shellRead($delimitor, $maxTimeout);
-				if (strlen($rData['error']) > 0 && $delimitor !== false) {
-					if ($rData['error'] == "timeout") {
-						throw new \Exception(__METHOD__ . ">> Read data timeout", 2500);
-					} else {
-						throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
-					}
+			$this->getPipes()->resetReadPosition();
+			$rawCmdStr	= $strCmd . $this->_strCmdCommit;
+			$wData		= $this->shellWrite($rawCmdStr);
+			if (strlen($wData['error']) > 0) {
+				throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
+			}
+		}
+		
+		if ($maxTimeout === false || $maxTimeout == 0) {
+			//no return requested
+		} else {
+				
+			$rData	= $this->shellRead($delimitor, $maxTimeout);
+			if ($delimitor !== false && strlen($rData['error']) > 0) {
+				//we did not find the delimitor in the allowed time frame
+		
+				if ($rData['error'] == "timeout") {
+					//need a code for this common occuring error, used for i.e. ssh connect times out
+					throw new \Exception(__METHOD__ . ">> Read data timeout", 2500);
 				} else {
+					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
+				}
 					
-					$rawData			= $rData['data'];
-					$lines				= explode("\r\n", $rawData);
-					if ($this->getInitialized() === true && count($lines) > 0) {
-						//strip command if it exists anywhere at the top
-						$strCmdLen		= strlen($strCmd);
-						if ($strCmdLen > 0) {
-							$strCmdmaxLen	= ($strCmdLen * 2);
-							$cmdLine		= "";
-							foreach ($lines as $lKey => $line) {
-								$cmdLine	.= trim($line);
-								$cmdLineLen	= strlen($cmdLine);
-								if ($cmdLineLen > 0) {
-									if ($cmdLineLen == ($strCmdLen + strpos($cmdLine, $strCmd))) {
-										//found a match
-										$lines	= array_slice($lines, ($lKey + 1));
-										break;
-									} elseif ($cmdLineLen > $strCmdmaxLen) {
-										break;
+			} else {
+					
+				$rawData			= $rData['data'];
+		
+				if ($this->getInitialized() === true) {
+					$lines				= explode("\n", $rawData);
+					$lineCount			= count($lines);
+					if ($lineCount > 0) {
+		
+						//Command string removal from return
+						if ($strCmd !== false) {
+							$strCmdLen		= strlen(trim($strCmd));
+							if ($strCmdLen > 0) {
+								//there could be junk left over on the terminal before the command was issued
+								//so allow a longer string to match before giving up
+								$strCmdmaxLen	= ($strCmdLen * 3);
+								$cmdLine		= "";
+								foreach ($lines as $lKey => $line) {
+									$cmdLine	.= trim($line);
+									$cmdLineLen	= strlen($cmdLine);
+									if ($cmdLineLen > 0) {
+										if ($cmdLineLen == ($strCmdLen + strpos($cmdLine, $strCmd))) {
+											//found the command, delete the lines that has the command and anything before it
+											$lines		= array_slice($lines, ($lKey + 1));
+											break;
+										} elseif ($cmdLineLen > $strCmdmaxLen) {
+											//no match
+											break;
+										}
 									}
 								}
 							}
+						} else {
+							//this is a read without a command being issued
 						}
-					}
-
-					if (count($lines) > 0) {
+		
+						//Locate the delimitor in the return
 						if ($delimitor !== false) {
+							//its faster to start from the bottom of the return
 							$lines		= array_reverse($lines);
-							foreach ($lines as $linNbr => $line) {
+							foreach ($lines as $lKey => $line) {
 								if (preg_match("/(.*?)?(".$delimitor.")/", $line, $lineParts)) {
-									
-									//found the delimitor
-									if ($delimitorProvided === true) {
-										//user gave the delimitor, include the data from it
-										$lines[$linNbr]	= $lineParts[1] . $lineParts[2];
+									if ($stdDelimitor === false) {
+										//User provided the delimitor, we include the data from it
+										$lines[$lKey]	= $lineParts[1] . $lineParts[2];
 									} else {
-										//delimitor is the shell prompt, dont include it
-										
-										if (strlen(trim($lineParts[1])) > 0) {
-											$lines[$linNbr]	= $lineParts[1];
+										//standard delimitor, remove it
+										$preDelimLen	= strlen(trim($lineParts[1]));
+										if ($preDelimLen > 0) {
+											$lines[$lKey]	= $lineParts[1];
 										} else {
-											//the last line only has the prompt
-											unset($lines[$linNbr]);
+											//Only delimitor on the last line
+											unset($lines[$lKey]);
 										}
 									}
 									break;
+										
 								} else {
-									//this line is after the delimitor has been reached, remove it
-									unset($lines[$linNbr]);
+									//this is data that was picked up after the delimitor was reached
+									unset($lines[$lKey]);
 								}
 							}
-							$rawData		= implode("\r\n", array_reverse($lines));
-							
-						} else {
-							//user did not want the result delimited
-							$rawData		= implode("\r\n", $lines);
+							$lines		= array_reverse($lines);
 						}
-
-					} else {
-						//no lines left
-						$rawData		= "";
+		
+						$rawData		= implode("\n", $lines);
+		
 					}
-					
 					unset($lines);
-					
-					return $rawData;
 				}
-				
-			} else {
-				// no return requested
+		
+				return $rawData;
 			}
 		}
 	}

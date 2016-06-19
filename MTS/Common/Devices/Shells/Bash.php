@@ -8,7 +8,6 @@ class Bash extends Base
 	private $_strCmdCommit=null;
 	private	$_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
-	private $_termBreakDetail=array();
 	private $_baseShellPPID=null;
 	private	$_columnCount=null;
 
@@ -27,15 +26,14 @@ class Bash extends Base
 	}
 	public function getTerminalWidth()
 	{
-		if ($this->_columnCount === null) {
-			$strCmd		= "echo \$COLUMNS";
-			$reData		= $this->exeCmd($strCmd);
-			if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
-				$this->_columnCount	=  $rawColCount[1];
-			} else {
-				throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
-			}
+		$strCmd		= "echo \$COLUMNS";
+		$reData		= $this->exeCmd($strCmd);
+		if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
+			$this->_columnCount	=  $rawColCount[1];
+		} else {
+			throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
 		}
+		
 		return $this->_columnCount;
 	}
 	public function getMaxExecutionTime()
@@ -60,11 +58,11 @@ class Bash extends Base
 		} elseif ($this->getInitialized() !== true) {
 			$this->shellInitialize();
 		}
+		
+		$stdDelimitor	= false;
 		if ($delimitor === null) {
-			$delimitorProvided	= false;
-			$delimitor			= preg_quote($this->_shellPrompt);
-		} else {
-			$delimitorProvided	= true;
+			$stdDelimitor	= true;
+			$delimitor		= preg_quote($this->_shellPrompt);
 		}
 
 		$rTimeout	= $this->getMaxExecutionTime();
@@ -73,108 +71,108 @@ class Bash extends Base
 			$maxTimeout		= 15000;
 		} elseif ($maxTimeout === null) {
 			$maxTimeout		= $rTimeout;
-		}elseif ($maxTimeout > $rTimeout) {
+		} elseif ($maxTimeout > $rTimeout) {
 			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
 		}
-
-		$this->getPipes()->resetReadPosition();
 		
-		$rawCmdStr	= $strCmd . $this->_strCmdCommit;
-		$wData		= $this->shellWrite($rawCmdStr);
-		if (strlen($wData['error']) > 0) {
-			throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
+		if ($strCmd === false) {
+			//we only want to read
+		} else {
+			$this->getPipes()->resetReadPosition();
+			$rawCmdStr	= $strCmd . $this->_strCmdCommit;
+			$wData		= $this->shellWrite($rawCmdStr);
+			if (strlen($wData['error']) > 0) {
+				throw new \Exception(__METHOD__ . ">> Failed to write command submit. Error: " . $wData['error']);
+			}
+		}
+
+		if ($maxTimeout === false || $maxTimeout == 0) {
+			//no return requested
 		} else {
 			
-			if ($maxTimeout > 0) {
-				$rData	= $this->shellRead($delimitor, $maxTimeout);
-				if (strlen($rData['error']) > 0 && $delimitor !== false) {
-					
-					if ($rData['error'] == "timeout") {
-						throw new \Exception(__METHOD__ . ">> Read data timeout", 2500);
-					} else {
-						throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
-					}
-					
+			$rData	= $this->shellRead($delimitor, $maxTimeout);
+			if ($delimitor !== false && strlen($rData['error']) > 0) {
+				//we did not find the delimitor in the allowed time frame	
+				
+				if ($rData['error'] == "timeout") {
+					//need a code for this common occuring error, used for i.e. ssh connect times out
+					throw new \Exception(__METHOD__ . ">> Read data timeout", 2500);
 				} else {
+					throw new \Exception(__METHOD__ . ">> Failed to read data. Error: " . $rData['error']);
+				}
 					
-					$rawData			= $rData['data'];
+			} else {
+					
+				$rawData			= $rData['data'];
+				
+				if ($this->getInitialized() === true) {
 					$lines				= explode("\n", $rawData);
-					if (count($lines) > 0) {
-						//strip command if on line 1
-						$expectCmd			= str_replace($this->_termBreakDetail, "", $lines[0]);
-						$expectCmdLen		= strlen($expectCmd);
-						if ($expectCmdLen > 0) {
-							if ($expectCmd == $rawCmdStr) {
-								//command as expected
-								unset($lines[0]);
-							} elseif ($expectCmd == $strCmd . chr(8)) {
-								//command ends in backspace. i think this happens when the command is one char too long to fit on a single line.
-								unset($lines[0]);
-							} elseif (
-								$this->getInitialized() === true 
-								&& strpos($lines[0], $expectCmd) !== false
-								&& strlen($lines[0]) == (strlen($expectCmd) + strpos($lines[0], $expectCmd))
-							) {
-								//we need to be initialized before we can use this as determining the terminal Break Detail
-								//depends on getting the command back as part of the return
-								//command with junk in front of it
-								unset($lines[0]);
-							} else {
-								//there is still a problem stripping the command line if the string command contains
-								//escaped chars that should not be escaped for the command to work i.e.
-								//cmd string stripped correctly: ldd "/usr/bin/ssh" | grep "=> \/" | awk '{print $3}'
-								//cmd string not stripped correctly: ldd "/usr/bin/ssh" | grep "=> /" | awk '{print $3}'
-								//bash does not care if the / is escaped, and both commands work, but this function will
-								//not strip the last one
-								//we cannot simply remove the first line since entering passwords does not show in the output
+					$lineCount			= count($lines);
+					if ($lineCount > 0) {
+						
+						//Command string removal from return
+						if ($strCmd !== false) {
+							$strCmdLen		= strlen(trim($strCmd));
+							if ($strCmdLen > 0) {
+								//there could be junk left over on the terminal before the command was issued
+								//so allow a longer string to match before giving up
+								$strCmdmaxLen	= ($strCmdLen * 3);
+								$cmdLine		= "";
+								foreach ($lines as $lKey => $line) {
+									$cmdLine	.= trim($line);
+									$cmdLineLen	= strlen($cmdLine);
+									if ($cmdLineLen > 0) {
+										if ($cmdLineLen == ($strCmdLen + strpos($cmdLine, $strCmd))) {
+											//found the command, delete the lines that has the command and anything before it
+											$lines		= array_slice($lines, ($lKey + 1));
+											break;
+										} elseif ($cmdLineLen > $strCmdmaxLen) {
+											//no match
+											break;
+										}
+									}
+								}
 							}
+						} else {
+							//this is a read without a command being issued
 						}
-					}
-					
-					if (count($lines) > 0) {
+						
+						//Locate the delimitor in the return
 						if ($delimitor !== false) {
+							//its faster to start from the bottom of the return
 							$lines		= array_reverse($lines);
-							foreach ($lines as $linNbr => $line) {
+							foreach ($lines as $lKey => $line) {
 								if (preg_match("/(.*?)?(".$delimitor.")/", $line, $lineParts)) {
-									
-									//found the delimitor
-									if ($delimitorProvided === true) {
-										//user gave the delimitor, include the data from it
-										$lines[$linNbr]	= $lineParts[1] . $lineParts[2];
+									if ($stdDelimitor === false) {
+										//User provided the delimitor, we include the data from it
+										$lines[$lKey]	= $lineParts[1] . $lineParts[2];
 									} else {
-										//delimitor is the shell prompt, dont include it
-										
-										if (strlen(trim($lineParts[1])) > 0) {
-											$lines[$linNbr]	= $lineParts[1];
+										//standard delimitor, remove it
+										$preDelimLen	= strlen(trim($lineParts[1]));
+										if ($preDelimLen > 0) {
+											$lines[$lKey]	= $lineParts[1];
 										} else {
-											//the last line only has the prompt
-											unset($lines[$linNbr]);
+											//Only delimitor on the last line
+											unset($lines[$lKey]);
 										}
 									}
 									break;
+									
 								} else {
-									//this line is after the delimitor has been reached, remove it
-									unset($lines[$linNbr]);
+									//this is data that was picked up after the delimitor was reached
+									unset($lines[$lKey]);
 								}
 							}
-							$rawData		= implode("\n", array_reverse($lines));
-							
-						} else {
-							//user did not want the result delimited
-							$rawData		= implode("\n", $lines);
+							$lines		= array_reverse($lines);
 						}
-					} else {
-						//no lines left
-						$rawData		= "";
+						
+						$rawData		= implode("\n", $lines);
+						
 					}
-					
 					unset($lines);
-					
-					return $rawData;
 				}
-				
-			} else {
-				// no return requested
+
+				return $rawData;
 			}
 		}
 	}
@@ -200,23 +198,7 @@ class Bash extends Base
 				//just a tiny sleep (1 ms) to make sure the last command has completed its prompt
 				//this seems to only be needed on Arch, but i imagine that other busy servers will encounter the same issue.
 				usleep(1000);
-				
-				$repeatChar		= "A";
-				$repeatCount	= $this->getTerminalWidth() * 2;
-				
-				$strCmd			= "echo \"".str_repeat($repeatChar, $repeatCount)."\"";
-				$reData			= $this->exeCmd($strCmd);
-				
-				$regEx			= "echo \"([".$repeatChar."]+)([^".$repeatChar."]+)([".$repeatChar."]+)";		
-				if (preg_match("/".$regEx."/", $reData, $breakerRaw)) {
-					//if the result for the previous command did not end in a line break, then the terminal will
-					//introduce a 200d (hex) terminal break rather than the normal 2008 (hex) break for the next command. not sure why
-					$this->_termBreakDetail[]		= $breakerRaw[2];
-					$this->_termBreakDetail[]		= " \r";
-				} else {
-					throw new \Exception(__METHOD__ . ">> Failed to determine terminal break detail.");
-				}
-	
+
 				if ($this->getParentShell() === null) {
 					//if there is no parent then this is the initial shell
 					//get the PID of the parent so we can kill that process if everything else fails.

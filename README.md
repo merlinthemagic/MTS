@@ -144,7 +144,7 @@ may never terminate and would need to be terminated manually by you.
 Is the absolute longest the current command is allowed to run. This argument is in mili seconds.
 By default this is set to what remains of the 'max_execution_time'.
 
-You would change this argument to 0 if you simply want to trigger the command and do not want any return.
+You would change this argument to "false" if you simply want to trigger the command and do not want any return.
 If you have a command that runs for a long time and you just want the first 5 seconds of return then you set the delimitor to false and timeout to 5000.
 
 Be careful with commands you timeout rather than delimit, you want to make sure they have completed before you issue the next one.

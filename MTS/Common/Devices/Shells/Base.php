@@ -148,6 +148,13 @@ class Base
 		} elseif ($ownError !== null) {
 			throw $ownError;
 		}
+		
+		if ($parentShell !== null) {
+			//the user may still have some use of the parent
+			return $parentShell;
+		} else {
+			return null;
+		}
 	}
 	public function setChildShell($shellObj)
 	{
