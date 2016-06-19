@@ -376,6 +376,7 @@ class SetupMTS
 		$result		= $this->getReturnArray();
 	
 		try {
+			
 			$shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell();
 			$username		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
 
@@ -387,6 +388,7 @@ class SetupMTS
 				$result['msgLines'][]	= "Exception Message: " . $e->getMessage();
 			}
 		}
+
 		return $result;
 	}
 	public function createBrowser()

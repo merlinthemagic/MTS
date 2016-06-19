@@ -108,6 +108,11 @@ class Ssh extends Base
 						} else {
 
 							$childShell			= new \MTS\Common\Devices\Shells\RouterOS();
+							
+							//terminal options dictate the terminal width for ROS
+							preg_match("/([0-9]+)w/", $this->getMtTermOptions(), $colCount);
+							$childShell->columnCount	= $colCount[1];
+							
 							$shellObj->setChildShell($childShell);
 							return $childShell;
 						}
@@ -214,6 +219,11 @@ class Ssh extends Base
 						} else {
 
 							$childShell			= new \MTS\Common\Devices\Shells\RouterOS();
+							
+							//terminal options dictate the terminal width for ROS
+							preg_match("/([0-9]+)w/", $this->getMtTermOptions(), $colCount);
+							$childShell->columnCount	= $colCount[1];
+							
 							$shellObj->setChildShell($childShell);
 							return $childShell;
 						}

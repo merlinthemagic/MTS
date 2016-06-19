@@ -9,7 +9,7 @@ class Bash extends Base
 	private	$_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
 	private $_baseShellPPID=null;
-	private	$_columnCount=null;
+	public	$columnCount=null;
 
 	public function setPipes($procPipeObj)
 	{
@@ -29,12 +29,12 @@ class Bash extends Base
 		$strCmd		= "echo \$COLUMNS";
 		$reData		= $this->exeCmd($strCmd);
 		if (preg_match("/([0-9]+)/", $reData, $rawColCount)) {
-			$this->_columnCount	=  $rawColCount[1];
+			$this->columnCount	=  $rawColCount[1];
 		} else {
 			throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
 		}
 		
-		return $this->_columnCount;
+		return $this->columnCount;
 	}
 	public function getMaxExecutionTime()
 	{
@@ -189,15 +189,11 @@ class Bash extends Base
 				$this->_cmdSigInt		= chr(3) . $this->_strCmdCommit;
 			
 				//set the prompt to a known value
-				$strCmd		= "PS1=\"".$this->_shellPrompt."\" && echo $$\"MERLIN\"$$" . $this->_strCmdCommit;
-				$delimitor	= "[0-9]+MERLIN[0-9]+";
+				$strCmd		= "PS1=\"".$this->_shellPrompt."\"";
+				$delimitor	= "(\n" . preg_quote($this->_shellPrompt) .")";
 				$this->exeCmd($strCmd, $delimitor);
-
-				//shell is now usable with the standard delimitor
 				
-				//just a tiny sleep (1 ms) to make sure the last command has completed its prompt
-				//this seems to only be needed on Arch, but i imagine that other busy servers will encounter the same issue.
-				usleep(1000);
+				//shell is now usable with the standard delimitor
 
 				if ($this->getParentShell() === null) {
 					//if there is no parent then this is the initial shell

@@ -9,7 +9,7 @@ class RouterOS extends Base
 	private $_cmdSigInt=null;
 	private $_cmdMaxTimeout=null;
 	private $_baseShellPPID=null;
-	private $_columnCount=80;
+	public $columnCount=80;
 	
 	public function setPipes($procPipeObj)
 	{
@@ -26,7 +26,7 @@ class RouterOS extends Base
 	}
 	public function getTerminalWidth()
 	{
-		return $this->_columnCount;
+		return $this->columnCount;
 	}
 	public function getMaxExecutionTime()
 	{
@@ -222,8 +222,8 @@ class RouterOS extends Base
 						if ($testEnd < time()) {
 							throw new \Exception(__METHOD__ . ">> Failed to get clean shell");
 						} else {
-							//wait for output to clear
-							//sleep longer and longer or we just clutter the pipe
+							//wait for output to clear, sleep longer and longer or we just clutter the pipe
+							//on slow connections
 							if ($i == 1) {
 								usleep(250000);
 							} elseif ($i == 2) {
