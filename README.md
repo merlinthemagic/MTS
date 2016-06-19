@@ -79,8 +79,11 @@ echo $return1; //root
 
 <h3>How It Works:</h3>
 PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
-We obtain a real shell by creating a Bash shell inside an instance of screen. 
-You can then interact with it through PHP, you control the terminal environment and all variables are maintained throughout the session.
+
+We obtain a real shell by creating a Bash shell inside an instance of screen.
+You can then interact with the shell through PHP by calling exeCmd() on the shell object. 
+You control the terminal environment and all variables, except for $PS1 (used as standard delimitor). 
+All variables are maintained throughout the session. The Python setup provides the shell with a PTY (pseudo-teletype), this allows you to run applications that require TTY.
 
 In terms of security, is it safe to allow sudo to python or pass root credentials in code?
 The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now it is your choice.
@@ -94,9 +97,22 @@ You can also get a shell to a remote server through SSH if you like. Here is how
 $shellObj		= \MTS\Factories::getDevices()->getRemoteHost('ip_address')->setConnectionDetail('username', 'password')->getShell();
 </pre>
 
-The returned shell can be used just like a local shell
+The returned shell can be used just like a local shell.
 
-<h3>Using commands:</h3>
+You also have the option to keep building on a remote SSH shell like this:
+ 
+```php
+//Server 1 shell:
+$shellObj		= \MTS\Factories::getDevices()->getRemoteHost('ip_address1')->setConnectionDetail('username1', 'password1')->getShell();
+
+//Server 2 shell. Use the shell from the first server to login to a second server
+\MTS\Factories::getDevices()->getRemoteHost('ip_address2')->setConnectionDetail('username2', 'password2', null, $shellObj)->getShell();
+
+//any commands executed on $shellObj will be executed on Server 2.
+
+```
+
+### Using commands:
 When you issue a command i.e. 'cat /etc/os-release' that command is executed in the shell and the output is returned to you.
 
 The exeCmd() method takes 3 arguments.
@@ -109,6 +125,7 @@ timeout
 
 <h5>The string command:</h5>
 Is the command you want to execute.
+If you set this to false then no command will be executed and we will just read pending data until the delimitor is reached (if specified).
 
 <h5>The delimitor:</h5>
 Is a regular expression that is compared to the return data, once the expression is matched the data is returned.
