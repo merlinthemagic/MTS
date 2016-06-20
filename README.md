@@ -6,7 +6,7 @@ This project strives to give developers the tools that let them automate process
 
 My philosophy: <b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
 
-## Installation:
+# Installation:
 
 ### Requirements:
 Tested working against the following operating systems and versions.
@@ -55,6 +55,8 @@ In this case you cannot move the 'MtsSetup.php' file, it must be located in the 
 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
+
+# The Tools:
 
 ## The Shell:
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
