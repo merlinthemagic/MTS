@@ -158,7 +158,7 @@ You also have the option to keep building on a remote SSH shell like this:
 $shellObj		= \MTS\Factories::getDevices()->getRemoteHost('ip_address1')->setConnectionDetail('username1', 'password1')->getShell();
 
 //Server 2 shell. Use the shell from the first server to login to a second server
-\MTS\Factories::getDevices()->getRemoteHost('ip_address2')->setConnectionDetail('username2', 'password2', null, $shellObj)->getShell();
+\MTS\Factories::getDevices()->getRemoteHost('ip_address2')->setConnectionDetail('username2', 'password2')->getShell($shellObj);
 
 //any commands executed on $shellObj will be executed on Server 2.
 
