@@ -493,6 +493,6 @@ try {
 
 echo "Start Debug<<<\n <code><pre> \n ";
 echo "Exception Message: " . $errMsg;
-print_r($shellObj->getDebugData());
+print_r($browserObj->getDebugData());
 echo "\n </pre></code> \n >>>End Debug";
 ```
