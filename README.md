@@ -6,6 +6,56 @@ This project strives to give developers the tools that let them automate process
 
 My philosophy: <b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
 
+## Installation:
+
+### Requirements:
+Tested working against the following operating systems and versions.
+```php
+Centos 6, 7.
+RedHat Enterprise 6.
+Debian 8.
+Ubuntu 16.
+Arch 2016-05-01
+```
+
+It should work against other versions as long as they are the same flavor of Linux.
+
+Mandetory packages:
+```php
+php 5.3 (or newer)
+php must allow the "exec()" function
+python
+screen
+fontconfig
+```
+
+Optional packages:
+```php
+sudo
+msttcore-fonts
+```
+If browser screenshots are not rendering text on buttons you are most likely missing the correct fonts. 
+
+
+### Perform Install:
+Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
+You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
+Remember the location you uploaded to, you will need it later.
+
+You can run the setup in one of 2 ways:
+
+1) Place the 'MtsSetup.php' file in a folder that is published by your webserver.
+Then Access the 'MtsSetup.php' file in a browser and follow the instructions. 
+At the top of the page you will be asked to give 'Absolute Path to the directory that holds the MTS folder:'.
+In this example that path is '/var/www/tools/', because inside the tools directory is the MTS directory you uploaded.
+
+2)
+Run the setup from the command line of the server.
+In this case you cannot move the 'MtsSetup.php' file, it must be located in the same directory as the 'MTS' directory.
+
+Once all dependencies have been resolved you will be provided a path that should be included in your
+project whenever you wish to call a function included in the MTS kit.
+
 ## The Shell:
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
 Would it not be nice if the built in functions were more verbose. 
@@ -22,7 +72,7 @@ The goal is to have easy shell access, allowing root when needed, as securely as
 
 ### Basic use:
 
-You start by following the installation instructions at the very bottom of this Readme, then instantiate a shell. The first argument on getShell() is the shell name (only bash for now). 
+You start by following the installation instructions at the very top of this Readme, then instantiate a shell. The first argument on getShell() is the shell name (only bash for now). 
 The second argument depends on weather you choose to allow sudo access to python during the installation.
 If you choose to allow sudo on python then setting the second argument to true will return a shell logged in as root, while false will return a shell as the webserver user, i.e. apache or www-data.
 
@@ -218,7 +268,7 @@ This project simply wraps their work so it is easy for you to access using PHP.
 ### Basic use:
 
 This package creates a instance of PhantomJS, you can then open a website and execute standard functions against it through PHP.
-You start by following the installation instructions at the very bottom of this Readme, then instantiate a browser.
+You start by following the installation instructions at the very top of this Readme, then instantiate a browser.
 
 ```php
 //Some websites are either far away or just slow, so it is a good idea to up the allowed execution time.
@@ -444,53 +494,3 @@ echo "Exception Message: " . $errMsg;
 print_r($shellObj->getDebugData());
 echo "\n </pre></code> \n >>>End Debug";
 ```
-
-## Installation:
-
-### Requirements:
-Tested working against the following operating systems and versions.
-```php
-Centos 6, 7.
-RedHat Enterprise 6.
-Debian 8.
-Ubuntu 16.
-Arch 2016-05-01
-```
-
-It should work against other versions as long as they are the same flavor of Linux.
-
-Mandetory packages:
-```php
-php 5.3 (or newer)
-php must allow the "exec()" function
-python
-screen
-fontconfig
-```
-
-Optional packages:
-```php
-sudo
-msttcore-fonts
-```
-If browser screenshots are not rendering text on buttons you are most likely missing the correct fonts. 
-
-
-### Perform Install:
-Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
-You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
-Remember the location you uploaded to, you will need it later.
-
-You can run the setup in one of 2 ways:
-
-1) Place the 'MtsSetup.php' file in a folder that is published by your webserver.
-Then Access the 'MtsSetup.php' file in a browser and follow the instructions. 
-At the top of the page you will be asked to give 'Absolute Path to the directory that holds the MTS folder:'.
-In this example that path is '/var/www/tools/', because inside the tools directory is the MTS directory you uploaded.
-
-2)
-Run the setup from the command line of the server.
-In this case you cannot move the 'MtsSetup.php' file, it must be located in the same directory as the 'MTS' directory.
-
-Once all dependencies have been resolved you will be provided a path that should be included in your
-project whenever you wish to call a function included in the MTS kit.
