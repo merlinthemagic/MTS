@@ -243,7 +243,7 @@ class Bash extends Base
 				if ($parentObj === null) {
 					$delimitor	= "(screen is terminating)";
 				} else {
-					$delimitor	= "(".preg_quote($parentObj->getPrompt()).")";
+					$delimitor	= "(".preg_quote($parentObj->getShellPrompt()).")";
 				}
 				
 				$this->exeCmd($strCmd, $delimitor);

@@ -15,8 +15,17 @@ class OperatingSystem extends Base
 	{
 		$requestType		= $this->_classStore['requestType'];
 		$shellObj			= $this->_classStore['shellObj']->getActiveShell();
-
+		
 		if ($requestType == 'getOsObj') {
+			
+			//the OS is constantly needed when other Actions want to determine what command syntax to use
+			//it also does not change without a reboot, so it is safe to cache.
+			if (
+				isset($this->_classStore['getOsObjCache']) === true 
+				&& isset($this->_classStore['getOsObjCache'][$shellObj->getShellUUID()]) === true
+			) {
+				return $this->_classStore['getOsObjCache'][$shellObj->getShellUUID()];
+			}
 			
 			$osObj				= null;
 			
@@ -124,6 +133,8 @@ class OperatingSystem extends Base
 				if ($osObj !== null) {
 					$osObj->setMajorVersion($osMajorVersion);
 					$osObj->setArchitecture($osArch);
+					//add to cache
+					$this->_classStore['getOsObjCache'][$shellObj->getShellUUID()]	= $osObj;
 					return $osObj;
 				}
 			}

@@ -9,6 +9,7 @@ class Base
 	protected $_initialized=null;
 	protected $_terminating=false;
 	protected $_shellPrompt=null;
+	protected $_shellUUID=null;
 	public $debug=false;
 	public $debugData=array();
 	
@@ -198,9 +199,16 @@ class Base
 	{
 		return $this->_initialized;
 	}
-	public function getPrompt()
+	public function getShellPrompt()
 	{
 		//needed on exit from child shell
 		return $this->_shellPrompt;
+	}
+	public function getShellUUID()
+	{
+		if ($this->_shellUUID === null) {
+			$this->_shellUUID		= uniqid("", true);
+		}
+		return $this->_shellUUID;
 	}
 }

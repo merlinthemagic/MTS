@@ -7,7 +7,6 @@ class Users extends Base
 {
 	public function getUsername($shellObj)
 	{
-		//return the name of the user php is executed as
 		$this->_classStore['requestType']	= __FUNCTION__;
 		$this->_classStore['shellObj']		= $shellObj;
 		return $this->execute();
