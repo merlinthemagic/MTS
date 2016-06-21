@@ -385,7 +385,7 @@ $windowObj->sendKeyPresses($keys);
 //Example 2, send a string of characters while holding down "shift". 
 $keys		= "My Search Key Words";
 $modifiers	= array("shift").
-$windowObj->sendKeyPresses($keys, modifiers);
+$windowObj->sendKeyPresses($keys, $modifiers);
 
 //Example 3, press enter
 $keys	= array('Enter');
@@ -394,6 +394,7 @@ $windowObj->sendKeyPresses($keys);
 ```
 
 Perform a mouse event on an element:
+
 All valid event options: "up", "down", "move", "leftclick", "leftdoubleclick", "rightclick", "rightdoubleclick"
 ```php
 //left click an element
@@ -421,10 +422,10 @@ $windowObj->loadJS($scriptData);
 
 Call a JavaScript function:
 ```php
-//only content that can be serialize by Json can be returned (JSON.stringify(data), will help you), no objects.
 //$funcReturn will contain a string with the return from the function.
 $funcReturn = $windowObj->callJSFunction("myHelloWorld");
 ```
+Note: Only content that can be serialize by Json can be returned (JSON.stringify(data), will help you), no objects.
 
 Get all cookies from a page:
 ```php
@@ -456,9 +457,10 @@ $windowObj->setURL($myUrl);
 
 Get the current url in the window:
 ```php
-//returns the current URL as a string. If you i.e. submitted a form the URL may not be the same as you originally set 
+//returns the current URL as a string.
 $strUrl		= $windowObj->getURL();
 ```
+Note: It is the CURRENT url that is returned, so if you submitted a form the URL may not be the same as you originally set.
 
 Set the User Agent:
 ```php
