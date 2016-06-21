@@ -85,7 +85,6 @@ class Users extends Base
 					
 						$shellObj->setChildShell($childShell);
 						$newUser	= $this->getUsername($childShell);
-						$newUser	= "merlin";
 						if (strtolower($username) == strtolower($newUser)) {
 							//user was successfully changed
 							return $childShell;
