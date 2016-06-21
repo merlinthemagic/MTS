@@ -20,14 +20,12 @@ class ApplicationPaths extends Base
 	}
 	private function execute()
 	{
-		$requestType		= $this->_classStore['requestType'];
-		
+		$requestType	= $this->_classStore['requestType'];
+		$osObj			= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
+
 		if ($requestType == 'getExecutionFile') {
-			
-			$localOsObj		= $this->getLocalOsObj();
-			$osType			= $localOsObj->getType();
-			
-			if ($osType == 'Linux') {
+
+			if ($osObj->getType() == "Linux") {
 				$cmdString		= "which ".$this->_classStore['appName']."";
 				$cReturn		= $this->shellExec($cmdString);
 				$path			= trim($cReturn);
@@ -46,11 +44,10 @@ class ApplicationPaths extends Base
 					return false;
 				}
 			}
-		} elseif ($requestType == 'getSudoEnabled') {
 			
-			$osType		= $this->getLocalOsObj()->getType();
+		} elseif ($requestType == 'getSudoEnabled') {
 
-			if ($osType == 'Linux') {
+			if ($osObj->getType() == "Linux") {
 				$appName	= $this->_classStore['appName'];
 				//first check that sudo is installed
 				$sudoExist	= $this->getExecutionFile("sudo");

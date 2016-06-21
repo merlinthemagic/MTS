@@ -258,6 +258,8 @@ class Bash extends Base
 			try {
 				if ($this->_baseShellPPID !== null) {
 					
+					//give the local shell time to exit
+					usleep(100000);
 					$stillRunning	= \MTS\Factories::getActions()->getLocalProcesses()->isRunningPid($this->_baseShellPPID);
 					
 					if ($stillRunning === true) {

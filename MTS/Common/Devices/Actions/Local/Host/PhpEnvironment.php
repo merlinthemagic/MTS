@@ -28,7 +28,8 @@ class PhpEnvironment extends Base
 	}
 	private function execute()
 	{
-		$requestType		= $this->_classStore['requestType'];
+		$requestType	= $this->_classStore['requestType'];
+		$osObj			= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 		
 		if ($requestType == 'getIniTimezone') {
 			$timezone	= trim(ini_get('date.timezone'));

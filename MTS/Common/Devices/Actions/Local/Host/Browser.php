@@ -14,14 +14,14 @@ class Browser extends Base
 	}
 	private function execute()
 	{
-		$requestType		= $this->_classStore['requestType'];
+		$requestType	= $this->_classStore['requestType'];
+		$osObj			= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 		
 		if ($requestType == 'getBrowser') {
 			$browserName	= strtolower($this->_classStore['browserName']);
 			$enableDebug	= $this->_classStore['enableDebug'];
-			$osObj			= $this->getLocalOsObj();
 			
-			if ($osObj->getType() == 'Linux') {
+			if ($osObj->getType() == "Linux") {
 				if ($browserName == 'phantomjs') {
 					
 					$fileFact		= \MTS\Factories::getFiles();

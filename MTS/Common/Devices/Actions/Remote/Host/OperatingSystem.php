@@ -134,6 +134,7 @@ class OperatingSystem extends Base
 						return $this->_classStore[$cacheId];
 					}
 				}
+				
 			} else {
 				return $this->_classStore[$cacheId];
 			}

@@ -27,13 +27,13 @@ class Processes extends Base
 	}
 	private function execute()
 	{
-		$requestType		= $this->_classStore['requestType'];
+		$requestType	= $this->_classStore['requestType'];
+		$osObj			= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 		
 		if ($requestType == 'isRunningPid') {
 			$pid		= $this->_classStore['pid'];
 			
-			$osType			= $this->getLocalOsObj()->getType();
-			if ($osType == 'Linux') {
+			if ($osObj->getType() == "Linux") {
 				$cmdString	= "(kill -0 ".$pid." 2> /dev/null && echo \"Alive\" ) || echo \"Dead\"";
 				$rData		= $this->shellExec($cmdString);
 				
@@ -49,8 +49,8 @@ class Processes extends Base
 			$running	= $this->isRunningPid($pid);
 
 			if ($running === true) {
-				$osType			= $this->getLocalOsObj()->getType();
-				if ($osType == 'Linux') {
+				
+				if ($osObj->getType() == "Linux") {
 					
 					$killExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile("kill");
 					
@@ -65,10 +65,16 @@ class Processes extends Base
 						} else {
 							throw new \Exception(__METHOD__ . ">> Failed to SIGTERM PID: " . $pid . ", still running");
 						}
+					} else {
+						throw new \Exception(__METHOD__ . ">> Cannot kill PID: " . $pid . ", missing application 'kill'");
 					}
 				}
+			} else {
+				//pid not running, nothing to do
+				return;
 			}
 		}
+		
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
 	}
 }

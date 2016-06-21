@@ -17,7 +17,8 @@ class Shell extends Base
 	}
 	private function execute()
 	{
-		$requestType		= $this->_classStore['requestType'];
+		$requestType	= $this->_classStore['requestType'];
+		$osObj			= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 		
 		if ($requestType == 'getShell') {
 			$shellType		= strtolower($this->_classStore['shellType']);
@@ -25,9 +26,8 @@ class Shell extends Base
 			$enableDebug	= $this->_classStore['enableDebug'];
 			$width			= $this->_classStore['width'];
 			$height			= $this->_classStore['height'];
-			$osObj			= $this->getLocalOsObj();
-			
-			if ($osObj->getType() == 'Linux') {
+
+			if ($osObj->getType() == "Linux") {
 				if ($shellType == 'bash') {
 					
 					//get bash exe path
