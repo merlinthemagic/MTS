@@ -319,14 +319,14 @@ You only have to worry about opening a page and manipulating it.
 
 ### Window Methods:
 
-Set the size of the window:
+Set the size of the window (in pixels):
 ```php
 $width	= 640;
 $height	= 480;
 $windowObj->setSize($width, $height);
 ```
 
-Set the area of the window you want to screenshot:
+Set the area of the window you want to screenshot (in pixels):
 ```php
 $top	= 0;
 $left	= 0;
@@ -336,6 +336,8 @@ $windowObj->setRasterSize($top, $left, $width, $height);
 ```
 
 Take a screenshot of the window:
+Takes one argument which determines the image format. 
+By default "png", accepts "png", "jpeg".
 ```php
 $imageData	= $windowObj->screenshot();
 ```
@@ -430,13 +432,18 @@ $myUrl	= "http://www.google.com";
 $windowObj->setURL($myUrl);
 ```
 
+Get the current url in the window:
+```php
+$strUrl		= $windowObj->getURL();
+```
+
 Set the User Agent:
 ```php
 $agentName	= "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:47.0) Gecko/20100101 Firefox/47.0";
 $windowObj->setUserAgent($agentName);
 ```
 
-Set the scroll position in the window:
+Set the scroll position in the window (in pixels):
 ```php
 //scroll down the page 500px
 $top	= 500;
