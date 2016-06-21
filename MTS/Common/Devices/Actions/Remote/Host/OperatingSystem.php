@@ -35,7 +35,7 @@ class OperatingSystem extends Base
 			$osName				= null;
 			$osMajorVersion		= null;
 			
-
+			//try to infer the OS type from the shell type.
 			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
 
 				$cmdString		= 'cat /etc/os-release';

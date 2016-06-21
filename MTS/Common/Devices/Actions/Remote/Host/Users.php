@@ -24,8 +24,9 @@ class Users extends Base
 	{
 		$requestType		= $this->_classStore['requestType'];
 		$shellObj			= $this->_classStore['shellObj']->getActiveShell();
+		$osObj				= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
 		
-		if ($requestType == 'changeShellUser') {
+		if ($requestType == 'changeUser') {
 
 			$currentUser	= $this->getUsername($shellObj);
 			$username		= $this->_classStore['username'];
@@ -36,9 +37,9 @@ class Users extends Base
 			unset($this->_classStore['password']);
 			
 			if (strtolower($currentUser) != strtolower($username)) {
-				$childShell		= null;
 				
-				if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
+				$childShell		= null;
+				if ($osObj->getType() == "Linux") {
 
 					$regExSu	= "(Password:|user ".$username." does not exist|This account is currently not available|".$username."@)";
 					$suReturn	= $shellObj->exeCmd("su " . $username, $regExSu);
@@ -79,22 +80,21 @@ class Users extends Base
 							$childShell			= new \MTS\Common\Devices\Shells\Bash();
 						}
 					}
-				}
-				
-
-				if ($childShell !== null) {
-				
-					$shellObj->setChildShell($childShell);
-					$newUser	= $this->getUsername($childShell);
-
-					if (strtolower($username) == strtolower($newUser)) {
-						//user was successfully changed
-						return $childShell;
-					} else {
-						//wrong user, get out
-						$shellObj->exeCmd("exit", false, 100);
-						$shellObj->exeCmd("");
-						throw new \Exception(__METHOD__ . ">> Error: Changing user to: ".$username.", got logged in as: " . $newUser);
+					
+					if ($childShell !== null) {
+					
+						$shellObj->setChildShell($childShell);
+						$newUser	= $this->getUsername($childShell);
+					
+						if (strtolower($username) == strtolower($newUser)) {
+							//user was successfully changed
+							return $childShell;
+						} else {
+							//wrong user, get out
+							$shellObj->exeCmd("exit", false, 100);
+							$shellObj->exeCmd("");
+							throw new \Exception(__METHOD__ . ">> Error: Changing user to: ".$username.", got logged in as: " . $newUser);
+						}
 					}
 				}
 				
@@ -104,12 +104,13 @@ class Users extends Base
 			}
 			
 		} elseif ($requestType == 'getUsername') {
-			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
+
+			if ($osObj->getType() == "Linux") {
 				$username			= trim($shellObj->exeCmd("whoami"));
 				if (strlen($username) > 0) {
 					return $username;
 				}
-			} elseif ($shellObj instanceof \MTS\Common\Devices\Shells\RouterOS) {
+			} elseif ($osObj->getType() == "Mikrotik") {
 				
 				$reData		= $shellObj->exeCmd("", "\[(.*?)\>");
 				if (preg_match("/\[(.*?)\@(.*?)\]\s\>/", $reData, $rawUser) == 1) {
