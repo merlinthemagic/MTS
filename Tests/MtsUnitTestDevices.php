@@ -5,34 +5,31 @@ class MtsUnitTestDevices
 {
 	protected static $_classStore=array();
 	
-	//configure generic host
-	public static $genericHostname="";
-	public static $genericUsername="";
-	public static $genericPassword="";
-	public static $genericConnType="";
-	public static $genericConnPort="";
-	public static $genericCache=false;
+	//configure device
+	public static $hostname=null;
+	public static $username=null;
+	public static $password=null;
+	public static $connType=null;
+	public static $connPort=null;
+	public static $deviceCache=null;
+	public static $deviceType=null;
 	
-	//configure ros device
-	public static $rosHostname="";
-	public static $rosUsername="";
-	public static $rosPassword="";
-	public static $rosConnType="";
-	public static $rosConnPort="";
-	public static $rosCache=false;
-	
-	public static function getGenericDevice()
+	//test if we change user in the shell, i.e. obtain root shell from the default user
+	public static $switchUsername=null;
+	public static $switchPassword=null;
+
+	public static function getDevice()
 	{
 		$deviceObj	= null;
 		//password may be empty
 		if (
-			self::$genericHostname != ""
-			&& self::$genericUsername != ""
-			&& self::$genericConnType != ""
-			&& self::$genericConnPort != ""
+			self::$hostname != ""
+			&& self::$username != ""
+			&& self::$connType != ""
+			&& self::$connPort != ""
 		) {
 		
-			if (self::$genericCache === false) {
+			if (self::$deviceCache === false) {
 				//destroy existing device if there is one
 				if (array_key_exists(__METHOD__, self::$_classStore) === true) {
 					self::$_classStore[__METHOD__]->getShell()->terminate();
@@ -41,43 +38,18 @@ class MtsUnitTestDevices
 			}
 			
 			if (array_key_exists(__METHOD__, self::$_classStore) === false) {
-				self::$_classStore[__METHOD__]	= \MTS\Factories::getDevices()->getRemoteHost(self::$genericHostname)->setConnectionDetail(self::$genericUsername, self::$genericPassword, self::$genericConnType, self::$genericConnPort);
+				
+				$username	= self::$username;
+				if (strtolower(self::$deviceType) == "ros") {
+					if (strtolower(self::$connType) == "ssh") {
+						//much faster if we add the correct terminal options before login
+						$termOptions	= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->getMtTermOptions();
+						$username		= $username . "+" . $termOptions;
+					}
+				}
+				self::$_classStore[__METHOD__]	= \MTS\Factories::getDevices()->getRemoteHost(self::$hostname)->setConnectionDetail($username, self::$password, self::$connType, self::$connPort);
 			}
 				
-			$deviceObj	= self::$_classStore[__METHOD__];
-		}
-		
-		return $deviceObj;
-	}
-	public static function getROSDevice()
-	{
-		$deviceObj	= null;
-		//password may be empty
-		if (
-			self::$rosHostname != ""
-			&& self::$rosUsername != ""
-			&& self::$rosConnType != ""
-			&& self::$rosConnPort != ""
-		) {
-
-			if (self::$rosCache === false) {
-				//destroy existing device if there is one
-				if (array_key_exists(__METHOD__, self::$_classStore) === true) {
-					self::$_classStore[__METHOD__]->getShell()->terminate();
-					unset(self::$_classStore[__METHOD__]);
-				}
-			}
-			
-			if (array_key_exists(__METHOD__, self::$_classStore) === false) {
-				$username	= self::$rosUsername;
-				if (self::$rosConnType == "ssh") {
-					//much faster if we add the correct terminal options before login
-					$termOptions	= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->getMtTermOptions();
-					$username		= $username . "+" . $termOptions;
-				}
-				self::$_classStore[__METHOD__]	= \MTS\Factories::getDevices()->getRemoteHost(self::$rosHostname)->setConnectionDetail($username, self::$rosPassword, self::$rosConnType, self::$rosConnPort);
-			}
-			
 			$deviceObj	= self::$_classStore[__METHOD__];
 		}
 		

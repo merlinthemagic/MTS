@@ -21,25 +21,22 @@ class UsersTest extends PHPUnit_Framework_TestCase
 	}
 	public function test_changeUserRemote()
 	{
-		//no good way to test this works without knowing another user exists
+		$switchUsername	= \MtsUnitTestDevices::$switchUsername;
+		if ($switchUsername != "") {
+			$switchPassword	= \MtsUnitTestDevices::$switchPassword;
+			$shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
+			$result			= \MTS\Factories::getActions()->getRemoteUsers()->changeUser($shellObj, $switchUsername, $switchPassword);
+			$this->assertInternalType("object", $result);
+			$shellObj->terminate();
+		}
 	}
 	
 	//Real Device Testing
-	public function test_getUsernameRemoteGeneric()
+	public function test_getUsernameRealDevice()
 	{
-		$deviceObj	= \MtsUnitTestDevices::getGenericDevice();
+		$deviceObj	= \MtsUnitTestDevices::getDevice();
 		if ($deviceObj !== null) {
-			$shellObj	= $deviceObj->getShell();
-			$result		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
-			$this->assertInternalType("string", $result);
-		}
-	}
-	public function test_getUsernameRemoteROS()
-	{
-		$deviceObj	= \MtsUnitTestDevices::getROSDevice();
-		if ($deviceObj !== null) {
-			$shellObj	= $deviceObj->getShell();
-			$result		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
+			$result		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($deviceObj->getShell());
 			$this->assertInternalType("string", $result);
 		}
 	}

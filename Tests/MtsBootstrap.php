@@ -17,22 +17,20 @@ require_once $mtsEnablePath;
 //include real devices if any
 require_once $curPath . DIRECTORY_SEPARATOR . "MtsUnitTestDevices.php";
 
-//set a generic remote device if you want to test a specific device
-\MtsUnitTestDevices::$genericHostname	= "";
-\MtsUnitTestDevices::$genericUsername	= "";
-\MtsUnitTestDevices::$genericPassword	= "";
-\MtsUnitTestDevices::$genericConnType	= "ssh";
-\MtsUnitTestDevices::$genericConnPort	= 22;
-\MtsUnitTestDevices::$genericCache		= false;
+//set real remote device for testing, if you like. many of the Actions cannot be tested against local host
+\MtsUnitTestDevices::$hostname			= "";
+\MtsUnitTestDevices::$username			= "";
+\MtsUnitTestDevices::$password			= "";
+\MtsUnitTestDevices::$connType			= "ssh";
+\MtsUnitTestDevices::$connPort			= 22;
+//Leave $deviceCache true, unless you want each test to open its own connection
+\MtsUnitTestDevices::$deviceCache		= true;
+//Leave $deviceType empty, unless you are connecting to a ROS device, then set it to "ros"
+\MtsUnitTestDevices::$deviceType		= "";
 
-//set ROS remote device if you want to test a specific device
-\MtsUnitTestDevices::$rosHostname		= "";
-\MtsUnitTestDevices::$rosUsername		= "";
-\MtsUnitTestDevices::$rosPassword		= "";
-\MtsUnitTestDevices::$rosConnType		= "ssh";
-\MtsUnitTestDevices::$rosConnPort		= 22;
-\MtsUnitTestDevices::$rosCache			= false;
-//set cache to true to avoid every test opening its own connection
+//if you want to test changing local shell user to another (maybe root), set the username and password here
+\MtsUnitTestDevices::$switchUsername	= "";
+\MtsUnitTestDevices::$switchPassword	= "";
 
 //to run all tests execute:
 //phpunit -c MtsPhpUnit.xml

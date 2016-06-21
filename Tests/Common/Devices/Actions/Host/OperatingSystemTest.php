@@ -20,21 +20,11 @@ class OperatingSystemTest extends PHPUnit_Framework_TestCase
 	}
 	
 	//Real Device Testing
-	public function test_getOsObjRemoteGeneric()
+	public function test_getOsObjRealDevice()
 	{
-		$deviceObj	= \MtsUnitTestDevices::getGenericDevice();
+		$deviceObj	= \MtsUnitTestDevices::getDevice();
 		if ($deviceObj !== null) {
-			$shellObj	= $deviceObj->getShell();
-			$result		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
-			$this->assertInternalType("object", $result);
-		}
-	}
-	public function test_getOsObjRemoteROS()
-	{
-		$deviceObj	= \MtsUnitTestDevices::getROSDevice();
-		if ($deviceObj !== null) {
-			$shellObj	= $deviceObj->getShell();
-			$result		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
+			$result		= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($deviceObj->getShell());
 			$this->assertInternalType("object", $result);
 		}
 	}
