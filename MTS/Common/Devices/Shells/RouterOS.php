@@ -272,7 +272,7 @@ class RouterOS extends Base
 				
 				//issue the exit
 				$strCmd		= "/quit";
-				$delimitor	= "(closed|Welcome back\!)";
+				$delimitor	= "(".preg_quote($this->getParentShell()->getShellPrompt()).")";
 				$this->exeCmd($strCmd, $delimitor);
 				
 				$this->_initialized	= false;

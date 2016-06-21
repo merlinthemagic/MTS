@@ -85,14 +85,13 @@ class Users extends Base
 					
 						$shellObj->setChildShell($childShell);
 						$newUser	= $this->getUsername($childShell);
-					
+						$newUser	= "merlin";
 						if (strtolower($username) == strtolower($newUser)) {
 							//user was successfully changed
 							return $childShell;
 						} else {
 							//wrong user, get out
-							$shellObj->exeCmd("exit", false, 100);
-							$shellObj->exeCmd("");
+							$shellObj->terminate();
 							throw new \Exception(__METHOD__ . ">> Error: Changing user to: ".$username.", got logged in as: " . $newUser);
 						}
 					}
