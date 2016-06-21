@@ -402,7 +402,7 @@ $selector	= "[id=someElementId]";
 $event		= "leftclick";
 $windowObj->mouseEventOnElement($selector, $event);
 ```
-Note: Do not use this method to click hyperlinks, ratheru se clickElement().
+Note: Do not use this method to click hyperlinks, use clickElement() instead.
 mouseEventOnElement() can only click on elements that have 2D size, a hyperlink is just a line and has no area to click.
 
 Click on an element:
