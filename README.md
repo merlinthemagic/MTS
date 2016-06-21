@@ -4,7 +4,9 @@ Simple, its a tool set for PHP. Currently comprised of two core components, shel
 
 This project strives to give developers the tools that let them automate processes that were designed for people.
 
-My philosophy: <b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
+My philosophy: 
+
+<b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
 
 # Installation:
 
@@ -60,7 +62,7 @@ project whenever you wish to call a function included in the MTS kit.
 
 ## The Shell:
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
-Would it not be nice if the built in functions were more verbose. 
+Would it not be nice if the built in functions were more verbose? 
 
 More generally the shell in Linux is very powerful, but PHP never had a good way to interact with it.
 There are 100's of questions on sites like askubuntu.com or stackoverflow.com asking: my PHP script needs to run as root, how do I do it?
