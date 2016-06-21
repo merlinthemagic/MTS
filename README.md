@@ -336,8 +336,8 @@ $windowObj->setRasterSize($top, $left, $width, $height);
 ```
 
 Take a screenshot of the window:
-Takes one argument which determines the image format. 
-By default "png", accepts "png", "jpeg".
+
+Accepts one argument which determines the image format. By default "png". All valid options: "png", "jpeg".
 ```php
 $imageData	= $windowObj->screenshot();
 ```
@@ -366,25 +366,43 @@ $exists		= $windowObj->getSelectorExists($selector);
 //true if exists, else false
 ```
 
-Type with the keyboard:
+Type with the keyboard. Accepts two arguments: Keys to press and modifiers.
+
+Characters and numbers are accepted as a string. Special keys must be set as array, special keys:
 ```php
+$keys	= array('Enter', 'Space', 'Backspace', 'Delete', 'Up', 'Down', 'Left', 'Right', 'Pageup', 'Pagedown', 'Numlock');
+```
+Modifiers must  be set as array, modifier keys:
+```php
+$modifiers	= array('Alt', 'Shift', 'Ctrl', 'Meta', 'Keypad');
+```
+Examples:
+```php
+//Example 1, send a string of characters
 $keys	= "My Search Key Words";
 $windowObj->sendKeyPresses($keys);
 
-//sendKeyPresses takes a second argument, if you want to i.e. be holding "shift", "ctrl" or "alt" down while typing. 
+//Example 2, send a string of characters while holding down "shift". 
 $keys		= "My Search Key Words";
 $modifiers	= array("shift").
 $windowObj->sendKeyPresses($keys, modifiers);
+
+//Example 3, press enter
+$keys	= array('Enter');
+$windowObj->sendKeyPresses($keys);
+
 ```
 
 Perform a mouse event on an element:
+All valid event options: "up", "down", "move", "leftclick", "leftdoubleclick", "rightclick", "rightdoubleclick"
 ```php
+//left click an element
 $selector	= "[id=someElementId]";
 $event		= "leftclick";
 $windowObj->mouseEventOnElement($selector, $event);
 ```
-use clickElement() rather than sending a mouseEventOnElement($selector, 'leftclick') when clicking hyperlinks.
-mouseEventOnElement() can only click on elements that have 2D size, a hyperlink is just a line.
+Note: Do not use this method to click hyperlinks, ratheru se clickElement().
+mouseEventOnElement() can only click on elements that have 2D size, a hyperlink is just a line and has no area to click.
 
 Click on an element:
 ```php
@@ -403,19 +421,21 @@ $windowObj->loadJS($scriptData);
 
 Call a JavaScript function:
 ```php
-//only content that can be serialize by Json can be returned, no objects.
+//only content that can be serialize by Json can be returned (JSON.stringify(data), will help you), no objects.
 //$funcReturn will contain a string with the return from the function.
 $funcReturn = $windowObj->callJSFunction("myHelloWorld");
 ```
 
 Get all cookies from a page:
 ```php
+//returns array of cookies
 $cookies	= $windowObj->getCookies();
 ```
 
 Get details of an element i.e. value:
 ```php
 //limited currently, will get more detail over time
+//returns array
 $selector	= "[id=someElementId]";
 $eleDetails	= $windowObj->getElement($selector);
 ```
@@ -423,17 +443,20 @@ $eleDetails	= $windowObj->getElement($selector);
 Get details of the document i.e. height and width:
 ```php
 //limited currently, will get more detail over time
+//returns array
 $docDetails	= $windowObj->getDocument();
 ```
 
 Set the url in the window:
 ```php
+//Will load the URL in the window
 $myUrl	= "http://www.google.com";
 $windowObj->setURL($myUrl);
 ```
 
 Get the current url in the window:
 ```php
+//returns the current URL as a string. If you i.e. submitted a form the URL may not be the same as you originally set 
 $strUrl		= $windowObj->getURL();
 ```
 
@@ -458,7 +481,6 @@ $bool	= false;
 $windowObj->setLoadImages($bool);
 ```
 
-
 If the window spawned a popup or another window:
 ```php
 $childWindowObjs	= $windowObj->getChildren();
@@ -469,6 +491,7 @@ if (count(childWindowObjs) > 0) {
 	$childImageData		= $childWindowObj->screenshot();
 }
 ```
+Note: If you execute setURL() on the parent window, all child windows will be closed automatically
 
 ##### Debugging:
 

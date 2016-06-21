@@ -70,6 +70,10 @@ class Window
 	{
 		return $this->getBrowser()->setURL($this, $strUrl);
 	}
+	public function getURL()
+	{
+		return $this->getBrowser()->getURL($this);
+	}
 	public function close()
 	{
 		$this->getBrowser()->closeWindow($this);

@@ -60,6 +60,8 @@ function exeCmd(cmdObj)
 				terminate(cmdObj);
 			} else if (cmdObj.cmd.name == "seturl") {
 				commandWaitForWindowLoad(cmdObj, setUrl);
+			} else if (cmdObj.cmd.name == "geturl") {
+				commandWaitForWindowLoad(cmdObj, getUrl);
 			} else if (cmdObj.cmd.name == "getdom") {
 				commandWaitForWindowLoad(cmdObj, getDom);
 			} else if (cmdObj.cmd.name == "loadjs") {
@@ -150,6 +152,24 @@ function setUrl(cmdObj)
 
 	} catch(e) {
 		cmdObj.result.error.msg		= "Failed to set Url. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
+function getUrl(cmdObj)
+{
+	try {
+		
+		//validate
+		var windowObj				= getWindowByCommand(cmdObj);
+		
+		cmdObj.result.data.script	= windowObj.pjsPage.url;
+		cmdObj.result.code			= 200;
+		writeReturn(cmdObj);
+		processLoop();
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to get Url. Error: " + e;
 		writeReturn(cmdObj);
 		processLoop();
 	}

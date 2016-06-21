@@ -148,6 +148,13 @@ class PhantomJSTest extends PHPUnit_Framework_TestCase
 				$result			= $windowObj->getElement($selector);
 				$this->assertInternalType("array", $result);
 				$this->assertEquals($testStr . $testStr2, $result['value']);
+				
+				$testSpecialKeys		= array("Enter");
+				$result					= $windowObj->sendKeyPresses($testSpecialKeys);
+				$this->assertEmpty($result);
+				
+				$result			= $windowObj->getURL();
+				$this->assertInternalType("string", $result);
 			}
 
 			//completed
