@@ -182,14 +182,14 @@ class RouterOS extends Base
 				//set the variables
 				$this->_strCmdCommit				= chr(13);
 				$this->_cmdSigInt					= chr(3) . $this->_strCmdCommit;
-				$promptReturn						= $this->exeCmd("", "\[(.*?)\>");
-								
+				$promptReturn						= $this->exeCmd("", "\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>");
+
 				//prompt may carry some junk back, not sure why
 				$singlePrompts			= array_filter(explode("\n", $promptReturn));
 				foreach ($singlePrompts as $singlePrompt) {
 					$singlePrompt	= trim($singlePrompt);
-					if (preg_match("/^(\[(.*?)\>)$/", $singlePrompt) == 1) {
-						$this->_shellPrompt	= $singlePrompt;
+					if (preg_match("/(\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>)/", $singlePrompt, $promptParts) == 1) {
+						$this->_shellPrompt	= $promptParts[1];
 						break;
 					}
 				}
