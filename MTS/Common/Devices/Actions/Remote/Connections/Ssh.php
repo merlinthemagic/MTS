@@ -20,6 +20,7 @@ class Ssh extends Base
 	{
 		$requestType		= $this->_classStore['requestType'];
 		$shellObj			= $this->_classStore['shellObj']->getActiveShell();
+		$osObj				= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
 		
 		if ($requestType == 'connectByUsername') {
 			
@@ -32,7 +33,7 @@ class Ssh extends Base
 			unset($this->_classStore['username']);
 			unset($this->_classStore['password']);
 
-			if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
+			if ($osObj->getType() == "Linux") {
 
 				try {
 						$connCmd		= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
@@ -143,7 +144,7 @@ class Ssh extends Base
 					throw new \Exception(__METHOD__ . ">> SSH: Could not resolve hostname: " . $ipaddress);
 				}
 				
-			} elseif ($shellObj instanceof \MTS\Common\Devices\Shells\RouterOS) {
+			} elseif ($osObj->getType() == "Mikrotik") {
 
 				try {
 					$connCmd		= "/system ssh address=\"".$ipaddress."\" port=".$port." user=\"".$username."\"";
