@@ -7,7 +7,10 @@ class PhantomJSTest extends PHPUnit_Framework_TestCase
 		$hasInternet	= \MTS\Factories::getActions()->getLocalPhpEnvironment()->isConnectedToInternet();
 		if ($hasInternet === true) {
 			
-			$browserObj		= \MTS\Factories::getDevices()->getLocalHost()->getBrowser('phantomjs');
+			$localhost		= \MTS\Factories::getDevices()->getLocalHost();
+			$localhost->setDebug(true);
+			
+			$browserObj		= $localhost->getBrowser('phantomjs');
 			$this->assertInstanceOf("MTS\Common\Devices\Browsers\PhantomJS", $browserObj);
 			
 			$windowObj			= $browserObj->getNewWindow();
@@ -98,7 +101,7 @@ class PhantomJSTest extends PHPUnit_Framework_TestCase
 			
 			$result			= $windowObj->callJSFunction($funcName);
 			$this->assertEquals($scriptReturn, $result);
-			
+
 			//selector will change as wikipedia changes their site
 			$selector		= "[id=searchInput]";
 			$result			= $windowObj->getSelectorExists($selector);
@@ -157,8 +160,13 @@ class PhantomJSTest extends PHPUnit_Framework_TestCase
 				$this->assertInternalType("string", $result);
 			}
 
-			//completed
+			//terminate
 			$browserObj->terminate();
+			
+			//test debug
+			$result		= $browserObj->getDebugData();
+			$this->assertInternalType("array", $result);
+			$this->assertNotEmpty($result);
 			
 		} else {
 			//what can we test without internet?

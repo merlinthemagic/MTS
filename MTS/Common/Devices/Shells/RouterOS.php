@@ -309,7 +309,7 @@ class RouterOS extends Base
 		}
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->debug === true) {
+		if ($this->_debug === true) {
 			
 			$debugData			= $return;
 			$debugData['cmd']	= $strCmd;
@@ -358,7 +358,7 @@ class RouterOS extends Base
 		
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->debug === true) {
+		if ($this->_debug === true) {
 			$debugData				= $return;
 			$debugData['type']		= __FUNCTION__;
 			$debugData['regex']		= $regex;

@@ -10,8 +10,8 @@ class Base
 	protected $_terminating=false;
 	protected $_shellPrompt=null;
 	protected $_shellUUID=null;
-	public $debug=false;
-	public $debugData=array();
+	protected $_debug=false;
+	protected $_debugData=array();
 	
 	public function __construct()
 	{
@@ -28,17 +28,33 @@ class Base
 	}
 	public function setDebug($bool)
 	{
-		$this->debug	= $bool;
+		$this->_debug	= $bool;
+		
+		//make sure the entire chell chain has the same debug. 
 		$childShell		= $this->getChildShell();
-		if ($childShell !== null && $childShell->debug !== $bool) {
-			$childShell->setDebug($bool);
+		if ($childShell !== null) {
+			$childDebug	= $childShell->getDebug();
+			if ($childDebug !== $bool) {
+				$childShell->setDebug($bool);
+			}
 		}
+		$parentShell		= $this->getParentShell();
+		if ($parentShell !== null) {
+			$parentDebug	= $parentShell->getDebug();
+			if ($parentDebug !== $bool) {
+				$parentShell->setDebug($bool);
+			}
+		}
+	}
+	public function getDebug()
+	{
+		return $this->_debug;
 	}
 	public function addDebugData($debugData)
 	{
 		$parentShell		= $this->getParentShell();
 		if ($parentShell === null) {
-			$this->debugData[]	= $debugData;
+			$this->_debugData[]	= $debugData;
 		} else {
 			$parentShell->addDebugData($debugData);
 		}
@@ -47,7 +63,7 @@ class Base
 	{
 		$parentShell		= $this->getParentShell();
 		if ($parentShell === null) {
-			return $this->debugData;
+			return $this->_debugData;
 		} else {
 			return $parentShell->getDebugData();
 		}
@@ -99,7 +115,7 @@ class Base
 	}
 	public function terminate()
 	{
-		if ($this->debug === true && $this->_parentShell === null && $this->_terminating === false) {
+		if ($this->_debug === true && $this->_parentShell === null && $this->_terminating === false) {
 			$runTime	= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
 			$maxRunTime	= ini_get('max_execution_time');
 			if ($maxRunTime <= $runTime) {
@@ -168,7 +184,7 @@ class Base
 				$childShell->setChildShell($shellObj);
 			} else {
 				$this->_childShell 			= $shellObj;
-				$this->_childShell->setDebug($this->debug);
+				$this->_childShell->setDebug($this->_debug);
 				$this->_childShell->setParentShell($this);
 			}
 		}

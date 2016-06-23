@@ -1,7 +1,8 @@
 <phpunit backupGlobals="false"
    		 bootstrap="MtsBootstrap.php"
          backupStaticAttributes="false"
-         syntaxCheck="false"
+         syntaxCheck="true"
+         stopOnFailure="true"
          colors="true">
 	<testsuites>
 	    <testsuite name="Factories">

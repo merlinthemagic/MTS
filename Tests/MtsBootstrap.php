@@ -1,9 +1,8 @@
 <?php
 //© 2016 Martin Madsen
 
-//Actions local and remote are tested in the same file, because we cannot redeclare a class name even on seperate path
-//Tests that involve browser and shell can take a long time even if remote devices are not used
-ini_set('max_execution_time', 120);
+//Tests that involve browser and remote shells can take a long time
+ini_set('max_execution_time', 180);
 
 //include MTS
 $curPath		= realpath(dirname(__FILE__));
@@ -28,7 +27,7 @@ require_once $curPath . DIRECTORY_SEPARATOR . "MtsUnitTestDevices.php";
 //Leave $deviceType empty, unless you are connecting to a ROS device, then set it to "ros"
 \MtsUnitTestDevices::$deviceType		= "";
 
-//if you want to test changing local shell user to another (maybe root), set the username and password here
+//if you want to test changing a non root shell to another user (maybe root), set the username and password here
 \MtsUnitTestDevices::$switchUsername	= "";
 \MtsUnitTestDevices::$switchPassword	= "";
 

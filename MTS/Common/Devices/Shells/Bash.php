@@ -263,7 +263,7 @@ class Bash extends Base
 					$stillRunning	= \MTS\Factories::getActions()->getLocalProcesses()->isRunningPid($this->_baseShellPPID);
 					
 					if ($stillRunning === true) {
-						if ($this->debug === true) {
+						if ($this->_debug === true) {
 							$this->addDebugData("Sending SIGTERM to process PID: " . $this->_baseShellPPID);
 						}
 						//something went wrong, try force killing the process
@@ -314,7 +314,7 @@ class Bash extends Base
 	
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->debug === true) {
+		if ($this->_debug === true) {
 			
 			$debugData			= $return;
 			$debugData['cmd']	= $strCmd;
@@ -361,7 +361,7 @@ class Bash extends Base
 		}
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->debug === true) {
+		if ($this->_debug === true) {
 			$debugData				= $return;
 			$debugData['type']		= __FUNCTION__;
 			$debugData['regex']		= $regex;

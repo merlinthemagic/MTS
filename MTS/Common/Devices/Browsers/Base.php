@@ -29,6 +29,10 @@ class Base
 			$this->browserSetDebug();
 		}
 	}
+	public function getDebug()
+	{
+		return $this->_debug;
+	}
 	public function addDebugData($debugData)
 	{
 		$this->_debugData[]	= $debugData;

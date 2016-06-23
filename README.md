@@ -123,7 +123,7 @@ But for those users who are not comfortable with that type of setup, there is an
 //Get a shell as the webserver user i.e. apache or www-data
 $shellObj		= \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', false);
 
-//Pass localhost to the following function with root credentials.
+//Pass the shellObj to the following function with root credentials.
 \MTS\Factories::getActions()->getRemoteUsers()->changeUser($shellObj, 'root', 'rootPassword');
 
 $return1 	= $shellObj->exeCmd('whoami');
