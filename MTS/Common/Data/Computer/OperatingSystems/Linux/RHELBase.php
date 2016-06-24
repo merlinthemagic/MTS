@@ -2,7 +2,7 @@
 //© 2016 Martin Madsen
 namespace MTS\Common\Data\Computer\OperatingSystems\Linux;
 
-class RHELBase extends Base
+class RHELBase extends LinuxBase
 {
 	public function getName()
 	{

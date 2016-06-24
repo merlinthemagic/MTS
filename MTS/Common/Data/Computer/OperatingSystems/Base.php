@@ -1,16 +1,12 @@
 <?php
 //© 2016 Martin Madsen
-namespace MTS\Common\Data\Computer\OperatingSystems\Mikrotik;
+namespace MTS\Common\Data\Computer\OperatingSystems;
 
 class Base
 {
 	protected $_mVersion=null;
 	protected $_architecture=null;
-	
-	public function getType()
-	{
-		return 'Mikrotik';
-	}
+
 	public function setMajorVersion($version)
 	{
 		$this->_mVersion	= $version;
