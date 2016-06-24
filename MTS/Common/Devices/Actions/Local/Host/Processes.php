@@ -46,13 +46,17 @@ class Processes extends Base
 			
 			if ($osObj->getType() == "Linux") {
 				$killExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile("kill");
-				$cmdString	= "(".$killExe->getPathAsString()." -0 ".$pid." 2> /dev/null && echo \"Alive\" ) || echo \"Dead\"";
-				$rData		= $this->shellExec($cmdString);
-				
-				if ($rData == "Alive") {
-					return true;
-				} elseif ($rData == "Dead") {
-					return false;
+				if ($killExe !== false) {
+					$cmdString	= "(".$killExe->getPathAsString()." -0 ".$pid." 2> /dev/null && echo \"Alive\" ) || echo \"Dead\"";
+					$rData		= $this->shellExec($cmdString);
+					
+					if ($rData == "Alive") {
+						return true;
+					} elseif ($rData == "Dead") {
+						return false;
+					}
+				}  else {
+					throw new \Exception(__METHOD__ . ">> Cannot Determine if PID: " . $pid . " is running, missing application 'kill'");
 				}
 			}
 
@@ -96,31 +100,25 @@ class Processes extends Base
 				
 				if ($osObj->getType() == "Linux") {
 					
+					//presense of kill validated by isRunningPID()
 					$killExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile("kill");
-					
-					if ($killExe !== false) {
+					if ($delay === null) {
 						
-						if ($delay === null) {
-							
-							$cmdString	= $killExe->getPathAsString() . " -SIGTERM " . $pid;
-							$this->shellExec($cmdString);
-							usleep(100000);
-							$running	= $this->isRunningPid($pid);
-							if ($running === false) {
-								return;
-							} else {
-								throw new \Exception(__METHOD__ . ">> Failed to SIGTERM PID: " . $pid . ", still running");
-							}
-							
-						} else {
-							//the kill should be executed at a delay
-							$cmdString	= "( sleep ".$delay."s && (".$killExe->getPathAsString()." -0 ".$pid." 2> /dev/null && ".$killExe->getPathAsString()." -SIGTERM ".$pid." & ) & ) > /dev/null 2>&1";
-							$this->shellExec($cmdString);
+						$cmdString	= $killExe->getPathAsString() . " -SIGTERM " . $pid;
+						$this->shellExec($cmdString);
+						usleep(100000);
+						$running	= $this->isRunningPid($pid);
+						if ($running === false) {
 							return;
+						} else {
+							throw new \Exception(__METHOD__ . ">> Failed to SIGTERM PID: " . $pid . ", still running");
 						}
 						
 					} else {
-						throw new \Exception(__METHOD__ . ">> Cannot kill PID: " . $pid . ", missing application 'kill'");
+						//the kill should be executed at a delay
+						$cmdString	= "( sleep ".$delay."s && (".$killExe->getPathAsString()." -0 ".$pid." 2> /dev/null && ".$killExe->getPathAsString()." -SIGTERM ".$pid." & ) & ) > /dev/null 2>&1";
+						$this->shellExec($cmdString);
+						return;
 					}
 				}
 			} else {
