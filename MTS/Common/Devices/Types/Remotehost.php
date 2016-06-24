@@ -56,14 +56,10 @@ class Remotehost extends Device
 							//will build a new ssh connection from a local shell
 							$localHost		= \MTS\Factories::getDevices()->getLocalHost();
 							$localHost->setDebug($this->getDebug());
-							$sudoEnabled	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getSudoEnabled('python');
-							if ($sudoEnabled === true) {
-								//root is more likely to have SSH privilige
-								$shellObj	= $localHost->getShell('bash', true);
-							} else {
-								$shellObj	= $localHost->getShell('bash', false);
-							}
-								
+							
+							//use the non priviliged shell by default. otherwise the shell class cannot kill the local process
+							//if terminate fails. This because the shell should be root and the php script cannot kill root processes
+							$shellObj		= $localHost->getShell('bash', false);
 						} else {
 							//you have already connected to another host and want to make the connection from that host
 						}

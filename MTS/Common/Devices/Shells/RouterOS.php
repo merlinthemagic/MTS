@@ -7,8 +7,6 @@ class RouterOS extends Base
 	private $_procPipe=null;
 	private $_strCmdCommit=null;
 	private $_cmdSigInt=null;
-	private $_cmdMaxTimeout=null;
-	private $_baseShellPPID=null;
 	public $columnCount=80;
 	
 	public function setPipes($procPipeObj)
@@ -27,18 +25,6 @@ class RouterOS extends Base
 	public function getTerminalWidth()
 	{
 		return $this->columnCount;
-	}
-	public function getMaxExecutionTime()
-	{
-		//returns time until max_execution_time is exceeded
-		$curRunTime				= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
-		$this->_cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
-		
-		if ($this->_cmdMaxTimeout < 0) {
-			$this->_cmdMaxTimeout = 0;
-		}
-		
-		return $this->_cmdMaxTimeout;
 	}
 	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)
 	{
@@ -61,7 +47,7 @@ class RouterOS extends Base
 		}
 		
 		$rTimeout	= $this->getMaxExecutionTime();
-		if ($this->_terminating === true || $this->getInitialized() === 'setup') {
+		if ($this->getInitialized() === 'terminating' || $this->getInitialized() === 'setup') {
 			//when terminating and setting up we should be able to take a very long time
 			$maxTimeout		= 15000;
 		} elseif ($maxTimeout === null) {
@@ -184,7 +170,7 @@ class RouterOS extends Base
 				$this->_cmdSigInt					= chr(3) . $this->_strCmdCommit;
 				$promptReturn						= $this->exeCmd("", "\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>");
 
-				//prompt may carry some junk back, not sure why
+				//prompt may carry some junk special characters back even with colors disabled, not sure why, might be a MT issue
 				$singlePrompts			= array_filter(explode("\n", $promptReturn));
 				foreach ($singlePrompts as $singlePrompt) {
 					$singlePrompt	= trim($singlePrompt);
@@ -256,17 +242,17 @@ class RouterOS extends Base
 	protected function shellTerminate()
 	{
 		
-		if ($this->_terminating === false) {
-			$this->_terminating		= true;
+		if ($this->getInitialized() !== false) {
 				
 			try {
 
-				if ($this->getInitialized() !== true) {
-					//in case the shell was setup, but no commands were
-					//issued, we will need to initiate before terminating
-					$this->shellInitialize();
-				}
-		
+				//in case the shell was setup, but no commands were issued, we will need to initiate before terminating
+				//the method is safe to run since it ignores if already executed
+				$this->shellInitialize();
+				
+				//we cannot set status terminating until the init has completed
+				$this->_initialized	= 'terminating';
+				
 				//make sure the last command is dead
 				$this->killLastProcess();
 				
@@ -278,7 +264,6 @@ class RouterOS extends Base
 				$this->_initialized	= false;
 		
 			} catch (\Exception $e) {
-					
 				switch($e->getCode()){
 					default;
 					throw $e;
@@ -288,12 +273,9 @@ class RouterOS extends Base
 	}
 	protected function shellKillLastProcess()
 	{
-		if ($this->getInitialized() !== null && $this->getInitialized() !== false) {
-	
-			//SIGINT current process and get prompt
-			$strCmd		= $this->_cmdSigInt;
-			$this->exeCmd($strCmd);
-		}
+		//SIGINT current process and get prompt
+		$strCmd		= $this->_cmdSigInt;
+		$this->exeCmd($strCmd);
 	}
 	private function shellWrite($strCmd)
 	{
@@ -309,7 +291,7 @@ class RouterOS extends Base
 		}
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->_debug === true) {
+		if ($this->getDebug() === true) {
 			
 			$debugData			= $return;
 			$debugData['cmd']	= $strCmd;
@@ -358,7 +340,7 @@ class RouterOS extends Base
 		
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->_debug === true) {
+		if ($this->getDebug() === true) {
 			$debugData				= $return;
 			$debugData['type']		= __FUNCTION__;
 			$debugData['regex']		= $regex;

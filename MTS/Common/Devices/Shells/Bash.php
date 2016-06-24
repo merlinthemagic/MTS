@@ -7,8 +7,6 @@ class Bash extends Base
 	private $_procPipe=null;
 	private $_strCmdCommit=null;
 	private	$_cmdSigInt=null;
-	private $_cmdMaxTimeout=null;
-	private $_baseShellPPID=null;
 	public	$columnCount=null;
 
 	public function setPipes($procPipeObj)
@@ -36,24 +34,14 @@ class Bash extends Base
 		
 		return $this->columnCount;
 	}
-	public function getMaxExecutionTime()
-	{
-		//returns time until max_execution_time is exceeded
-		$curRunTime				= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
-		$this->_cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
-		
-		if ($this->_cmdMaxTimeout < 0) {
-			$this->_cmdMaxTimeout = 0;
-		}
-		
-		return $this->_cmdMaxTimeout;
-	}
 	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)
 	{
 		//this method should only be called from base::exeCmd()
 		//if this method is called directly it breaks the child shell logic
 		//all commands must be executed on the furthest child
-		if ($this->getInitialized() === false) {
+		if ($this->getInitialized() === true || $this->getInitialized() === 'terminating') {
+			//no problem
+		} elseif ($this->getInitialized() === false) {
 			throw new \Exception(__METHOD__ . ">> Error. Shell has been terminated, cannot execute anymore commands.");
 		} elseif ($this->getInitialized() !== true) {
 			$this->shellInitialize();
@@ -66,7 +54,7 @@ class Bash extends Base
 		}
 
 		$rTimeout	= $this->getMaxExecutionTime();
-		if ($this->_terminating === true || $this->getInitialized() === 'setup') {
+		if ($this->getInitialized() === 'terminating' || $this->getInitialized() === 'setup') {
 			//when terminating and setting up we should be able to take a very long time
 			$maxTimeout		= 15000;
 		} elseif ($maxTimeout === null) {
@@ -226,66 +214,38 @@ class Bash extends Base
 	}
 	protected function shellTerminate()
 	{
-		
-		if ($this->_terminating === false) {
-			$this->_terminating		= true;
+		if ($this->getInitialized() !== false) {
 
-			$errObj	= null;
 			try {
 
+				//in case the shell was setup, but no commands were issued, we will need to initiate before terminating
+				//the method is safe to run since it ignores if already executed
+				$this->shellInitialize();
+				
+				//we cannot set status terminating until the init has completed
+				$this->_initialized	= 'terminating';
+				
 				//make sure the last command is dead
 				$this->killLastProcess();
 
 				//issue the exit
 				$strCmd		= "exit";
 				
-				$parentObj	= $this->getParentShell();
-				if ($parentObj === null) {
+				if ($this->getParentShell() === null) {
 					$delimitor	= "(screen is terminating)";
 				} else {
-					$delimitor	= "(".preg_quote($parentObj->getShellPrompt()).")";
+					$delimitor	= "(".preg_quote($this->getParentShell()->getShellPrompt()).")";
 				}
 				
 				$this->exeCmd($strCmd, $delimitor);
 				
-			} catch (\Exception $e) {
-				switch($e->getCode()){
-					default;
-					$errObj	= $e;
-				}
-			}
-
-			try {
-				if ($this->_baseShellPPID !== null) {
-					
-					//give the local shell time to exit
-					usleep(100000);
-					$stillRunning	= \MTS\Factories::getActions()->getLocalProcesses()->isRunningPid($this->_baseShellPPID);
-					
-					if ($stillRunning === true) {
-						if ($this->_debug === true) {
-							$this->addDebugData("Sending SIGTERM to process PID: " . $this->_baseShellPPID);
-						}
-						//something went wrong, try force killing the process
-						\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->_baseShellPPID);
-						//success problem handled
-						$errObj	= null;
-					}
-				}
+				$this->_initialized	= false;
 				
 			} catch (\Exception $e) {
-					
-				switch($e->getCode()){
+				switch($e->getCode()) {
 					default;
-					if ($errObj === null) {
-						$errObj	= $e;
-					}
+					throw $e;
 				}
-			}
-			
-			$this->_initialized	= false;
-			if ($errObj !== null) {
-				throw $errObj;
 			}
 		}
 	}
@@ -314,7 +274,7 @@ class Bash extends Base
 	
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->_debug === true) {
+		if ($this->getDebug() === true) {
 			
 			$debugData			= $return;
 			$debugData['cmd']	= $strCmd;
@@ -361,7 +321,7 @@ class Bash extends Base
 		}
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 		
-		if ($this->_debug === true) {
+		if ($this->getDebug() === true) {
 			$debugData				= $return;
 			$debugData['type']		= __FUNCTION__;
 			$debugData['regex']		= $regex;

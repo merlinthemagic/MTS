@@ -5,7 +5,7 @@ class ApplicationPathsTest extends PHPUnit_Framework_TestCase
 	//Local
 	public function test_getExecutionFileLocal()
 	{
-		$result	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('bash');
+		$result		= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('bash');
 		$this->assertInstanceOf("MTS\Common\Data\Computer\FileSystems\File", $result);
 	}
 	public function test_getSudoEnabledLocal()

@@ -81,7 +81,8 @@ class Ssh extends Base
 					} elseif ($returnPass[1] == "MikroTik RouterOS") {
 						
 						//logged in, make sure the username includes disabling colors
-						$validLogin	= true;
+						$validLogin		= true;
+						$cleanUsername	= $username;
 						preg_match("/(.*?)\+(.*)/", $username, $addName);
 
 						if (isset($addName[2]) === false) {
@@ -90,17 +91,21 @@ class Ssh extends Base
 							$validLogin	= false;
 						} else if ($addName[2] != $this->getMtTermOptions()) {
 							//username has the wrong options
-							$username	= $addName[1] . "+" . $this->getMtTermOptions();
-							$validLogin	= false;
+							$cleanUsername	= $addName[1];
+							$username		= $addName[1] . "+" . $this->getMtTermOptions();
+							$validLogin		= false;
 						}
 
 						if ($validLogin === false) {
 							
+							if ($shellObj->getDebug() === true) {
+								$shellObj->addDebugData(__METHOD__ . ">> Redoing Connection, terminal options are incorrect, avoid by setting username to: " . $cleanUsername . "+" . $this->getMtTermOptions());
+							}
 							//since we cutoff the return, we have to make sure the welcome text is done
-							$shellObj->exeCmd("", "\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>");
+							//we cannot assume the class ends in any kind of prompt since terminal colors may be enabled
+							$shellObj->exeCmd("", "]\s+\>");
 							//then we can quit
-							$shellObj->exeCmd("/quit", false, 0);
-							$shellObj->exeCmd("");
+							$shellObj->exeCmd("/quit", preg_quote($shellObj->getShellPrompt()));
 
 							//then back in with a properly formatted username
 							$newShell	= $this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);
@@ -192,7 +197,8 @@ class Ssh extends Base
 					} elseif ($returnPass[1] == "MikroTik RouterOS") {
 						
 						//logged in, make sure the username includes disabling colors
-						$validLogin	= true;
+						$validLogin		= true;
+						$cleanUsername	= $username;
 						preg_match("/(.*?)\+(.*)/", $username, $addName);
 
 						if (isset($addName[2]) === false) {
@@ -201,17 +207,21 @@ class Ssh extends Base
 							$validLogin	= false;
 						} else if ($addName[2] != $this->getMtTermOptions()) {
 							//username has the wrong options
-							$username	= $addName[1] . "+" . $this->getMtTermOptions();
-							$validLogin	= false;
+							$cleanUsername	= $addName[1];
+							$username		= $addName[1] . "+" . $this->getMtTermOptions();
+							$validLogin		= false;
 						}
 
 						if ($validLogin === false) {
-							
-							//since we cutoff the return, /we have to make sure the welcome text is done
-							$shellObj->exeCmd("", "\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>");
+	
+							if ($shellObj->getDebug() === true) {
+								$shellObj->addDebugData(__METHOD__ . ">> Redoing Connection, terminal options are incorrect, avoid by setting username to: " . $cleanUsername . "+" . $this->getMtTermOptions());
+							}
+							//since we cutoff the return, we have to make sure the welcome text is done
+							//we cannot assume the class ends in any kind of prompt since terminal colors may be enabled
+							$shellObj->exeCmd("", "]\s+\>");
 							//then we can quit
-							$shellObj->exeCmd("/quit", false, 0);
-							$shellObj->exeCmd("");
+							$shellObj->exeCmd("/quit", preg_quote($shellObj->getShellPrompt()));
 
 							//then back in with a properly formatted username
 							$newShell	= $this->connectByUsername($shellObj, $username, $password, $ipaddress, $port);

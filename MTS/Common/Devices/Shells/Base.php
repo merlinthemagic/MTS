@@ -4,12 +4,13 @@ namespace MTS\Common\Devices\Shells;
 
 class Base
 {
+	
 	protected $_childShell=null;
 	protected $_parentShell=null;
 	protected $_initialized=null;
-	protected $_terminating=false;
 	protected $_shellPrompt=null;
 	protected $_shellUUID=null;
+	protected $_baseShellPPID=null;
 	protected $_debug=false;
 	protected $_debugData=array();
 	
@@ -20,7 +21,7 @@ class Base
 	}
 	public function __destruct()
 	{
-		if ($this->_parentShell === null) {
+		if ($this->getParentShell() === null) {
 			//destruction should only be triggered in the initial shell.
 			//that way we get an orderly shutdown of nested shells
 			$this->terminate();
@@ -29,21 +30,12 @@ class Base
 	public function setDebug($bool)
 	{
 		$this->_debug	= $bool;
-		
 		//make sure the entire chell chain has the same debug. 
-		$childShell		= $this->getChildShell();
-		if ($childShell !== null) {
-			$childDebug	= $childShell->getDebug();
-			if ($childDebug !== $bool) {
-				$childShell->setDebug($bool);
-			}
+		if ($this->getChildShell() !== null && $this->getChildShell()->getDebug() !== $bool) {
+			$this->getChildShell()->setDebug($bool);
 		}
-		$parentShell		= $this->getParentShell();
-		if ($parentShell !== null) {
-			$parentDebug	= $parentShell->getDebug();
-			if ($parentDebug !== $bool) {
-				$parentShell->setDebug($bool);
-			}
+		if ($this->getParentShell() !== null && $this->getParentShell()->getDebug() !== $bool) {
+			$this->getParentShell()->setDebug($bool);
 		}
 	}
 	public function getDebug()
@@ -88,10 +80,10 @@ class Base
 		//you should issue another command to stop it or use the killLastProcess() function
 
 		try {
-			$childShell	= $this->getChildShell();
-			if ($childShell !== null) {
+
+			if ($this->getChildShell() !== null) {
 				//must execute on child as it rides on top of this shell
-				return $childShell->exeCmd($strCmd, $delimitor, $timeout);
+				return $this->getChildShell()->exeCmd($strCmd, $delimitor, $timeout);
 			} else {
 				return $this->shellStrExecute($strCmd, $delimitor, $timeout);
 			}
@@ -105,31 +97,39 @@ class Base
 	}
 	public function killLastProcess()
 	{
-		$childShell	= $this->getChildShell();
-		if ($childShell !== null) {
+		if ($this->getChildShell() !== null) {
 			//must execute on child as it rides on top of this shell
-			$childShell->killLastProcess();
+			$this->getChildShell()->killLastProcess();
 		} else {
 			$this->shellKillLastProcess();
 		}
 	}
 	public function terminate()
 	{
-		if ($this->_debug === true && $this->_parentShell === null && $this->_terminating === false) {
-			$runTime	= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
-			$maxRunTime	= ini_get('max_execution_time');
-			if ($maxRunTime <= $runTime) {
-				//help debug when commands fail because the "max_execution_time" was not long enough
-				$this->addDebugData("Process terminated because 'max_execution_time': ".$maxRunTime.", was reached. Run time: " . $runTime);
+		if ($this->getParentShell() === null) {
+			
+			//PHP does not allow us to handle exceptions during shutdown. If termination fails on the base shell
+			//it will hang around forever taking up resources on the server. The only way to avoid this is to
+			//have a kill wait around to see if terminate completes its job. if not force the process termination
+			if ($this->getBaseShellPID() !== null) {
+				\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->getBaseShellPID(), 15);
+			}
+			
+			if ($this->getDebug() === true) {
+				$this->addDebugData("Starting Termination of shells. If you dont see a 'Completed' message something went wrong");
+				if ($this->getMaxExecutionTime() == 0) {
+					//help debug when commands fail when "max_execution_time" was not long enough.
+					$this->addDebugData("Shell terminated because 'max_execution_time': ".ini_get('max_execution_time').", was reached.");
+				}
 			}
 		}
+
 		$childError	= null;
 		$ownError	= null;
 		try {
 			//child shells must be shutdown before this
-			$childShell	= $this->getChildShell();
-			if ($childShell !== null) {
-				$childShell->terminate();
+			if ($this->getChildShell() !== null) {
+				$this->getChildShell()->terminate();
 			}
 		} catch (\Exception $e) {
 			switch($e->getCode()){
@@ -150,10 +150,10 @@ class Base
 
 		//tell the parent we are shutdown
 		$parentShell	= $this->getParentShell();
-		if ($parentShell !== null) {
-			$parentShell->setChildShell(null);
+		if ($this->getParentShell() !== null) {
+			$this->getParentShell()->setChildShell(null);
 			//clean up
-			$parentShell->exeCmd("");
+			$this->getParentShell()->exeCmd("");
 		}
 		
 		//finish by throwing the errors. It is crucial that the parent
@@ -164,6 +164,10 @@ class Base
 			throw $childError;
 		} elseif ($ownError !== null) {
 			throw $ownError;
+		}
+		
+		if ($this->getDebug() === true && $this->getParentShell() === null) {
+			$this->addDebugData("Completed Termination of shells");
 		}
 		
 		if ($parentShell !== null) {
@@ -179,12 +183,11 @@ class Base
 			//this is a child destructing it self and letting its parent know it is done
 			$this->_childShell = null;
 		} else {
-			$childShell	= $this->getChildShell();
-			if ($childShell !== null) {
-				$childShell->setChildShell($shellObj);
+			if ($this->getChildShell() !== null) {
+				$this->getChildShell()->setChildShell($shellObj);
 			} else {
 				$this->_childShell 			= $shellObj;
-				$this->_childShell->setDebug($this->_debug);
+				$this->_childShell->setDebug($this->getDebug());
 				$this->_childShell->setParentShell($this);
 			}
 		}
@@ -195,11 +198,10 @@ class Base
 	}
 	public function getActiveShell()
 	{
-		$childShell	= $this->getChildShell();
-		if ($childShell === null) {
+		if ($this->getChildShell() === null) {
 			return $this;
 		} else {
-			return $childShell->getActiveShell();
+			return $this->getChildShell()->getActiveShell();
 		}
 	}
 	public function setParentShell($shellObj)
@@ -226,5 +228,25 @@ class Base
 			$this->_shellUUID		= uniqid("", true);
 		}
 		return $this->_shellUUID;
+	}
+	public function getMaxExecutionTime()
+	{
+		//returns time until max_execution_time is exceeded
+		$curRunTime		= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
+		$cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
+	
+		if ($cmdMaxTimeout < 0) {
+			$cmdMaxTimeout = 0;
+		}
+	
+		return $cmdMaxTimeout;
+	}
+	public function getBaseShellPID()
+	{
+		if ($this->getParentShell() !== null) {
+			return $this->getParentShell()->getBaseShellPID();
+		} else {
+			return $this->_baseShellPPID;
+		}
 	}
 }
