@@ -168,13 +168,15 @@ class RouterOS extends Base
 				//set the variables
 				$this->_strCmdCommit				= chr(13);
 				$this->_cmdSigInt					= chr(3) . $this->_strCmdCommit;
-				$promptReturn						= $this->exeCmd("", "\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>");
+				
+				$allowedCharRegEx					= "[a-zA-Z0-9\_\-\.\:\#\,]+";
+				$promptReturn						= $this->exeCmd("", "\[((".$allowedCharRegEx.")@(".$allowedCharRegEx."))]\s+\>");
 
 				//prompt may carry some junk special characters back even with colors disabled, not sure why, might be a MT issue
 				$singlePrompts			= array_filter(explode("\n", $promptReturn));
 				foreach ($singlePrompts as $singlePrompt) {
 					$singlePrompt	= trim($singlePrompt);
-					if (preg_match("/(\[(([a-zA-Z0-9\_\-]+)@([a-zA-Z0-9\_\-]+))]\s+\>)/", $singlePrompt, $promptParts) == 1) {
+					if (preg_match("/(\[((".$allowedCharRegEx.")@(".$allowedCharRegEx."))]\s+\>)/", $singlePrompt, $promptParts) == 1) {
 						$this->_shellPrompt	= $promptParts[1];
 						break;
 					}

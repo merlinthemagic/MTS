@@ -346,8 +346,9 @@ $imageData	= $windowObj->screenshot();
 
 Close window:
 ```php
-$imageData	= $windowObj->close();
+$windowObj->close();
 ```
+Note: This will also close any child windows
 
 Get the DOM:
 ```php
