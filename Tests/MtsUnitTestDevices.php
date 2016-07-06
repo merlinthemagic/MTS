@@ -12,7 +12,6 @@ class MtsUnitTestDevices
 	public static $connType=null;
 	public static $connPort=null;
 	public static $deviceCache=null;
-	public static $deviceType=null;
 	
 	//test if we change user in the shell, i.e. obtain root shell from the default user
 	public static $switchUsername=null;
@@ -38,16 +37,7 @@ class MtsUnitTestDevices
 			}
 			
 			if (array_key_exists(__METHOD__, self::$_classStore) === false) {
-				
-				$username	= self::$username;
-				if (strtolower(self::$deviceType) == "ros") {
-					if (strtolower(self::$connType) == "ssh") {
-						//much faster if we add the correct terminal options before login
-						$termOptions	= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->getMtTermOptions();
-						$username		= $username . "+" . $termOptions;
-					}
-				}
-				self::$_classStore[__METHOD__]	= \MTS\Factories::getDevices()->getRemoteHost(self::$hostname)->setConnectionDetail($username, self::$password, self::$connType, self::$connPort);
+				self::$_classStore[__METHOD__]	= \MTS\Factories::getDevices()->getRemoteHost(self::$hostname)->setConnectionDetail(self::$username, self::$password, self::$connType, self::$connPort);
 			}
 				
 			$deviceObj	= self::$_classStore[__METHOD__];

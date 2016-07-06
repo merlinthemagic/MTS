@@ -24,8 +24,6 @@ require_once $curPath . DIRECTORY_SEPARATOR . "MtsUnitTestDevices.php";
 \MtsUnitTestDevices::$connPort			= 22;
 //Leave $deviceCache true, unless you want each test to open its own connection
 \MtsUnitTestDevices::$deviceCache		= true;
-//Leave $deviceType empty, unless you are connecting to a ROS device, then set it to "ros"
-\MtsUnitTestDevices::$deviceType		= "";
 
 //if you want to test changing a non root shell to another user (maybe root), set the username and password here
 \MtsUnitTestDevices::$switchUsername	= "";
