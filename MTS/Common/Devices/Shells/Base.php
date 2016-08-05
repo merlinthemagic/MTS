@@ -13,6 +13,7 @@ class Base
 	protected $_baseShellPPID=null;
 	protected $_debug=false;
 	protected $_debugData=array();
+	protected $_defaultExecutionTime=10000;
 	
 	public function __construct()
 	{
@@ -111,13 +112,14 @@ class Base
 			//PHP does not allow us to handle exceptions during shutdown. If termination fails on the base shell
 			//it will hang around forever taking up resources on the server. The only way to avoid this is to
 			//have a kill wait around to see if terminate completes its job. if not force the process termination
-			if ($this->getBaseShellPID() !== null) {
+			if ($this->getBaseShellPID() !== null && $this->getInitialized() != "terminating") {
 				\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->getBaseShellPID(), 15);
 			}
 			
 			if ($this->getDebug() === true) {
 				$this->addDebugData("Starting Termination of shells. If you dont see a 'Completed' message something went wrong");
-				if ($this->getMaxExecutionTime() == 0) {
+				$exeTimeout		= \MTS\Factories::getActions()->getLocalPhpEnvironment()->getRemainingExecutionTime();
+				if ($exeTimeout == 0) {
 					//help debug when commands fail when "max_execution_time" was not long enough.
 					$this->addDebugData("Shell terminated because 'max_execution_time': ".ini_get('max_execution_time').", was reached.");
 				}
@@ -229,17 +231,13 @@ class Base
 		}
 		return $this->_shellUUID;
 	}
-	public function getMaxExecutionTime()
+	public function setDefaultExecutionTime($mSecs)
 	{
-		//returns time until max_execution_time is exceeded
-		$curRunTime		= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
-		$cmdMaxTimeout	= floor((ini_get('max_execution_time') - $curRunTime) * 1000);
-	
-		if ($cmdMaxTimeout < 0) {
-			$cmdMaxTimeout = 0;
-		}
-	
-		return $cmdMaxTimeout;
+		$this->_defaultExecutionTime	= intval($mSecs);
+	}
+	public function getDefaultExecutionTime()
+	{
+		return $this->_defaultExecutionTime;
 	}
 	public function getBaseShellPID()
 	{

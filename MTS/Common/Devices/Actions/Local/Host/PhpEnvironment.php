@@ -26,6 +26,11 @@ class PhpEnvironment extends Base
 		$this->_classStore['requestType']	= __FUNCTION__;
 		return $this->execute();
 	}
+	public function getRemainingExecutionTime()
+	{
+		$this->_classStore['requestType']	= __FUNCTION__;
+		return $this->execute();
+	}
 	private function execute()
 	{
 		$requestType	= $this->_classStore['requestType'];
@@ -71,6 +76,25 @@ class PhpEnvironment extends Base
 			} else {
 				return true;
 			}
+		} elseif ($requestType == 'getRemainingExecutionTime') {
+			
+			$maxExeTime		= ini_get('max_execution_time');
+			if ($maxExeTime > 0) {
+				$curRunTime		= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
+				$exeTimeout		= ($maxExeTime - $curRunTime);
+				if ($exeTimeout < 0) {
+					$exeTimeout	= 0;
+				}
+				
+			} else {
+				//unlimited execution time, i.e. a cli script, but we *want* this function to return an integer :). 
+				//It is reasonable to assume the script will stop executing when the earth is no longer,
+				//since it is absorbed by the sun turing to a red giant in 6 billion years
+				//https://en.wikipedia.org/wiki/Red_giant#The_Sun_as_a_red_giant
+				$exeTimeout	= 189216000000000000;
+			}
+			
+			return $exeTimeout;
 		}
 
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);

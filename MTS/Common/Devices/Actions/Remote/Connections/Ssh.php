@@ -5,7 +5,7 @@ use MTS\Common\Devices\Actions\Remote\Base;
 
 class Ssh extends Base
 {
-	public function connectByUsername($shellObj, $username, $password, $ipaddress, $port=22)
+	public function connectByUsername($shellObj, $username, $password, $ipaddress, $port=22, $timeout=30000)
 	{
 		//return the name of the user php is executed as
 		$this->_classStore['requestType']	= __FUNCTION__;
@@ -14,6 +14,7 @@ class Ssh extends Base
 		$this->_classStore['password']		= $password;
 		$this->_classStore['ipaddress']		= $ipaddress;
 		$this->_classStore['port']			= $port;
+		$this->_classStore['timeout']		= $timeout;
 		return $this->execute();
 	}
 	public function getMtTermOptions()
@@ -36,22 +37,23 @@ class Ssh extends Base
 			$username		= $this->_classStore['username'];
 			$password		= $this->_classStore['password'];
 			$port			= $this->_classStore['port'];
+			$timeout		= $this->_classStore['timeout'];
 			
 			//remove the username and password, they are too sensetive to keep around in case the object is dumped
 			unset($this->_classStore['username']);
 			unset($this->_classStore['password']);
 
 			if ($osObj->getType() == "Linux") {
-				return $this->connectByUsernameFromLinux($shellObj, $username, $password, $ipaddress, $port);
+				return $this->connectByUsernameFromLinux($shellObj, $username, $password, $ipaddress, $port, $timeout);
 			} elseif ($osObj->getType() == "Mikrotik") {
-				return $this->connectByUsernameFromMikrotik($shellObj, $username, $password, $ipaddress, $port);
+				return $this->connectByUsernameFromMikrotik($shellObj, $username, $password, $ipaddress, $port, $timeout);
 			}
 		}
 
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
 	}
 	
-	private function connectByUsernameFromLinux($shellObj, $username, $password, $ipaddress, $port)
+	private function connectByUsernameFromLinux($shellObj, $username, $password, $ipaddress, $port, $timeout)
 	{
 		$requestType	= $this->_classStore['requestType'];
 		$osObj			= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
@@ -62,7 +64,7 @@ class Ssh extends Base
 			try {
 				$connCmd		= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
 				$regExConn		= "(".$ipaddress."'s password:|No route to host|Could not resolve hostname)";
-				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn);
+				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn, $timeout);
 				if (preg_match("/".$regExConn."/", $connReturn, $returnConn) == 1) {
 					$returnConn	= $returnConn[1];
 				}
@@ -118,7 +120,7 @@ class Ssh extends Base
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
 	}
 	
-	private function connectByUsernameFromMikrotik($shellObj, $username, $password, $ipaddress, $port)
+	private function connectByUsernameFromMikrotik($shellObj, $username, $password, $ipaddress, $port, $timeout)
 	{
 		$requestType	= $this->_classStore['requestType'];
 		$osObj			= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
@@ -130,7 +132,7 @@ class Ssh extends Base
 				$connCmd		= "/system ssh address=\"".$ipaddress."\" port=".$port." user=\"".$username."\"";
 			
 				$regExConn		= "(password:|Connection timed out|No route to host)";
-				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn);
+				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn, $timeout);
 
 				if (preg_match("/".$regExConn."/", $connReturn, $returnConn) == 1) {
 					$returnConn	= $returnConn[1];

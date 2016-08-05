@@ -53,14 +53,8 @@ class Bash extends Base
 			$delimitor		= preg_quote($this->_shellPrompt);
 		}
 
-		$rTimeout	= $this->getMaxExecutionTime();
-		if ($this->getInitialized() === 'terminating' || $this->getInitialized() === 'setup') {
-			//when terminating and setting up we should be able to take a very long time
-			$maxTimeout		= 15000;
-		} elseif ($maxTimeout === null) {
-			$maxTimeout		= $rTimeout;
-		} elseif ($maxTimeout > $rTimeout) {
-			throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
+		if ($maxTimeout === null) {
+			$maxTimeout		= $this->getDefaultExecutionTime();
 		}
 		
 		if ($strCmd === false) {
