@@ -236,33 +236,29 @@ class RouterOS extends Base
 	}
 	protected function shellTerminate()
 	{
-		
-		if ($this->getInitialized() !== false) {
-				
-			try {
+		try {
 
-				//in case the shell was setup, but no commands were issued, we will need to initiate before terminating
-				//the method is safe to run since it ignores if already executed
-				$this->shellInitialize();
-				
-				//we cannot set status terminating until the init has completed
-				$this->_initialized	= 'terminating';
-				
-				//make sure the last command is dead
-				$this->killLastProcess();
-				
-				//issue the exit
-				$strCmd		= "/quit";
-				$delimitor	= "(".preg_quote($this->getParentShell()->getShellPrompt()).")";
-				$this->exeCmd($strCmd, $delimitor);
-				
-				$this->_initialized	= false;
-		
-			} catch (\Exception $e) {
-				switch($e->getCode()){
-					default;
-					throw $e;
-				}
+			//in case the shell was setup, but no commands were issued, we will need to initiate before terminating
+			//the method is safe to run since it ignores if already executed
+			$this->shellInitialize();
+			
+			//we cannot set status terminating until the init has completed
+			$this->_initialized	= "terminating";
+			
+			//make sure the last command is dead
+			$this->killLastProcess();
+			
+			//issue the exit
+			$strCmd		= "/quit";
+			$delimitor	= "(".preg_quote($this->getParentShell()->getShellPrompt()).")";
+			$this->exeCmd($strCmd, $delimitor);
+			
+			$this->_initialized	= false;
+	
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
 			}
 		}
 	}

@@ -10,7 +10,7 @@ class Base
 	protected $_initialized=null;
 	protected $_shellPrompt=null;
 	protected $_shellUUID=null;
-	protected $_baseShellPPID=null;
+	protected $_procPID=null;
 	protected $_debug=false;
 	protected $_debugData=array();
 	protected $_defaultExecutionTime=10000;
@@ -107,76 +107,80 @@ class Base
 	}
 	public function terminate()
 	{
-		if ($this->getParentShell() === null) {
-			
-			//PHP does not allow us to handle exceptions during shutdown. If termination fails on the base shell
-			//it will hang around forever taking up resources on the server. The only way to avoid this is to
-			//have a kill wait around to see if terminate completes its job. if not force the process termination
-			if ($this->getBaseShellPID() !== null && $this->getInitialized() != "terminating") {
-				\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->getBaseShellPID(), 15);
-			}
-			
-			if ($this->getDebug() === true) {
-				$this->addDebugData("Starting Termination of shells. If you dont see a 'Completed' message something went wrong");
-				$exeTimeout		= \MTS\Factories::getActions()->getLocalPhpEnvironment()->getRemainingExecutionTime();
-				if ($exeTimeout == 0) {
-					//help debug when commands fail when "max_execution_time" was not long enough.
-					$this->addDebugData("Shell terminated because 'max_execution_time': ".ini_get('max_execution_time').", was reached.");
+		if ($this->getInitialized() !== "terminating" && $this->getInitialized() !== false) {
+
+			if ($this->getParentShell() === null) {
+				
+				//PHP does not allow us to handle exceptions during shutdown. If termination fails on the base shell
+				//it will hang around forever taking up resources on the server. The only way to avoid this is to
+				//have a kill wait around to see if terminate completes its job. if not force the process termination
+				if ($this->getProcessPID() !== null) {
+					\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->getProcessPID(), 15);
+				}
+				
+				if ($this->getDebug() === true) {
+					$exeTimeout		= \MTS\Factories::getActions()->getLocalPhpEnvironment()->getRemainingExecutionTime();
+					if ($exeTimeout == 0) {
+						//help debug when commands fail when "max_execution_time" was not long enough.
+						$this->addDebugData("Shell terminated because 'max_execution_time' value: ".ini_get('max_execution_time').", was exceeded.");
+					}
+					
+					$this->addDebugData("Starting Termination of shells. If you dont see a 'Completed' message something went wrong");
 				}
 			}
-		}
-
-		$childError	= null;
-		$ownError	= null;
-		try {
-			//child shells must be shutdown before this
-			if ($this->getChildShell() !== null) {
-				$this->getChildShell()->terminate();
+	
+			$childError	= null;
+			$ownError	= null;
+			try {
+				//child shells must be shutdown before this
+				if ($this->getChildShell() !== null) {
+					$this->getChildShell()->terminate();
+				}
+			} catch (\Exception $e) {
+				switch($e->getCode()){
+					default;
+					$childError = $e;
+				}
 			}
-		} catch (\Exception $e) {
-			switch($e->getCode()){
-				default;
-				$childError = $e;
-			}
-		}
-		
-		try {
 			
-			$this->shellTerminate();
-		} catch (\Exception $e) {
-			switch($e->getCode()){
-				default;
-				$ownError = $e;
+			try {
+				
+				$this->shellTerminate();
+			} catch (\Exception $e) {
+				switch($e->getCode()){
+					default;
+					$ownError = $e;
+				}
 			}
-		}
-
-		//tell the parent we are shutdown
-		$parentShell	= $this->getParentShell();
-		if ($this->getParentShell() !== null) {
-			$this->getParentShell()->setChildShell(null);
-			//clean up
-			$this->getParentShell()->exeCmd("");
-		}
-		
-		//finish by throwing the errors. It is crucial that the parent
-		//is informed it no longer has a child, even though it may have failed 
-		//some part of the termination process. otherwise commands are still passed upstream
-		//and the initial shell will never get a chance to terminate
-		if ($childError !== null) {
-			throw $childError;
-		} elseif ($ownError !== null) {
-			throw $ownError;
-		}
-		
-		if ($this->getDebug() === true && $this->getParentShell() === null) {
-			$this->addDebugData("Completed Termination of shells");
-		}
-		
-		if ($parentShell !== null) {
-			//the user may still have some use of the parent
-			return $parentShell;
-		} else {
-			return null;
+	
+			//tell the parent we are shutdown
+			$parentShell	= $this->getParentShell();
+			if ($this->getParentShell() !== null) {
+				$this->getParentShell()->setChildShell(null);
+				//clean up
+				$this->getParentShell()->exeCmd("");
+			}
+			
+			//finish by throwing the errors. It is crucial that the parent
+			//is informed it no longer has a child, even though it may have failed 
+			//some part of the termination process. otherwise commands are still passed upstream
+			//and the initial shell will never get a chance to terminate
+			if ($childError !== null) {
+				throw $childError;
+			} elseif ($ownError !== null) {
+				throw $ownError;
+			}
+			
+			if ($this->getDebug() === true && $this->getParentShell() === null) {
+				$this->addDebugData("Completed Termination of shells");
+			}
+			
+			if ($parentShell !== null) {
+				//the user may still have some use of the parent
+				return $parentShell;
+			} else {
+				return null;
+			}
 		}
 	}
 	public function setChildShell($shellObj)
@@ -239,12 +243,12 @@ class Base
 	{
 		return $this->_defaultExecutionTime;
 	}
-	public function getBaseShellPID()
+	public function getProcessPID()
 	{
 		if ($this->getParentShell() !== null) {
-			return $this->getParentShell()->getBaseShellPID();
+			return $this->getParentShell()->getProcessPID();
 		} else {
-			return $this->_baseShellPPID;
+			return $this->_procPID;
 		}
 	}
 }

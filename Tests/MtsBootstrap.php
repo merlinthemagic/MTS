@@ -1,9 +1,6 @@
 <?php
 //© 2016 Martin Madsen
 
-//Tests that involve browser and remote shells can take a long time
-ini_set('max_execution_time', 180);
-
 //include MTS
 $curPath		= realpath(dirname(__FILE__));
 $dirs			= array_filter(explode(DIRECTORY_SEPARATOR, $curPath));
@@ -24,8 +21,6 @@ require_once $curPath . DIRECTORY_SEPARATOR . "MtsUnitTestDevices.php";
 \MtsUnitTestDevices::$connPort			= 22;
 //Leave $deviceCache true, unless you want each test to open its own connection
 \MtsUnitTestDevices::$deviceCache		= true;
-//Leave $deviceType empty, unless you are connecting to a ROS device, then set it to "ros"
-\MtsUnitTestDevices::$deviceType		= "";
 
 //if you want to test changing a non root shell to another user (maybe root), set the username and password here
 \MtsUnitTestDevices::$switchUsername	= "";

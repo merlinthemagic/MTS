@@ -5,11 +5,12 @@ namespace MTS\Common\Devices\Browsers;
 class Base
 {
 	protected $_keepAlive=false;
+	protected $_procPID=null;
 	protected $_initialized=null;
-	protected $_terminating=false;
 	protected $_windowObjs=array();
 	protected $_debug=false;
 	protected $_debugData=array();
+	protected $_defaultExecutionTime=30000;
 	
 	public function __construct()
 	{
@@ -102,18 +103,41 @@ class Base
 	}
 	public function terminate()
 	{
-		if ($this->_debug === true && $this->_terminating === false) {
-			$runTime	= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
-			$maxRunTime	= ini_get('max_execution_time');
-			if ($maxRunTime <= $runTime) {
-				//help debug when commands fail because the "max_execution_time" was not long enough
-				$this->addDebugData("Process terminated because 'max_execution_time': ".$maxRunTime.", was reached. Run time: " . $runTime);
+		if ($this->getInitialized() !== "terminating" && $this->getInitialized() !== false) {
+
+			if ($this->getDebug() === true) {
+				$exeTimeout		= \MTS\Factories::getActions()->getLocalPhpEnvironment()->getRemainingExecutionTime();
+				if ($exeTimeout == 0) {
+					//help debug when commands fail because the "max_execution_time" was not long enough
+					$this->addDebugData("Process terminated because 'max_execution_time' value: ".ini_get('max_execution_time').", was exceeded.");
+				}
 			}
+			
+			//PHP does not allow us to handle exceptions during shutdown. If termination fails for some reason
+			//the process may hang around taking up resources on the server. The only way to avoid this is to
+			//have a kill wait around to see if terminate completes its job. if not force the process termination
+			if ($this->getProcessPID() !== null) {
+				\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->getProcessPID(), 15);
+			}
+			
+			//terminate the browser
+			$this->browserTerminate();
 		}
-		$this->browserTerminate();
+	}
+	public function setDefaultExecutionTime($mSecs)
+	{
+		$this->_defaultExecutionTime	= intval($mSecs);
+	}
+	public function getDefaultExecutionTime()
+	{
+		return $this->_defaultExecutionTime;
 	}
 	public function getInitialized()
 	{
 		return $this->_initialized;
+	}
+	public function getProcessPID()
+	{
+		return $this->_procPID;
 	}
 }

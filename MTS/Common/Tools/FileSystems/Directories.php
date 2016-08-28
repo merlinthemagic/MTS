@@ -64,4 +64,13 @@ class Directories
 			}
 		}
 	}
+	public function setMode($dirObj, $mode)
+	{
+		$this->isDirectory($dirObj, true);
+	
+		$valid	= chmod($dirObj->getPathAsString(), $mode);
+		if ($valid === false) {
+			throw new \Exception(__METHOD__ . ">> Failed to set mode. Directory name: " . $dirObj->getPathAsString());
+		}
+	}
 }

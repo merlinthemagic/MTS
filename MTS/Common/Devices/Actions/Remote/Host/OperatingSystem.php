@@ -34,11 +34,11 @@ class OperatingSystem extends Base
 				//try to infer the OS type from the shell type.
 				if ($shellObj instanceof \MTS\Common\Devices\Shells\Bash) {
 	
-					$cmdString		= 'cat /etc/os-release';
+					$cmdString		= "cat /etc/os-release";
 					$cReturn		= $shellObj->exeCmd($cmdString);
 	
 					if (strlen($cReturn) == 0) {
-						$cmdString		= 'cat /etc/redhat-release';
+						$cmdString		= "cat /etc/redhat-release";
 						$cReturn		= $shellObj->exeCmd($cmdString);
 					}
 					

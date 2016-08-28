@@ -7,7 +7,6 @@ class PhantomJS extends Base implements BrowserInterface
 	private $_procPipe=null;
 	private $_cmdMaxTimeout=null;
 	private $_partialReturn="";
-	private $_phantomPID=null;
 	private $_debugFile=null;
 	
 	public function setPipes($procPipeObj)
@@ -18,21 +17,22 @@ class PhantomJS extends Base implements BrowserInterface
 	{
 		return $this->_procPipe;
 	}
-	public function getMaxExecutionTime()
+	private function getDebugFile()
 	{
-		//returns time until max_execution_time is exceeded
-		$curRunTime				= (\MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime() - MTS_EXECUTION_START);
-		//the -250 is the same as we add to the read time. That way phantomJS has time to return an error
-		$this->_cmdMaxTimeout	= (floor((ini_get('max_execution_time') - $curRunTime) * 1000) - 250);
-	
-		if ($this->_cmdMaxTimeout < 0) {
-			$this->_cmdMaxTimeout = 0;
-		}
-	
-		return $this->_cmdMaxTimeout;
+		return $this->_debugFile;
 	}
-	
-	//functions
+	public function getDebugFileContent()
+	{
+		$content	= "";
+		if ($this->getDebugFile() !== null) {
+			$exist	= \MTS\Factories::getFiles()->getFilesTool()->isFile($this->getDebugFile());
+			if ($exist === true) {
+				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getDebugFile());
+				$content	.= $this->getDebugFile()->getContent();
+			}
+		}
+		return $content;
+	}
 	public function setURL($windowObj, $url)
 	{
 		try {
@@ -358,14 +358,14 @@ class PhantomJS extends Base implements BrowserInterface
 		try {
 			$options					= array();
 			$options['debug']			= 0;
-			if ($this->_debug === true) {
-				if ($this->_debugFile === null) {
+			if ($this->getDebug() === true) {
+				if ($this->getDebugFile() === null) {
 					$this->_debugFile		= \MTS\Factories::getFiles()->getFile("debug", $this->getPipes()->getOutputFile()->getDirectory()->getPathAsString());
 					\MTS\Factories::getFiles()->getFilesTool()->create($this->_debugFile);
 				}
 				
 				$options['debug']		= 1;
-				$options['debugPath']	= $this->_debugFile->getPathAsString();
+				$options['debugPath']	= $this->getDebugFile()->getPathAsString();
 			}
 		
 			$result						= $this->getResultArray($this->browserExecute(null, 'setdebug', $options));
@@ -373,8 +373,8 @@ class PhantomJS extends Base implements BrowserInterface
 				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
 			} else {
 				//if we had a debug file delete it
-				if ($this->_debug === false && $this->_debugFile !== null) {
-					\MTS\Factories::getFiles()->getFilesTool()->delete($this->_debugFile);
+				if ($this->getDebug() === false && $this->getDebugFile() !== null) {
+					\MTS\Factories::getFiles()->getFilesTool()->delete($this->getDebugFile());
 					$this->_debugFile	= null;
 				}
 			}
@@ -398,8 +398,9 @@ class PhantomJS extends Base implements BrowserInterface
 				$options['stdOutPath']		= $this->getPipes()->getOutputFile()->getPathAsString();
 				$options['stdErrPath']		= $this->getPipes()->getErrorFile()->getPathAsString();
 				
-				//+ 2 so we can get return from successful termination
-				$options['terminationSecs']	= (ini_get('max_execution_time') + 2);
+				//+ 5 so we can get return from successful termination if shutdown by execution time exceeded.
+				$exeTimeout		= \MTS\Factories::getActions()->getLocalPhpEnvironment()->getRemainingExecutionTime();
+				$options['terminationSecs']	= floor($exeTimeout + 5);
 
 				//use the result
 				$result				= $this->getResultArray($this->browserExecute(null, 'initialize', $options));
@@ -407,7 +408,7 @@ class PhantomJS extends Base implements BrowserInterface
 					throw new \Exception(__METHOD__ . ">> Got code: " . $result['code']);
 				}
 	
-				$this->_phantomPID	= $result['PID'];
+				$this->_procPID	= $result['PID'];
 				$this->_initialized = true;
 	
 			} catch (\Exception $e) {
@@ -423,66 +424,37 @@ class PhantomJS extends Base implements BrowserInterface
 	
 	protected function browserTerminate()
 	{
-		if ($this->_terminating === false) {
-			$this->_terminating		= true;
+		try {
 			
-			$errObj	= null;
-			try {
-	
-				
-				if ($this->getInitialized() !== true) {
-					//in case the browser was setup, but no commands were
-					//issued, we will need to initiate before terminating
-					//this because without any data in stdIn the process is blocked
-					//and we get a zombie process
-					$this->browserInitialize();
-				}
-	
-				$result		= $this->getResultArray($this->browserExecute(null, 'terminate', null, 2000));
-				if ($result['code'] != 200) {
-					throw new \Exception(__METHOD__ . ">> Got code: " . $result['code']);
-				}
-	
-			} catch (\Exception $e) {
-					
-				switch($e->getCode()){
-					default;
-					$errObj	= $e;
-				}
-			}
-				
-			if ($this->_debug === true) {
-				//read the debug file content into the file, the phantom JS process waits a bit before really exiting
-				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->_debugFile);
-				$this->addDebugData("Debug File Start>>>\n" . $this->_debugFile->getContent() . "\n<<<Debug File End");
-			}
-				
-			if ($errObj !== null) {
-				//something went wrong, try force killing the process
-				try {
-						
-					if ($this->_debug === true) {
-						$this->addDebugData("Sending SIGTERM to process PID: " . $this->_phantomPID);
-					}
-					//will validate if the PID is even set
-					\MTS\Factories::getActions()->getLocalProcesses()->sigTermPid($this->_phantomPID);
-					
-					//success problem handled
-					$errObj	= null;
+			//in case the browser class was instanciated, but phantomJS was never initiated, 
+			//we will need to initiate before terminating, because without any data in stdIn the process is blocked
+			//and we get a zombie process
+			$this->browserInitialize();
 
-				} catch (\Exception $e) {
-					switch($e->getCode()){
-						default;
-						//nothing the error will be thrown
-					}
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				if ($this->getDebug() === true) {
+					$this->addDebugData("While Terminating, Initialize threw the following error: " . $e->getMessage());
 				}
-			}
-			
-			$this->_initialized	= false;
-			if ($errObj !== null) {
-				throw $errObj;
+				$this->_initialized = "terminating";
+				throw $e;
 			}
 		}
+		
+		//now we are ready to terminate
+		$this->_initialized = "terminating";
+
+		$result		= $this->getResultArray($this->browserExecute(null, 'terminate', null));
+		if ($result['code'] != 200) {
+			if ($this->getDebug() === true) {
+				$this->addDebugData("Termination command received the following return code: " . $result['code']);
+			}
+			throw new \Exception(__METHOD__ . ">> Got code: " . $result['code']);
+		}
+
+		$this->_initialized	= false;
+		$this->addDebugData("Browser terminated successfully.");
 	}
 	
 	//read and write
@@ -496,11 +468,9 @@ class PhantomJS extends Base implements BrowserInterface
 				$this->browserInitialize();
 			}
 	
-			$rTimeout	= $this->getMaxExecutionTime();
+			
 			if ($maxTimeout === null) {
-				$maxTimeout		= $rTimeout;
-			} elseif ($maxTimeout > $rTimeout && $cmd != 'terminate') {
-				throw new \Exception(__METHOD__ . ">> You must set a lower timeout value, the current max allowed is: " . $rTimeout . ", that is what remains of PHP max_execution_time");
+				$maxTimeout		= $this->getDefaultExecutionTime();
 			}
 			
 			$cmdArr						= array();
@@ -682,11 +652,10 @@ class PhantomJS extends Base implements BrowserInterface
 	
 		$return['etime']	= \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime();
 	
-		if ($this->_debug === true) {
-				
+		if ($this->_debug === true) {	
 			$debugData				= $return;
-			$debugData['cmdJson']	= $cmdJson;
 			$debugData['type']		= __FUNCTION__;
+			$debugData['cmdJson']	= $cmdJson;
 			$this->addDebugData($debugData);
 		}
 		return $return;
@@ -782,9 +751,9 @@ class PhantomJS extends Base implements BrowserInterface
 	
 		if ($this->_debug === true) {
 			$debugData				= $return;
+			$debugData['type']		= __FUNCTION__;
 			$debugData['cmdJson']	= $cmdJson;
 			$debugData['timeout']	= ($maxWait * 1000); //we want a milisec value
-			$debugData['type']		= __FUNCTION__;
 			$this->addDebugData($debugData);
 		}
 

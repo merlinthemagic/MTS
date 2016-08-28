@@ -68,7 +68,7 @@ class Remotehost extends Device
 							//and replace it with the new one
 							$this->_shellObj		= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->connectByUsername($shellObj, $username, $password, $this->getHostname(), $this->_shellPort);
 						} else {
-							throw new \Exception(__METHOD__ . ">> Not Handled for Type: " . $this->_mtShellType);
+							throw new \Exception(__METHOD__ . ">> Not Handled for Type: " . $this->_shellType);
 						}
 				
 					} else {

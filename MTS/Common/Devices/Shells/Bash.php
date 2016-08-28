@@ -184,7 +184,7 @@ class Bash extends Base
 					$ppData			= $this->exeCmd($strCmd);
 
 					if (preg_match("/\s([0-9]+)/", $ppData, $rawPPID) == 1) {
-						$this->_baseShellPPID	= $rawPPID[1];
+						$this->_procPID	= $rawPPID[1];
 					} else {
 						throw new \Exception(__METHOD__ . ">> Failed to get parent process id");
 					}
@@ -217,7 +217,7 @@ class Bash extends Base
 				$this->shellInitialize();
 				
 				//we cannot set status terminating until the init has completed
-				$this->_initialized	= 'terminating';
+				$this->_initialized	= "terminating";
 				
 				//make sure the last command is dead
 				$this->killLastProcess();

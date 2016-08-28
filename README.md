@@ -6,7 +6,7 @@ This project strives to give developers the tools that let them automate process
 
 My philosophy: 
 
-<b>People should only do interesting work, computers can push the buttons. If it can be automated it should be.</b>
+<b>People should only do interesting work. If it can be automated it should be automated.</b>
 
 # Installation:
 
@@ -529,5 +529,6 @@ try {
 echo "Start Debug<<<\n <code><pre> \n ";
 echo "Exception Message: " . $errMsg;
 print_r($browserObj->getDebugData());
+print_r($browserObj->getDebugFileContent());
 echo "\n </pre></code> \n >>>End Debug";
 ```

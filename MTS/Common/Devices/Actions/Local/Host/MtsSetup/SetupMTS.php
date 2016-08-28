@@ -413,7 +413,7 @@ class SetupMTS
 		if (php_sapi_name() == "cli") {
 			return '$userName';
 		} else {
-			return \MTS\Factories::getActions()->getLocalOperatingSystem()->getUsername();
+			return \MTS\Factories::getActions()->getLocalUsers()->getUsername();
 		}
 	}
 	protected function getReturnArray()

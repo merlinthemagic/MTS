@@ -24,6 +24,18 @@ class ProcessPipe
 	{
 		return $this->_errFile;
 	}
+	public function getInputPosition()
+	{
+		return $this->_stdinPos;
+	}
+	public function getOutputPosition()
+	{
+		return $this->_stdoutPos;
+	}
+	public function getErrorPosition()
+	{
+		return $this->_stderrPos;
+	}
 	public function setInputFile($fileObj)
 	{
 		\MTS\Factories::getFiles()->getFilesTool()->isFileObj($fileObj, true);
@@ -92,9 +104,9 @@ class ProcessPipe
 		try {
 			$content	= "";
 			$sizeBytes	= $this->getOutputFileSize();
-			if ($this->_stdoutPos < $sizeBytes) {
+			if ($this->getOutputPosition() < $sizeBytes) {
 				//new content avaliable
-				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getOutputFile(), $this->_stdoutPos, $sizeBytes);
+				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getOutputFile(), $this->getOutputPosition(), $sizeBytes);
 				$this->_stdoutPos	= $sizeBytes;
 				
 				$content	= $this->getOutputFile()->getContent();
@@ -115,9 +127,9 @@ class ProcessPipe
 		try {
 			$content	= "";
 			$sizeBytes	= $this->getErrorFileSize();
-			if ($this->_stderrPos < $sizeBytes) {
+			if ($this->getErrorPosition() < $sizeBytes) {
 				//new content avaliable
-				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getErrorFile(), $this->_stderrPos, $sizeBytes);
+				\MTS\Factories::getFiles()->getFilesTool()->getContent($this->getErrorFile(), $this->getErrorPosition(), $sizeBytes);
 				$this->_stderrPos	= $sizeBytes;
 					
 				$content	= $this->getErrorFile()->getContent();

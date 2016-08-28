@@ -45,7 +45,7 @@ class Files
 				fclose($fh);
 				if ($this->isFile($fileObj) === false) {
 					//failed to create
-					throw new \Exception(__METHOD__ . ">> Failed to Create File: " . $fileObj->getPathAsString());
+					throw new \Exception(__METHOD__ . ">> Failed to Create: " . $fileObj->getPathAsString());
 				}
 			}
 		}
@@ -53,9 +53,9 @@ class Files
 	public function delete($fileObj)
 	{
 		if ($this->isFile($fileObj) === true) {
-			$deleted	= unlink($fileObj->getPathAsString());
+			$deleted	= @unlink($fileObj->getPathAsString());
 			if ($deleted === false) {
-				throw new \Exception(__METHOD__ . ">> Failed to Delete for: " . $fileObj->getPathAsString());
+				throw new \Exception(__METHOD__ . ">> Failed to Delete: " . $fileObj->getPathAsString());
 			}
 		}
 	}
@@ -150,8 +150,16 @@ class Files
 					fclose($fh);
 					$fileObj->setContent($contents);
 				}
-					
 			}
+		}
+	}
+	public function setMode($fileObj, $mode)
+	{
+		$this->isFile($fileObj, true);
+		
+		$valid	= chmod($fileObj->getPathAsString(), $mode);
+		if ($valid === false) {
+			throw new \Exception(__METHOD__ . ">> Failed to set mode. File name: " . $fileObj->getPathAsString());
 		}
 	}
 }
