@@ -15,12 +15,13 @@ class Processes extends Base
 			throw new \Exception(__METHOD__ . ">> Invalid Input ");
 		}
 	}
-	public function sigTermPid($pid, $delay=null)
+	public function sigTermPid($pid, $delay=null, $timeOut=5)
 	{
 		if (preg_match("/^[0-9]+$/", $pid)) {
 			$this->_classStore['requestType']	= __FUNCTION__;
 			$this->_classStore['pid']			= $pid;
 			$this->_classStore['delay']			= $delay;
+			$this->_classStore['timeout']		= $timeOut;
 			return $this->execute();
 		} else {
 			throw new \Exception(__METHOD__ . ">> Invalid Input ");
@@ -94,6 +95,7 @@ class Processes extends Base
 		} elseif ($requestType == 'sigTermPid') {
 			$pid		= $this->_classStore['pid'];
 			$delay		= $this->_classStore['delay'];
+			$timeout	= $this->_classStore['timeout'];
 			$running	= $this->isRunningPid($pid);
 
 			if ($running === true) {
@@ -106,12 +108,21 @@ class Processes extends Base
 						
 						$cmdString	= $killExe->getPathAsString() . " -SIGTERM " . $pid;
 						$this->shellExec($cmdString);
-						usleep(100000);
-						$running	= $this->isRunningPid($pid);
-						if ($running === false) {
-							return;
-						} else {
-							throw new \Exception(__METHOD__ . ">> Failed to SIGTERM PID: " . $pid . ", still running");
+						
+						//process must have terminated by this time
+						$termTime	= time() + $timeout;
+						
+						//validate the process is dead
+						while (true) {
+							$running	= $this->isRunningPid($pid);
+							if ($running === true) {
+								if (time() >= $termTime) {
+									throw new \Exception(__METHOD__ . ">> Failed to SIGTERM PID: " . $pid . ", still running");
+								}
+							} else {
+								//process is dead
+								return;
+							}
 						}
 						
 					} else {

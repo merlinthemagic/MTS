@@ -463,12 +463,11 @@ class PhantomJS extends Base implements BrowserInterface
 		try {
 			
 			if ($this->getInitialized() === false) {
-				throw new \Exception(__METHOD__ . ">> Cannot execute command: ". $cmd . ". Browser has been terminated");
+				throw new \Exception(__METHOD__ . ">> Cannot execute commands. Browser has been terminated");
 			} elseif ($this->getInitialized() === null) {
 				$this->browserInitialize();
 			}
 	
-			
 			if ($maxTimeout === null) {
 				$maxTimeout		= $this->getDefaultExecutionTime();
 			}
