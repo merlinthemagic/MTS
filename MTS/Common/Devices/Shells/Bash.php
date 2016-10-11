@@ -299,6 +299,9 @@ class Bash extends Base
 						//found pattern match
 						$done	= true;
 					}
+				} else {
+					//wait for a tiny bit no need to saturate the CPU
+					usleep(10000);
 				}
 				if ($done === false && ($exeTime - $return['stime']) > $maxWaitMs) {
 					//timed out

@@ -726,7 +726,11 @@ class PhantomJS extends Base implements BrowserInterface
 							}
 						}
 					}
+				} else {
+					//wait for a tiny bit no need to saturate the CPU
+					usleep(10000);
 				}
+				
 				if ($done === false && ($exeTime - $return['stime']) > $maxWait) {
 					//timed out
 					$return['error']	= 'timeout';

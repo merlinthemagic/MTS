@@ -96,8 +96,6 @@ function exeCmd(cmdObj)
 				var eMsg	= "Unknown command: " + cmdObj.cmd.name;
 				writeError(null, eMsg);
 			}
-			
-			
 
 		} else if (cmdObj.cmd.name == "initialize") {
 			initialize(cmdObj);
@@ -194,8 +192,6 @@ function closeWindow(cmdObj)
 				}
 			}
 		}
-		
-		
 
 		cmdObj.result.code	= 200;
 		
@@ -274,25 +270,35 @@ function getElement(cmdObj)
 	        	
 	        	try {
 		        	
-		        	var result							= {};
-		        	result.tagName						= element.tagName;
+		        	var result			= {};
+		        	result.tagName		= element.tagName;
 		        	
 		        	//get value
-		        	if (typeof element.value != 'undefined') {
-		        		result.value					= element.value;
+		        	if (typeof element.value !== "undefined") {
+		        		result.value	= element.value;
+		    		} else {
+		    			result.value	= null;
 		    		}
 		        	//get type
-		        	if (typeof element.type != 'undefined') {
-		        		result.type						= element.type;
+		        	if (typeof element.type !== "undefined") {
+		        		result.type		= element.type;
+		    		} else {
+		    			result.type		= null;
+		    		}
+		        	//get text
+		        	if (typeof element.text !== "undefined") {
+		        		result.text		= element.text;
+		    		} else {
+		    			result.text		= null;
 		    		}
 		        	
 		        	//get location
-		        	result.location						= {};
-		        	var rect 							= element.getBoundingClientRect();
-		        	result.location.top					= rect.top;
-		        	result.location.bottom				= rect.bottom;
-		        	result.location.right				= rect.right;
-		        	result.location.left				= rect.left;
+		        	result.location				= {};
+		        	var rect 					= element.getBoundingClientRect();
+		        	result.location.top			= rect.top;
+		        	result.location.bottom		= rect.bottom;
+		        	result.location.right		= rect.right;
+		        	result.location.left		= rect.left;
     	
 		        	return JSON.stringify(result);
 		        	
