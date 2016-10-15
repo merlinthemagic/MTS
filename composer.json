@@ -1,0 +1,38 @@
+{
+  "name": "merlinthemagic/mts",
+  "description": "PHP Automation Tools",
+  "type": "library",
+  "homepage": "https://github.com/merlinthemagic/MTS",
+  "keywords": [
+    "PHP",
+    "Automation",
+    "Shell",
+    "Browser",
+    "PhantomJS",
+    "Bash"
+  ],
+  "authors": [
+    {
+      "name": "Martin Madsen",
+      "email": "dev@martinpetermadsen.com",
+      "role": "Developer",
+      "homepage": "https://github.com/merlinthemagic"
+    }
+  ],
+  "support": {
+    "issues": "https://github.com/merlinthemagic/MTS/issues"
+  },
+  "require": {
+	"php": ">=5.3.0"
+  },
+  "autoload": {
+	"files": [
+		"MTS/EnableMTS.php"
+	]
+  },
+  "scripts": {
+       "post-install-cmd": [
+            "php MtsSetup.php"
+        ]
+    }
+}
