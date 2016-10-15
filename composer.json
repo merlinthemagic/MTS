@@ -31,8 +31,7 @@
 	]
   },
   "scripts": {
-       "post-install-cmd": [
-            "php MtsSetup.php"
-        ]
+       "post-install-cmd": "php ./MtsSetup.php\n",
+       "post-update-cmd": "php ./MtsSetup.php\n"
     }
 }
