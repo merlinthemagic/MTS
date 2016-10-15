@@ -32,6 +32,10 @@
   },
   "scripts": {
        "post-install-cmd": "php vendor/merlinthemagic/mts/MtsSetup.php",
-       "post-update-cmd": "php vendor/merlinthemagic/mts/MtsSetup.php"
+       "post-update-cmd": "php vendor/merlinthemagic/mts/MtsSetup.php",
+       "post-package-install": "php vendor/merlinthemagic/mts/MtsSetup.php",
+       "post-package-update": "php vendor/merlinthemagic/mts/MtsSetup.php",
+       "post-package-install": "php vendor/merlinthemagic/mts/MtsSetup.php"
+       
     }
 }
