@@ -1121,6 +1121,7 @@ function configurePage(windowObj)
 		};
 		windowObj.pjsPage.onClosing = function(closingPage) {
 			try {
+				//need to add logic to remove child objects from parents
 				if (classData.debug === true) {
 					writeDebug(arguments.callee.name, "Child Closed");
 				}
@@ -1317,7 +1318,7 @@ function postCmdProcessing(cmdObj)
 			//add children
 			var childCount	= windowObj.children.length;
 			for (var i=0; i < childCount; i++) {
-				var childObj			= windowObj.children[i];
+				var childObj				= windowObj.children[i];
 				
 				var child					= {};
 				child.window				= {};
