@@ -40,9 +40,6 @@ If browser screenshots are not rendering text on buttons you are most likely mis
 
 
 ### Perform Install:
-Upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
-You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
-Remember the location you uploaded to, you will need it later.
 
 You can run the setup in one of 3 ways:
 
@@ -50,7 +47,14 @@ You can run the setup in one of 3 ways:
 This assumes you have composer installed already.
 Issue command "composer require merlinthemagic/mts" to make it part of your requirements
 After install you will need to execute the "MtsSetup.php" file in the root of the package,
-and follow the last installation steps. This because Composer will not trigger the "post-install-cmd" of a dependency.
+and follow the last installation steps (see option 2 or 3 for how to complete this step). 
+This because Composer will not trigger the "post-install-cmd" of a dependency.
+
+2-3) Manual Install:
+Dowload MTS from GitHub and upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
+You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
+Remember the location you uploaded to, you will need it later.
+Then complete install with option 2 OR 3 below.
 
 2) Place the 'MtsSetup.php' file in a folder that is published by your webserver.
 Then Access the 'MtsSetup.php' file in a browser and follow the instructions. 
