@@ -583,6 +583,23 @@ function sendKeyPresses(cmdObj)
 				|| kpLow == "pageup"
 				|| kpLow == "pagedown"
 				|| kpLow == "numlock"
+				|| kpLow == "tab"
+				|| kpLow == "braceleft"
+				|| kpLow == "braceright"
+				|| kpLow == "bracketleft"
+				|| kpLow == "bracketright"
+				|| kpLow == "f1"
+				|| kpLow == "f2"
+				|| kpLow == "f3"
+				|| kpLow == "f4"
+				|| kpLow == "f5"
+				|| kpLow == "f6"
+				|| kpLow == "f7"
+				|| kpLow == "f8"
+				|| kpLow == "f9"
+				|| kpLow == "f10"
+				|| kpLow == "f11"
+				|| kpLow == "f12"
 			) {
 				var result	= windowObj.pjsPage.sendEvent("keypress", windowObj.pjsPage.event.key[kp], modString);
 			} else {
