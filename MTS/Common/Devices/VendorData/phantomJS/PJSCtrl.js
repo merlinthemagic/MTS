@@ -569,6 +569,8 @@ function sendKeyPresses(cmdObj)
 			var modString	= 0;
 		}
 
+		//full list
+		//src: https://github.com/ariya/phantomjs/commit/cab2635e66d74b7e665c44400b8b20a8f225153a
 		for (var i=0; i < keyCount; i++) {
 			var kp		= cmdObj.cmd.options.keys[i];
 			var kpLow	= String(kp).toLowerCase();

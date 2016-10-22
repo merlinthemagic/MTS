@@ -51,7 +51,7 @@ and follow the last installation steps (see option 2 or 3 for how to complete th
 This because Composer will not trigger the "post-install-cmd" of a dependency.
 
 2-3) Manual Install:
-Dowload MTS from GitHub and upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
+Download MTS from GitHub and upload the MTS directory to a location on your server. i.e. /var/www/tools/. 
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
 Remember the location you uploaded to, you will need it later.
 Then complete install with option 2 OR 3 below.
@@ -297,6 +297,7 @@ $windowObj now contains a browser window with wikipedias website loaded.
 
 Lets do a search on wikipedia. Whenever we wish to manipulate an element we do so by using a css selector to identify it. Its really easy i.e.:
 if we want an element with id='mySearchBox' the selector would be: [id=mySearchBox]. Basically [attribute=value].
+Another example of a selector: a.myClass:nth-of-type(2) this selector takes all hyperlinks in class "myClass", then picks the second one.
 For more information see this <a href="https://www.w3.org/TR/css3-selectors/#selectors">article</a>.
 
 ```php
@@ -383,7 +384,7 @@ Type with the keyboard. Accepts two arguments: Keys to press and modifiers.
 
 Characters and numbers are accepted as a string. Special keys must be set as array, special keys:
 ```php
-$keys	= array('Enter', 'Space', 'Backspace', 'Delete', 'Up', 'Down', 'Left', 'Right', 'Pageup', 'Pagedown', 'Numlock');
+$keys	= array('Enter', 'Space', 'Backspace', 'Delete', 'Up', 'Down', 'Left', 'Right', 'Pageup', 'Pagedown', 'Numlock', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'BraceLeft', 'BraceRight', 'BracketLeft', 'BracketRight');
 ```
 Modifiers must  be set as array, modifier keys:
 ```php
@@ -408,7 +409,8 @@ $windowObj->sendKeyPresses($keys);
 
 Perform a mouse event on an element:
 
-All valid event options: "up", "down", "move", "leftclick", "leftdoubleclick", "rightclick", "rightdoubleclick"
+Valid event options: 
+"up", "down", "move", "leftclick", "leftdoubleclick", "rightclick", "rightdoubleclick"
 ```php
 //left click an element
 $selector	= "[id=someElementId]";
