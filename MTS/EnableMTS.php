@@ -33,7 +33,7 @@ if (defined('MTS_BASE_PATH') === false) {
 	//make sure the environment PATH variable is set, on nginx it is not.
 	if (getenv("PATH") === false) {
 		if (function_exists("exec") === true) {
-			putenv("PATH=" . exec("echo \$PATH"));
+			putenv("PATH=" . trim(exec("echo \$PATH")));
 		}
 	}
 	

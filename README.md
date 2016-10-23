@@ -384,7 +384,7 @@ Type with the keyboard. Accepts two arguments: Keys to press and modifiers.
 
 Characters and numbers are accepted as a string. Special keys must be set as array, special keys:
 ```php
-$keys	= array('Enter', 'Space', 'Backspace', 'Delete', 'Up', 'Down', 'Left', 'Right', 'Pageup', 'Pagedown', 'Numlock', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'BraceLeft', 'BraceRight', 'BracketLeft', 'BracketRight');
+$keys	= array('Enter', 'Tab', 'Space', 'Backspace', 'Delete', 'Up', 'Down', 'Left', 'Right', 'Pageup', 'Pagedown', 'Numlock', 'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12', 'BraceLeft', 'BraceRight', 'BracketLeft', 'BracketRight');
 ```
 Modifiers must  be set as array, modifier keys:
 ```php
