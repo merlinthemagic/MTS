@@ -18,29 +18,43 @@ RedHat Enterprise 6.
 Debian 8.
 Ubuntu 16.
 Arch 2016-05-01
+Windows 7 (Still Experimental)
 ```
 
 It should work against other versions as long as they are the same flavor of Linux.
 
-Mandetory packages:
+####Packages Linux:
 ```php
+Mandetory:
+
 php 5.3 (or newer)
 php must allow the "exec()" function
 python
 screen
 fontconfig
-```
 
-Optional packages:
-```php
+Optional:
 sudo
 msttcore-fonts
 ```
+
+####Packages Windows:
+```php
+Mandetory:
+
+php 5.3 (or newer)
+php must allow the "exec()" function
+php must allow the "popen()" function
+php must allow the "pclose()" function
+
+```
+
 If browser screenshots are not rendering text on buttons you are most likely missing the correct fonts. 
 
 
 ### Perform Install:
 
+#### Linux:
 You can run the setup in one of 3 ways:
 
 1) Composer Install.
@@ -68,11 +82,27 @@ In this case you cannot move the 'MtsSetup.php' file, it must be located in the 
 Once all dependencies have been resolved you will be provided a path that should be included in your
 project whenever you wish to call a function included in the MTS kit.
 
+#### Windows:
+You can run the setup in one of 2 ways:
+
+1) Composer Install.
+This assumes you have composer installed already.
+Issue command "composer require merlinthemagic/mts" to make it part of your requirements
+
+2) Manual Install:
+Download MTS from GitHub and upload the MTS directory to a location on your server. i.e. C:\inet\wwwroot\tools\. 
+You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
+
+Whenever you wish to use the MTS tools add:
+require_once "c:\path\to\mts\folder\EnableMTS.php";
+
+(replace c:\path\to\mts\folder with whatever path you chose to place the package in i.e. C:\inet\wwwroot\tools)
+
 # The Tools:
 
 ## The Shell:
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
-Would it not be nice if the built in functions were more verbose? 
+Would it not be nice if the built in functions were more verbose?
 
 More generally the shell in Linux is very powerful, but PHP never had a good way to interact with it.
 There are 100's of questions on sites like askubuntu.com or stackoverflow.com asking: my PHP script needs to run as root, how do I do it?
@@ -96,6 +126,9 @@ $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', fa
 
 //Sudo enabled, get a shell as root
 $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
+
+//For windows you can only specify powershell
+$shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('powershell');
 ```
 
 The $shellObj variable now contains a bash shell object you can issue commands against. Here are a few examples:
@@ -107,22 +140,32 @@ The $shellObj variable now contains a bash shell object you can issue commands a
   //If you got a root shell redhat <7 distributions will return:
   //Stopping sshd:                                             [  OK  ]
   //Starting sshd:                                             [  OK  ]
+  
+  //or on windows, list of all processes
+  $return1  = $shellObj->exeCmd('Get-Process');
+  echo $return1;
 ```
 
 ```php
+  //Linux
   $shellObj->exeCmd('cd /var/log/');
   $return1  = $shellObj->exeCmd('ls -sho --color=none');
   echo $return1; // list files in '/var/log/'
+  
+  //Windows
+  $shellObj->exeCmd("cd c:\\");
+  $return1  = $shellObj->exeCmd("dir");
+  echo $return1; // list files in 'c:\'
 ```
 
 ```php
   $return1  = $shellObj->exeCmd('whoami');
-  echo $return1; // root or apache or www-data or http
+  echo $return1; // root or apache or www-data or http or "nt authority\iusr"
 ```
 
 Read the segment 'Using commands' below for more detail. 
 
-### Root access:
+### Root access (Linux Only):
 
 Getting a shell with root privileges is easy and there are 2 ways to obtain it.
 

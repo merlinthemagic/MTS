@@ -40,7 +40,16 @@ class File
 		if ($dir !== null) {
 			$strPath	.= $dir->getPathAsString();
 		}
-		$strPath	.= DIRECTORY_SEPARATOR . $this->getName();
+		if (DIRECTORY_SEPARATOR == "/") {
+			$strPath	.= DIRECTORY_SEPARATOR . $this->getName();
+		} else {
+			//windows
+			if (strlen($strPath) > 0) {
+				$strPath	.= DIRECTORY_SEPARATOR . $this->getName();
+			} else {
+				$strPath	.= $this->getName();
+			}
+		}
 	
 		return $strPath;
 	}

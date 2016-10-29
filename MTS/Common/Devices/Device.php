@@ -6,8 +6,8 @@ class Device
 {
 	protected $_debug=false;
 	protected $_classStore=array();
-	protected $_shellObj=null;
-	protected $_browserObj=null;
+	protected $_shellObjs=array();
+	protected $_browserObjs=array();
 	
 	public function setDebug($bool)
 	{

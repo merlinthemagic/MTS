@@ -145,6 +145,75 @@ class Shell extends Base
 				} else {
 					throw new \Exception(__METHOD__ . ">> Not able to setup shell of type: " . $shellName);
 				}
+			} elseif ($osObj->getType() == "Windows") {
+				
+				if ($shellType == 'powershell') {
+
+					$powerShellExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('powershell');
+
+					if ($powerShellExe !== false) {
+
+						$fileFact		= \MTS\Factories::getFiles();
+						$pipeUuid		= uniqid();
+						$workPath		= $fileFact->getDirectory(MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHS_" . $pipeUuid);
+					
+						$stdIn			= $fileFact->getFile("stdIn", $workPath->getPathAsString());
+						$stdOut			= $fileFact->getFile("stdOut", $workPath->getPathAsString());
+						$stdErr			= $fileFact->getFile("stdErr", $workPath->getPathAsString());
+
+						//maybe have more efficient versions for v3, 4?
+						$psInit			= $fileFact->getVendorFile("psv1ctrl");
+						
+						//what is the equivilent of sudo on windows?
+						//if ($asRoot === true) {	
+						//}
+
+						$fileFact->getFilesTool()->create($stdIn);
+						$fileFact->getFilesTool()->create($stdOut);
+						$fileFact->getFilesTool()->create($stdErr);
+
+						$exeCmd		= "";
+						$exeCmd		.= $powerShellExe->getPathAsString() . " -executionPolicy Unrestricted " . $psInit->getPathAsString();
+						
+						//wait 2 sec before deleting the files
+						$strCmd		= "START \"seq\" cmd /c \"" . $exeCmd . " \"" .$workPath->getPathAsString()."\" && ping -n 2 127.0.0.1 && rmdir /s /q \"" .$workPath->getPathAsString(). "\"\"";
+						
+						//cannot get exec() to return without waiting for process to exit
+						//should get fixed since we dont want to depend on another function for MTS to run 
+						pclose(popen($strCmd, "r"));
+
+						//do we need some validation the shell was created?
+						$errObj	= null;
+						
+						if ($errObj === null) {
+								
+							//all good shell was created
+							$stdPipe	= $fileFact->getProcessPipe($stdIn, $stdOut, $stdErr);
+							
+							$powerShell	= new \MTS\Common\Devices\Shells\PowerShell();
+							$powerShell->setPipes($stdPipe);
+							$powerShell->setDebug($enableDebug);
+							
+							return $powerShell;
+							
+						} else {
+								
+							//clean up
+							$fileFact->getFilesTool()->delete($stdIn);
+							$fileFact->getFilesTool()->delete($stdOut);
+							$fileFact->getFilesTool()->delete($stdErr);
+							$fileFact->getDirectoriesTool()->delete($workPath);
+								
+							throw $errObj;
+						}
+
+					} else {
+						throw new \Exception(__METHOD__ . ">> Powershell not available on localHost");
+					}
+						
+				} else {
+					throw new \Exception(__METHOD__ . ">> Not able to setup shell of type: " . $shellName);
+				}
 			}
 		}
 		

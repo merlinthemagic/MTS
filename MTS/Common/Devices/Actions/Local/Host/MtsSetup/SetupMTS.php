@@ -103,7 +103,7 @@ class SetupMTS
 			$result					= $this->getReturnArray();
 			$result['msgHead']		= "Install Valid";
 			$result['msgLines'][]	= "Include this line when you need to use a shell or browser:";
-			$result['msgLines'][]	= "require_once \"".MTS_BASE_PATH . DIRECTORY_SEPARATOR . "MTS" . DIRECTORY_SEPARATOR . "EnableMTS.php\"";
+			$result['msgLines'][]	= "require_once \"".MTS_BASE_PATH . "MTS" . DIRECTORY_SEPARATOR . "EnableMTS.php\"";
 			
 			$results[]	= $result;
 		}

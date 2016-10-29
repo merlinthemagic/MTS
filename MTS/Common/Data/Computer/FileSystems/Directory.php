@@ -40,7 +40,17 @@ class Directory
 		if ($pDir !== null) {
 			$strPath	.= $pDir->getPathAsString();
 		}
-		$strPath	.= DIRECTORY_SEPARATOR . $this->getName();
+		
+		if (DIRECTORY_SEPARATOR == "/") {
+			$strPath	.= DIRECTORY_SEPARATOR . $this->getName();
+		} else {
+			//windows
+			if ($pDir !== null) {
+				$strPath	.= DIRECTORY_SEPARATOR . $this->getName();
+			} else {
+				$strPath	.= $this->getName();
+			}
+		}
 
 		return $strPath;
 	}

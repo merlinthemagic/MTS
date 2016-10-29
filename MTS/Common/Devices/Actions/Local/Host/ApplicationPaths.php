@@ -43,6 +43,25 @@ class ApplicationPaths extends Base
 					//no path exists
 					return false;
 				}
+				
+			} elseif ($osObj->getType() == "Windows") {
+
+				$cmdString		= "where ".$this->_classStore['appName']."";
+				$cReturn		= $this->shellExec($cmdString);
+				$path			= trim($cReturn);
+
+				if (strlen($path) > 0) {
+					
+					$dirs		= explode(DIRECTORY_SEPARATOR, $path);
+					$fileName	= array_pop($dirs);
+					$exePath	= implode(DIRECTORY_SEPARATOR, $dirs);
+					$fileObj	= \MTS\Factories::getFiles()->getFile($fileName, $exePath);
+					return $fileObj;
+					
+				} else {
+					//no path exists
+					return false;
+				}
 			}
 			
 		} elseif ($requestType == 'getSudoEnabled') {

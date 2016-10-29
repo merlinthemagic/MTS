@@ -76,8 +76,32 @@ class OperatingSystem extends Base
 							}
 						}
 					}
+				} elseif (preg_match("/^Windows\s/", $osDetail)) {
+					
+					$osType			= 'windows';
+					$osName			= 'windows';
+					
+					$cmdString		= "wmic OS get Name";
+					$cReturn		= $this->shellExec($cmdString);
+					preg_match("/Microsoft\s+Windows\s+(.+?)\|/i", $cReturn, $rawVersion);
+					if (isset($rawVersion[1])) {
+						$rawVer			= strtolower($rawVersion[1]);
+						$osMajorVersion	= $rawVer;
+					}
+					
+					$cmdString		= "wmic OS get OSArchitecture";
+					$cReturn		= $this->shellExec($cmdString);
+					preg_match("/(64-bit|32-bit)/i", $cReturn, $rawArch);
+					if (isset($rawArch[1])) {
+						$rawArch	= strtolower($rawArch[1]);
+						if ($rawArch == "64-bit") {
+							$osArch	= 64;
+						} elseif ($rawArch == "32-bit") {
+							$osArch	= 32;
+						}
+					}
 				}
-	
+
 				if (
 					$osType !== null
 					&& $osName !== null
@@ -96,6 +120,10 @@ class OperatingSystem extends Base
 							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\UbuntuBase();
 						} elseif ($osName == 'arch linux') {
 							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\ArchBase();
+						}
+					} elseif ($osType == 'windows') {
+						if ($osName == 'windows') {
+							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Microsoft\Windows();
 						}
 					}
 					

@@ -5,15 +5,24 @@ use \MTS\Common\Devices\Device;
 
 class Localhost extends Device
 {	
-	public function getBrowser($browserName='phantomjs')
+	public function getBrowser($browserName='default')
 	{
-		if ($this->_browserObj === null) {
-			$this->_browserObj	= \MTS\Factories::getActions()->getLocalBrowser()->getBrowser($browserName, $this->getDebug());
+		if ($browserName == 'default') {
+			if ($this->getOS()->getType() == "Linux") {
+				$browserName = 'phantomjs';
+			} else {
+				throw new \Exception("MTS browser does not support OS Type: " . $this->getOS()->getType());
+			}
 		}
-		return $this->_browserObj;
+		
+		$browserName	= trim(strtolower($browserName));
+		if (isset($this->_browserObjs[$browserName]) === false) {
+			$this->_browserObjs[$browserName]	= \MTS\Factories::getActions()->getLocalBrowser()->getBrowser($browserName, $this->getDebug());
+		}
+		return $this->_browserObjs[$browserName];
 	}
 	
-	public function getShell($shellType='bash', $asRoot=false, $width=1000, $height=1000)
+	public function getShell($shellName='default', $asRoot=false, $width=1000, $height=1000)
 	{
 		//$asRoot
 		//setting this to true will return a shell where commands are executed as root if sudo is available.
@@ -29,17 +38,27 @@ class Localhost extends Device
 		//by default a very large terminal to avoid most terminal breaks
 		
 		//if you do not have sudo setup you can still get a root shell by running the unpriviliged shellObj through this function later:
-		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shell, 'root', 'rootPassword');
-		if ($this->_shellObj === null) {
-			$this->_shellObj		= \MTS\Factories::getActions()->getLocalShell()->getShell($shellType, $asRoot, $this->getDebug(), $width, $height);
+		//\MTS\Factories::getActions()->getRemoteUsers()->changeShellUser($shellObj, 'root', 'rootPassword');
+		
+		if ($shellName == 'default') {
+			if ($this->getOS()->getType() == "Linux") {
+				$shellName = 'bash';
+			} elseif ($this->getOS()->getType() == "Windows") {
+				$shellName = 'powershell';
+			} else {
+				throw new \Exception("MTS shell does not support OS Type: " . $this->getOS()->getType());
+			}
 		}
-		return $this->_shellObj;
+		
+		$shellName	= trim(strtolower($shellName));
+		if (isset($this->_shellObjs[$shellName]) === false) {
+			$this->_shellObjs[$shellName]		= \MTS\Factories::getActions()->getLocalShell()->getShell($shellName, $asRoot, $this->getDebug(), $width, $height);
+		}
+		return $this->_shellObjs[$shellName];
 	}
 	public function getOS()
 	{
-		if (array_key_exists(__METHOD__, $this->_classStore) === false) {
-			$this->_classStore[__METHOD__]	= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
-		}
-		return $this->_classStore[__METHOD__];
+		//cached in action class
+		return \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 	}
 }

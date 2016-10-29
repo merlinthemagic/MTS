@@ -5,16 +5,16 @@
 
 //set the base path to MTS
 if (defined('MTS_BASE_PATH') === false) {
-	$mtsBasePath	= realpath(dirname(__FILE__));
+	$mtsBasePath	= realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR;
 	
 	//this is the directory used for all temp files. There seems to be a problem
 	//with file attributes being updated quickly enough when the underlying FS is tempFS like /tmp/
-	$mtsWorkPath	= $mtsBasePath . DIRECTORY_SEPARATOR . "WorkDirectory";
+	$mtsWorkPath	= $mtsBasePath . "WorkDirectory";
 	define('MTS_WORK_PATH', $mtsWorkPath);
 
-	$mtsClassPath	= rtrim($mtsBasePath, "MTS" . DIRECTORY_SEPARATOR);
+	$mtsClassPath	= realpath($mtsBasePath . "..") . DIRECTORY_SEPARATOR;
 	define('MTS_BASE_PATH', $mtsClassPath);
-	
+
 	//register the autoloader
 	spl_autoload_register(function($className)
 	{
@@ -22,7 +22,7 @@ if (defined('MTS_BASE_PATH') === false) {
 			$classPath		= array_values(array_filter(explode('\\', $className)));
 			$vendor			= $classPath[0];
 			if ($vendor == "MTS") {
-				$filePath	= MTS_BASE_PATH . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $className) . ".php";
+				$filePath	= MTS_BASE_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $className) . ".php";
 				if (is_readable($filePath)) {
 					require_once $filePath;
 				}
@@ -30,13 +30,24 @@ if (defined('MTS_BASE_PATH') === false) {
 		}
 	});
 	
-	//make sure the environment PATH variable is set, on nginx it is not.
-	if (getenv("PATH") === false) {
-		if (function_exists("exec") === true) {
-			putenv("PATH=" . trim(exec("echo \$PATH")));
-		}
+	//prep the environment
+	mtsEnvironmentalSetup();
+}
+
+function mtsEnvironmentalSetup()
+{
+	$osObj	= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
+	if ($osObj->getType() != "Linux" && $osObj->getType() != "Windows") {
+		throw new \Exception("MTS does not support OS Type: " . $osObj->getType());
 	}
 	
 	//set execution start microtime
 	define('MTS_EXECUTION_START', \MTS\Factories::getTime()->getEpochTool()->getCurrentMiliTime());
+	
+	if (getenv("PATH") === false) {
+		//make sure the environment PATH variable is set, on nginx it is not.
+		if (function_exists("exec") === true) {
+			putenv("PATH=" . trim(exec("echo \$PATH")));
+		}
+	}
 }

@@ -59,6 +59,26 @@ class Processes extends Base
 				}  else {
 					throw new \Exception(__METHOD__ . ">> Cannot Determine if PID: " . $pid . " is running, missing application 'kill'");
 				}
+			} elseif ($osObj->getType() == "Windows") {
+
+				$cmdString	= "tasklist";
+				$rData		= $this->shellExec($cmdString);
+				$lines		= explode("\n", $rData);
+				
+				if (count($lines) > 1) {
+					foreach ($lines as $line) {
+						if (preg_match("/(.+)\s+([0-9]+)\s+([0-9]+)\s+(.*)/", $line, $lineParts) == 1) {
+							if ($lineParts[2] == $pid) {
+								//found the pid alive
+								return true;
+							}
+						}
+					}
+					
+					return false;
+				} else {
+					//command did not execute, at the very least we should have the 2 header lines
+				}
 			}
 
 		} elseif ($requestType == 'createSleepProcess') {
@@ -131,7 +151,39 @@ class Processes extends Base
 						$this->shellExec($cmdString);
 						return;
 					}
+				} elseif ($osObj->getType() == "Windows") {
+
+					if ($delay === null) {
+						
+						$cmdString	= "Taskkill /PID ".$pid." /F ";
+						$this->shellExec($cmdString);
+						
+						//process must have terminated by this time
+						$termTime	= time() + $timeout;
+						
+						//validate the process is dead
+						while (true) {
+							$running	= $this->isRunningPid($pid);
+							if ($running === true) {
+								if (time() >= $termTime) {
+									throw new \Exception(__METHOD__ . ">> Failed to SIGTERM PID: " . $pid . ", still running");
+								}
+							} else {
+								//process is dead
+								return;
+							}
+						}
+						
+					} else {
+						
+						$cmdString	= "START \"seq\" cmd /c \"ping -n " .$delay. " 127.0.0.1 && Taskkill /PID ".$pid." /F\"";
+						//cannot get exec() to return without waiting for process to exit
+						//should get fixed since we dont want to depend on another function for MTS to run
+						pclose(popen($cmdString, "r"));
+						return;
+					}
 				}
+
 			} else {
 				//pid not running, nothing to do
 				return;
