@@ -176,7 +176,7 @@ class Shell extends Base
 						$exeCmd		.= $powerShellExe->getPathAsString() . " -executionPolicy Unrestricted " . $psInit->getPathAsString();
 						
 						//wait 2 sec before deleting the files
-						$strCmd		= "START \"seq\" cmd /c \"" . $exeCmd . " \"" .$workPath->getPathAsString()."\" && ping -n 2 127.0.0.1 && rmdir /s /q \"" .$workPath->getPathAsString(). "\"\"";
+						$strCmd		= "START \"seq\" cmd /c \"mode con cols=".$width." && " . $exeCmd . " \"" .$workPath->getPathAsString()."\" && ping -n 2 127.0.0.1 && rmdir /s /q \"" .$workPath->getPathAsString(). "\"\"";
 						
 						//cannot get exec() to return without waiting for process to exit
 						//should get fixed since we dont want to depend on another function for MTS to run 
