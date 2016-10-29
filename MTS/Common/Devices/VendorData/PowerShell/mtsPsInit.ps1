@@ -62,7 +62,8 @@ DO {
 					Write-Host "Processing Command Name: $cName";
 				}
 				
-				$cmdStr	= [string]$nextCmdObj.cmd.string;
+				$b64CmdStr	= [string]$nextCmdObj.cmd.string;
+				$cmdStr		= [string][System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($b64CmdStr));
 				
 				if ($cmdStr -eq "mtsTerminate") {
 				

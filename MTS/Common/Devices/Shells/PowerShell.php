@@ -176,7 +176,7 @@ class PowerShell extends Base
 		$cmdArr['cmd']				= array();
 		$cmdArr['cmd']['id']		= uniqid();
 		$cmdArr['cmd']['timeout']	= $timeout;
-		$cmdArr['cmd']['string']	= $strCmd;
+		$cmdArr['cmd']['string']	= base64_encode($strCmd);
 		
 		$cmdJson	= json_encode($cmdArr, JSON_PRETTY_PRINT | JSON_FORCE_OBJECT);
 		$wStr		=  "cmdStart>>>" . base64_encode($cmdJson) . "<<<cmdEnd";
