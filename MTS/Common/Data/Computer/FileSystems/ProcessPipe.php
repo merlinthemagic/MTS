@@ -4,6 +4,8 @@ namespace MTS\Common\Data\Computer\FileSystems;
 
 class ProcessPipe
 {
+	private $_parentProc=null;
+	private $_inType=null;
 	private $_inFile=null;
 	private $_outFile=null;
 	private $_errFile=null;
@@ -11,6 +13,14 @@ class ProcessPipe
 	private $_stdinPos=0;
 	private $_stdoutPos=0;
 	private $_stderrPos=0;
+	
+	public function __destruct()
+	{
+		if ($this->_inType == "resource") {
+			fclose($this->_inFile);
+			proc_close($this->_parentProc);
+		}
+	}
 
 	public function getInputFile()
 	{
@@ -36,10 +46,19 @@ class ProcessPipe
 	{
 		return $this->_stderrPos;
 	}
-	public function setInputFile($fileObj)
+	public function setInputFile($pipeObj, $parentProc=null)
 	{
-		\MTS\Factories::getFiles()->getFilesTool()->isFileObj($fileObj, true);
-		$this->_inFile	= $fileObj;
+		$isFile	= \MTS\Factories::getFiles()->getFilesTool()->isFileObj($pipeObj, false);
+		if ($isFile === true) {
+			$this->_inType	= 'file';
+			$this->_inFile	= $pipeObj;
+		} elseif (is_resource($pipeObj) === true) {
+			$this->_inType		= 'resource';
+			$this->_inFile		= $pipeObj;
+			$this->_parentProc	= $parentProc;
+		} else {
+			throw new \Exception(__METHOD__ . ">> Input pipe is invalid");
+		}
 	}
 	public function setOutputFile($fileObj)
 	{
@@ -88,10 +107,15 @@ class ProcessPipe
 	public function strWrite($data)
 	{
 		try {
-			\MTS\Factories::getFiles()->getFilesTool()->isFile($this->getInputFile(), true);
-			$this->getInputFile()->setContent($data);
-			\MTS\Factories::getFiles()->getFilesTool()->appendContent($this->getInputFile());
-			$this->getInputFile()->setContent(null);
+			if ($this->_inType == "file") {
+				\MTS\Factories::getFiles()->getFilesTool()->isFile($this->getInputFile(), true);
+				$this->getInputFile()->setContent($data);
+				\MTS\Factories::getFiles()->getFilesTool()->appendContent($this->getInputFile());
+				$this->getInputFile()->setContent(null);
+			} elseif ($this->_inType == "resource") {
+				fwrite($this->getInputFile(), $data);
+			}
+			
 		} catch (\Exception $e) {
 			switch($e->getCode()){
 				default;

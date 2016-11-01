@@ -47,6 +47,7 @@ php 5.3 (or newer)
 php must allow the "exec()" function
 php must allow the "popen()" function
 php must allow the "pclose()" function
+php must allow the "proc_open()" function
 
 ```
 
@@ -128,7 +129,7 @@ $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', fa
 //Sudo enabled, get a shell as root
 $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('bash', true);
 
-//For windows you can only specify powershell
+//For windows you can specify powershell or cmd
 $shellObj    = \MTS\Factories::getDevices()->getLocalHost()->getShell('powershell');
 ```
 

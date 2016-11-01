@@ -21,6 +21,7 @@ class Shell extends Base
 		$osObj			= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
 		
 		if ($requestType == 'getShell') {
+			
 			$shellType		= strtolower($this->_classStore['shellType']);
 			$asRoot			= $this->_classStore['asRoot'];
 			$enableDebug	= $this->_classStore['enableDebug'];
@@ -160,10 +161,6 @@ class Shell extends Base
 
 						//maybe have more efficient versions for v3, 4?
 						$psInit			= $fileFact->getVendorFile("psv1ctrl");
-						
-						//what is the equivilent of sudo on windows?
-						//if ($asRoot === true) {	
-						//}
 
 						$fileFact->getFilesTool()->create($stdIn);
 						$fileFact->getFilesTool()->create($stdOut);
@@ -203,6 +200,74 @@ class Shell extends Base
 
 					} else {
 						throw new \Exception(__METHOD__ . ">> Powershell not available on localHost");
+					}
+						
+				} elseif ($shellType == 'cmd') {
+
+					$cmdExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('cmd');
+					if ($cmdExe !== false) {
+
+						$fileFact		= \MTS\Factories::getFiles();
+						$pipeUuid		= uniqid();
+						$workPath		= $fileFact->getDirectory(MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHS_" . $pipeUuid);
+					
+						$stdIn			= $fileFact->getFile("stdIn", $workPath->getPathAsString());
+						$stdOut			= $fileFact->getFile("stdOut", $workPath->getPathAsString());
+						$stdErr			= $fileFact->getFile("stdErr", $workPath->getPathAsString());
+
+						$fileFact->getFilesTool()->create($stdOut);
+						$fileFact->getFilesTool()->create($stdErr);
+
+						$errObj	= null;
+						try {
+							
+							$dPipes = array(
+									0 => array("pipe", "r"),
+									1 => array("file", $stdOut->getPathAsString(), "w"),
+									2 => array("file", $stdErr->getPathAsString(), "a")
+							);
+								
+							$parentProc = proc_open($cmdExe->getPathAsString(), $dPipes, $pipes);
+								
+							if (is_resource($parentProc)) {
+								stream_set_blocking($pipes[0], 0);
+
+								//set the terminal width
+								$cmd 	="mode con cols=".$width."\r\n";
+								fwrite($pipes[0], $cmd);
+
+							} else {
+								throw new \Exception(__METHOD__ . ">> Failed to start shell process on localHost");
+							}
+						
+						} catch (\Exception $e) {
+							switch($e->getCode()){
+								default;
+								$errObj = $e;
+							}
+						}
+
+
+						if ($errObj === null) {
+								
+							//all good shell was created
+							$stdPipe	= $fileFact->getProcessPipe(null, $stdOut, $stdErr);
+							$stdPipe->setInputFile($pipes[0], $parentProc);
+							
+							$cmdShell	= new \MTS\Common\Devices\Shells\Cmd();
+							$cmdShell->setPipes($stdPipe);
+							$cmdShell->setDebug($enableDebug);
+							
+							return $cmdShell;
+							
+						} else {
+							//clean up
+							$fileFact->getDirectoriesTool()->delete($workPath);
+							throw $errObj;
+						}
+
+					} else {
+						throw new \Exception(__METHOD__ . ">> CMD not available on localHost");
 					}
 						
 				} else {
