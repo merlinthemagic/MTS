@@ -24,6 +24,14 @@ class PowerShell extends Base
 	}
 	public function getTerminalWidth()
 	{
+		$strCmd		= "mode con";
+		$reData		= $this->exeCmd($strCmd);
+		if (preg_match("/Columns:\s+([0-9]+)/", $reData, $rawColCount)) {
+			$this->columnCount	=  $rawColCount[1];
+		} else {
+			throw new \Exception(__METHOD__ . ">> Failed to get terminal width");
+		}
+		
 		return $this->columnCount;
 	}
 	protected function shellStrExecute($strCmd, $delimitor, $maxTimeout)

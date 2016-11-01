@@ -17,8 +17,8 @@ class ProcessPipe
 	public function __destruct()
 	{
 		if ($this->_inType == "resource") {
-			fclose($this->_inFile);
-			proc_close($this->_parentProc);
+			@fclose($this->_inFile);
+			@proc_close($this->_parentProc);
 		}
 	}
 
