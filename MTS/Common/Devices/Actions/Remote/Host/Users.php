@@ -28,14 +28,14 @@ class Users extends Base
 		
 		if ($requestType == 'changeUser') {
 
-			$currentUser	= $this->getUsername($shellObj);
+			//remove the username and password for object vars
+			//they are too sensetive to keep around in case the object is dumped
 			$username		= $this->_classStore['username'];
 			$password		= $this->_classStore['password'];
-			
-			//remove the username and password, they are too sensetive to keep around in case the object is dumped
 			unset($this->_classStore['username']);
 			unset($this->_classStore['password']);
 			
+			$currentUser	= $this->getUsername($shellObj);
 			if (strtolower($currentUser) != strtolower($username)) {
 				
 				$childShell		= null;
@@ -94,6 +94,80 @@ class Users extends Base
 							throw new \Exception(__METHOD__ . ">> Error: Changing user to: ".$username.", got logged in as: " . $newUser);
 						}
 					}
+					
+				} elseif ($osObj->getType() == "Windows") {
+
+					$pShellObj	= $shellObj->getParentShell();
+					if ($pShellObj === null) {
+						
+						$powerShellExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('powershell');
+						$fileFact		= \MTS\Factories::getFiles();
+						$pipeUuid		= uniqid();
+						$workPath		= $fileFact->getDirectory(MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHS_" . $pipeUuid);
+							
+						$stdIn			= $fileFact->getFile("stdIn", $workPath->getPathAsString());
+						$stdOut			= $fileFact->getFile("stdOut", $workPath->getPathAsString());
+						$stdErr			= $fileFact->getFile("stdErr", $workPath->getPathAsString());
+						
+						$psInit			= $fileFact->getVendorFile("psv1ctrl");
+
+						$fileFact->getFilesTool()->create($stdIn);
+						$fileFact->getFilesTool()->create($stdOut);
+						$fileFact->getFilesTool()->create($stdErr);
+				
+						//the files are not cleaned up after exit
+						//$changeCmd		= "Start-Process -FilePath \"".$powerShellExe->getPathAsString()."\" -Credential \$mtsChangeCred -LoadUserProfile -ArgumentList \"-executionPolicy Unrestricted\", '\"" . $psInit->getPathAsString() . "\" \"".$workPath->getPathAsString()."\"'";
+						//$changeCmd		= "Start-Process -FilePath \"".$powerShellExe->getPathAsString()."\" -ArgumentList \"-executionPolicy Unrestricted\", '\"" . $psInit->getPathAsString() . "\" \"".$workPath->getPathAsString()."\"'";						
+						
+						$credCmd		= "new-object -typename System.Management.Automation.PSCredential -argumentlist '".$username."', $(ConvertTo-SecureString '".$password."' -AsPlainText -Force)";
+						$argList		= "\"-executionPolicy Unrestricted\", '\"" . $psInit->getPathAsString() . "\" \"".$workPath->getPathAsString()."\"'";
+						
+						//remove -Wait whe you get this working on IIS
+						$changeCmd		= "Start-Process -Wait -FilePath \"".$powerShellExe->getPathAsString()."\" -Credential $(".$credCmd.") -ArgumentList (".$argList.")";
+						$cReturn		= trim($shellObj->exeCmd($changeCmd));
+
+						if (preg_match("/(logon failure|access is denied)/i", $cReturn, $match) == 1) {
+							//clean up and exit
+							$fileFact->getFilesTool()->delete($stdIn);
+							$fileFact->getFilesTool()->delete($stdOut);
+							$fileFact->getFilesTool()->delete($stdErr);
+							$fileFact->getDirectoriesTool()->delete($workPath);
+							
+							$reason	= trim(strtolower($match[1]));
+							
+							if ($reason == "access is denied") {
+								throw new \Exception(__METHOD__ . ">> Server does not allow change of user");
+							} else {
+								throw new \Exception(__METHOD__ . ">> Invalid credentials");
+							}
+
+						} else {
+							
+							$newUser	= $this->getUsername($childShell);
+							if (strtolower($username) == strtolower($newUser)) {
+								//all good shell was created
+								$stdPipe	= $fileFact->getProcessPipe($stdIn, $stdOut, $stdErr);
+								$childShell	= new \MTS\Common\Devices\Shells\PowerShell();
+								$childShell->setPipes($stdPipe);
+								$shellObj->setChildShell($childShell);
+								
+								//user was successfully changed
+								return $childShell;
+								
+							} else {
+								
+								$fileFact->getFilesTool()->delete($stdIn);
+								$fileFact->getFilesTool()->delete($stdOut);
+								$fileFact->getFilesTool()->delete($stdErr);
+								$fileFact->getDirectoriesTool()->delete($workPath);
+								
+								throw new \Exception(__METHOD__ . ">> Error: Changing user to: ".$username.", got logged in as: " . $newUser . "");
+							}
+						}
+						
+					} else {
+						throw new \Exception(__METHOD__ . ">> Not Handled for Remote Powershells yet");
+					}
 				}
 				
 			} else {
@@ -113,6 +187,11 @@ class Users extends Base
 				$reData		= $shellObj->exeCmd("", "\[(.*?)\>");
 				if (preg_match("/\[(.*?)\@(.*?)\]\s\>/", $reData, $rawUser) == 1) {
 					return trim($rawUser[1]);
+				}
+			} elseif ($osObj->getType() == "Windows") {
+				$username			= trim($shellObj->exeCmd("whoami"));
+				if (strlen($username) > 0) {
+					return $username;
 				}
 			}
 		}

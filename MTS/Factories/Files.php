@@ -78,7 +78,13 @@ class Files
 	public function getVendorFile($name)
 	{
 		$name	= strtolower($name);
-		if ($name == "pjslinux64") {
+		if ($name == "pjswindows64") {
+			$vendorPath		= $this->getDirectory(MTS_BASE_PATH . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
+			return $this->getFile("PJSWindows.exe", $vendorPath->getPathAsString());
+		} elseif ($name == "pjswindows32") {
+			$vendorPath		= $this->getDirectory(MTS_BASE_PATH . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
+			return $this->getFile("PJSWindows.exe", $vendorPath->getPathAsString());
+		} elseif ($name == "pjslinux64") {
 			$vendorPath		= $this->getDirectory(MTS_BASE_PATH . "MTS". DIRECTORY_SEPARATOR ."Common". DIRECTORY_SEPARATOR ."Devices". DIRECTORY_SEPARATOR ."VendorData". DIRECTORY_SEPARATOR ."phantomJS");
 			return $this->getFile("PJSLinux64", $vendorPath->getPathAsString());
 		} elseif ($name == "pjslinux32") {

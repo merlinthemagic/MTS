@@ -99,6 +99,29 @@ class OperatingSystem extends Base
 					if (preg_match("/version:\s([0-9]+)(\.[0-9]+)?/", $reData, $rawAttr) == 1) {
 						$osMajorVersion			= trim($rawAttr[1]);
 					}
+					
+				} elseif ($shellObj instanceof \MTS\Common\Devices\Shells\PowerShell) {
+					
+					$osType				= 'windows';
+					$osName				= 'windows';
+					
+					$cmdString		= '(Get-WmiObject -class Win32_OperatingSystem).Name';
+					$reData			= $shellObj->exeCmd($cmdString);
+					
+					preg_match("/Microsoft\s+Windows\s+(.+?)\|/i", $reData, $rawVersion);
+					if (isset($rawVersion[1])) {
+						$rawVer			= strtolower($rawVersion[1]);
+						$osMajorVersion	= $rawVer;
+					}
+					
+					$cmdString2		= '(Get-WmiObject -class Win32_OperatingSystem).OSArchitecture';
+					$reData2		= $shellObj->exeCmd($cmdString2);
+					
+					preg_match("/(64-bit|32-bit)/i", $reData2, $rawArch);
+					if (isset($rawArch[1])) {
+						$rawArch	= strtolower($rawArch[1]);
+						$osArch		= $rawArch;
+					}
 				}
 				
 				if (
@@ -123,6 +146,10 @@ class OperatingSystem extends Base
 					} elseif ($osType == 'mikrotik') {
 						if ($osName == 'routeros') {
 							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Mikrotik\RouterOSBase();
+						}
+					} elseif ($osType == 'windows') {
+						if ($osName == 'windows') {
+							$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Microsoft\Windows();
 						}
 					}
 				

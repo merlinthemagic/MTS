@@ -2,20 +2,18 @@
 var system 					= require('system');
 var fSystem					= require('fs');
 var webpage					= require('webpage');
+var initArgs				= system.args;
 
-//this is the time phantomJS will forcefully exit. It is
-//updated during initialize(), which must be called within 10 secs
-//this ensures (as long as we get past init) we dont get zombie processes that are never terminated
-//getting past init can be completely solved if phantomJS could somehow get access to the stdIn file location
 var terminationEpoch		= (getEpoch(false) + 10);
-
 var classData				= {};
+classData.workPath			= initArgs[1];
 classData.stdIn				= {};
-classData.stdIn.path		= "";
+classData.stdIn.path		= classData.workPath + "stdIn";
+
 classData.cmdStack			= [];
 classData.initialized		= false;
 classData.debug				= false;
-classData.debugPath			= null;
+classData.debugPath			= "C:\inetpub\wwwroot\Tools\MTS\WorkDirectory\debug.txt"; //null;
 classData.loadWaitInterval	= 500;
 classData.windows			= [];
 

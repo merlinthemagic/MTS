@@ -172,11 +172,11 @@ class Shell extends Base
 						$fileFact->getFilesTool()->create($stdOut);
 						$fileFact->getFilesTool()->create($stdErr);
 
-						$exeCmd		= "";
-						$exeCmd		.= $powerShellExe->getPathAsString() . " -executionPolicy Unrestricted " . $psInit->getPathAsString();
+						$exeCmd		= $powerShellExe->getPathAsString() . " -executionPolicy Unrestricted " . $psInit->getPathAsString();
 						
+						//the cmd width dictates the powershell width so we set it here
 						//wait 2 sec before deleting the files
-						$strCmd		= "START \"seq\" cmd /c \"mode con cols=".$width." && " . $exeCmd . " \"" .$workPath->getPathAsString()."\" && ping -n 2 127.0.0.1 && rmdir /s /q \"" .$workPath->getPathAsString(). "\"\"";
+						$strCmd		= "START \"seq\" cmd /c \"mode con cols=".$width." && " . $exeCmd . " \"" .$workPath->getPathAsString()."\" & ping -n 2 127.0.0.1 && rmdir /s /q \"" .$workPath->getPathAsString(). "\"\"";
 						
 						//cannot get exec() to return without waiting for process to exit
 						//should get fixed since we dont want to depend on another function for MTS to run 

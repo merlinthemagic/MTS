@@ -27,6 +27,8 @@ Clear-Content "$stdErr";
 add-type -assembly system.web.extensions;
 $serObj	= new-object system.web.script.serialization.javascriptSerializer;
 
+
+
 $i=0;
 DO {
 	$i++;
@@ -56,11 +58,6 @@ DO {
 		
 				$nextCmdObj	= $cmdObj;
 				$cmdObj		= "";
-				
-				if ($debug -eq 1) {
-					$cName	= [string]$nextCmdObj.cmd.name;
-					Write-Host "Processing Command Name: $cName";
-				}
 				
 				$b64CmdStr	= [string]$nextCmdObj.cmd.string;
 				$cmdStr		= [string][System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($b64CmdStr));
@@ -95,11 +92,6 @@ DO {
 				#enforce UTF8 encoding or powershell defaults to the system's current ANSI code page.
 				"cmdReturnStart>>>$rJsonEnc<<<cmdReturnEnd" | Out-File -Append "$stdOut" -Encoding UTF8;
 
-				if ($debug -eq 1) {
-					$cName	= [string]$nextCmdObj.cmd.name;
-					Write-Host "Completed Command Name: $cName";
-				}
-				
 				#free up mem
 				$nextCmdObj	= "";
 				$rJson		= "";
@@ -114,9 +106,12 @@ DO {
 	} catch {
 	
 		$rData		= $_.Exception.Message;
-		#$rEncData	= [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($rData));
-		$rEncData	= $rData;
+		$rEncData	= [System.Convert]::ToBase64String([System.Text.Encoding]::UTF8.GetBytes($rData));
 		"errorStart>>>$rEncData<<<errorEnd" | Out-File -Append "$stdErr" -Encoding UTF8;
+		
+		#process error, exit
+		Start-Sleep -s 2;
+		$run		= 0;
 	}
 
 } While ($run)

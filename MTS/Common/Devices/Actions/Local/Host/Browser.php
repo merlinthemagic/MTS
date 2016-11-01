@@ -42,7 +42,7 @@ class Browser extends Base
 					$stdOut			= $fileFact->getFile("stdOut", $workPath->getPathAsString());
 					$stdErr			= $fileFact->getFile("stdErr", $workPath->getPathAsString());
 					
-					$exeCmd			= "\"" . $pjsBin->getPathAsString() . "\" --local-storage-path=\"".$workPath->getPathAsString()."\" --web-security=false --local-to-remote-url-access=true --ignore-ssl-errors=true --load-images=true \"" . $pjsCtrl->getPathAsString() . "\"";
+					$exeCmd			= "\"" . $pjsBin->getPathAsString() . "\" --local-storage-path=\"".$workPath->getPathAsString()."\" --web-security=false --local-to-remote-url-access=true --ignore-ssl-errors=true --load-images=true \"" . $pjsCtrl->getPathAsString() . "\" \"".$workPath->getPathAsString() . DIRECTORY_SEPARATOR . "\"";
 					
 					//on RHEL 7 the xterm TERM will show a duplicate PS1 command that cannot be removed, also added a sleep 2s before deleting the std files, that way the files exist on the termination read / write
 					$term			= 'vt100';
@@ -93,7 +93,7 @@ class Browser extends Base
 					
 					if ($errObj === null) {
 					
-						//all good shell was created
+						//all good browser was created
 						$stdPipe	= $fileFact->getProcessPipe($stdIn, $stdOut, $stdErr);
 							
 						$pjsBrowser	= new \MTS\Common\Devices\Browsers\PhantomJS();
@@ -103,6 +103,7 @@ class Browser extends Base
 						$pjsBrowser->setDebug($enableDebug);
 					
 						return $pjsBrowser;
+						
 					} else {
 							
 						//clean up
@@ -115,7 +116,73 @@ class Browser extends Base
 					}
 						
 				} else {
-					throw new \Exception(__METHOD__ . ">> Not able to setup shell of type: " . $shellName);
+					throw new \Exception(__METHOD__ . ">> Not able to setup browser of type: " . $browserName);
+				}
+				
+			} elseif ($osObj->getType() == "Windows") {
+				
+				if ($browserName == 'phantomjs') {
+
+					$fileFact		= \MTS\Factories::getFiles();
+					$pipeUuid		= uniqid();
+					$workPath		= $fileFact->getDirectory(MTS_WORK_PATH . DIRECTORY_SEPARATOR . "LHB_" . $pipeUuid);
+				
+					$stdIn			= $fileFact->getFile("stdIn", $workPath->getPathAsString());
+					$stdOut			= $fileFact->getFile("stdOut", $workPath->getPathAsString());
+					$stdErr			= $fileFact->getFile("stdErr", $workPath->getPathAsString());
+
+					if ($osObj->getArchitecture() == 64) {
+						$pjsBin			= $fileFact->getVendorFile("pjswindows64");
+					} elseif ($osObj->getArchitecture() == 32) {
+						$pjsBin			= $fileFact->getVendorFile("pjswindows32");
+					} else {
+						throw new \Exception(__METHOD__ . ">> Phantomjs not available for OS Architecture: " . $osObj->getArchitecture());
+					}
+					
+					$fileFact->getFilesTool()->create($stdIn);
+					$fileFact->getFilesTool()->create($stdOut);
+					$fileFact->getFilesTool()->create($stdErr);
+					
+					$pjsCtrl		= $fileFact->getVendorFile("pjsctrl");
+					$exeCmd			= "\"" . $pjsBin->getPathAsString() . "\" --local-storage-path=\"".$workPath->getPathAsString()."\" --web-security=false --local-to-remote-url-access=true --ignore-ssl-errors=true --load-images=true \"" . $pjsCtrl->getPathAsString() . "\" \"".$workPath->getPathAsString() . DIRECTORY_SEPARATOR . "\" < \"".$stdIn->getPathAsString()."\" > \"".$stdOut->getPathAsString()."\" 2> \"".$stdErr->getPathAsString()."\"";
+					
+					//the cmd width dictates the powershell width so we set it here
+					//wait 2 sec before deleting the files
+					$strCmd		= "START \"seq\" cmd /c \"" . $exeCmd . " & ping -n 2 127.0.0.1 && rmdir /s /q \"" .$workPath->getPathAsString(). "\"\"";
+					
+					//cannot get exec() to return without waiting for process to exit
+					//should get fixed since we dont want to depend on another function for MTS to run 
+					pclose(popen($strCmd, "r"));
+
+					//do we need some validation the shell was created?
+					$errObj	= null;
+					
+					if ($errObj === null) {
+							
+						//all good browser was created
+						$stdPipe	= $fileFact->getProcessPipe($stdIn, $stdOut, $stdErr);
+							
+						$pjsBrowser	= new \MTS\Common\Devices\Browsers\PhantomJS();
+						$pjsBrowser->setPipes($stdPipe);
+						
+						//this will init the browser if true
+						$pjsBrowser->setDebug($enableDebug);
+					
+						return $pjsBrowser;
+						
+					} else {
+							
+						//clean up
+						$fileFact->getFilesTool()->delete($stdIn);
+						$fileFact->getFilesTool()->delete($stdOut);
+						$fileFact->getFilesTool()->delete($stdErr);
+						$fileFact->getDirectoriesTool()->delete($workPath);
+							
+						throw $errObj;
+					}
+
+				} else {
+					throw new \Exception(__METHOD__ . ">> Not able to setup browser of type: " . $browserName);
 				}
 			}
 		}
