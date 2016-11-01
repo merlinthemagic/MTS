@@ -107,11 +107,7 @@ class Browser extends Base
 					} else {
 							
 						//clean up
-						$fileFact->getFilesTool()->delete($stdIn);
-						$fileFact->getFilesTool()->delete($stdOut);
-						$fileFact->getFilesTool()->delete($stdErr);
 						$fileFact->getDirectoriesTool()->delete($workPath);
-							
 						throw $errObj;
 					}
 						
@@ -173,9 +169,6 @@ class Browser extends Base
 					} else {
 							
 						//clean up
-						$fileFact->getFilesTool()->delete($stdIn);
-						$fileFact->getFilesTool()->delete($stdOut);
-						$fileFact->getFilesTool()->delete($stdErr);
 						$fileFact->getDirectoriesTool()->delete($workPath);
 							
 						throw $errObj;

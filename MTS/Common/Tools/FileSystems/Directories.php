@@ -56,12 +56,39 @@ class Directories
 	}
 	public function delete($dirObj)
 	{
+		//should delete recursively files and directories
 		$isDir	= $this->isDirectory($dirObj);
+		
 		if ($isDir === true) {
-			$deleted	= rmdir($dirObj->getPathAsString());
-			if ($deleted === false) {
-				throw new \Exception(__METHOD__ . ">> Failed to Delete for: " . $dirObj->getPathAsString());
+
+			function removePath($path) {
+
+				$items	= scandir($path);
+				foreach ($items as $item) {
+					$item	= trim($item);
+					if ($item != "." && $item != "..") {
+						$nPath	= $path . DIRECTORY_SEPARATOR . $item;
+						$isDir	= is_dir($nPath);
+						if ($isDir === true) {
+							//recurse
+							removePath($nPath);
+						} else {
+							//delete file
+							$deleted	= @unlink($nPath);
+							if ($deleted === false) {
+								throw new \Exception(__METHOD__ . ">> Deleting Directory, Failed to Delete File: " . $nPath);
+							}
+						}
+					}
+				}
+				
+				//directory is now empty, delete it
+				$deleted	= rmdir($path);
+				if ($deleted === false) {
+					throw new \Exception(__METHOD__ . ">> Deleting Directory, Failed to Delete Directory: " . $path);
+				}
 			}
+			removePath($dirObj->getPathAsString());
 		}
 	}
 	public function setMode($dirObj, $mode)

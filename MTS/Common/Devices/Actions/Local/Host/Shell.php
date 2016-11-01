@@ -126,9 +126,6 @@ class Shell extends Base
 							} else {
 									
 								//clean up
-								$fileFact->getFilesTool()->delete($stdIn);
-								$fileFact->getFilesTool()->delete($stdOut);
-								$fileFact->getFilesTool()->delete($stdErr);
 								$fileFact->getDirectoriesTool()->delete($workPath);
 									
 								throw $errObj;
@@ -199,9 +196,6 @@ class Shell extends Base
 						} else {
 								
 							//clean up
-							$fileFact->getFilesTool()->delete($stdIn);
-							$fileFact->getFilesTool()->delete($stdOut);
-							$fileFact->getFilesTool()->delete($stdErr);
 							$fileFact->getDirectoriesTool()->delete($workPath);
 								
 							throw $errObj;

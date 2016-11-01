@@ -1,6 +1,6 @@
 ### What is this?
 
-Simple, its a tool set for PHP. Currently comprised of two core components, shell and browser.
+Simple, its a tool set for PHP. Currently comprised of two core components shell and browser.
 
 This project strives to give developers the tools that let them automate processes that were designed for people.
 
@@ -14,14 +14,15 @@ My philosophy:
 Tested working against the following operating systems and versions.
 ```php
 Centos 6, 7.
+Windows 7 (Still Experimental).
 RedHat Enterprise 6.
 Debian 8.
 Ubuntu 16.
 Arch 2016-05-01
-Windows 7 (Still Experimental)
+
 ```
 
-It should work against other versions as long as they are the same flavor of Linux.
+It should work against other Linux versions as long as they are the same flavor.
 
 ####Packages Linux:
 ```php
@@ -87,7 +88,7 @@ You can run the setup in one of 2 ways:
 
 1) Composer Install.
 This assumes you have composer installed already.
-Issue command "composer require merlinthemagic/mts" to make it part of your requirements
+Issue command "composer require merlinthemagic/mts" (dev version) to make it part of your requirements
 
 2) Manual Install:
 Download MTS from GitHub and upload the MTS directory to a location on your server. i.e. C:\inet\wwwroot\tools\. 
@@ -104,7 +105,7 @@ require_once "c:\path\to\mts\folder\EnableMTS.php";
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
 Would it not be nice if the built in functions were more verbose?
 
-More generally the shell in Linux is very powerful, but PHP never had a good way to interact with it.
+More generally the shell in Linux is very powerful (and Powershell is a definite improvement in Windows), but PHP never had a good way to interact with it.
 There are 100's of questions on sites like askubuntu.com or stackoverflow.com asking: my PHP script needs to run as root, how do I do it?
 There has never been an easy way to accomplish that. That is by design, of course, letting PHP anywhere near root presents real security issues.
 
@@ -160,7 +161,7 @@ The $shellObj variable now contains a bash shell object you can issue commands a
 
 ```php
   $return1  = $shellObj->exeCmd('whoami');
-  echo $return1; // root or apache or www-data or http or "nt authority\iusr"
+  echo $return1; // root, apache, www-data, http, "nt authority\iusr" etc...
 ```
 
 Read the segment 'Using commands' below for more detail. 
@@ -195,7 +196,7 @@ All variables are maintained throughout the session. The Python setup provides t
 In terms of security, is it safe to allow sudo to python or pass root credentials in code?
 The answer is of course not, but if you need root access it has inherent risk. The best solution is always to restructure your code so root is not needed, but now it is your choice.
 
-### Remote Shells:
+### Remote Shells (Linux Only):
 
 #### SSH:
 You can also get a shell to a remote server through SSH if you like. Here is how:
@@ -301,8 +302,6 @@ echo "Exception Message: " . $errMsg;
 print_r($shellObj->getDebugData());
 echo "\n </pre></code> \n >>>End Debug";
 ```
-
-
 
 
 ## The Browser:
