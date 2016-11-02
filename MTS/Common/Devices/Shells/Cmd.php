@@ -167,7 +167,7 @@ class Cmd extends Base
 
 				//set the variables
 				$this->_shellPrompt		= "[" . uniqid("cmd.", true) . "]";
-				$this->_strCmdCommit	= chr(13) . chr(10);
+				$this->_strCmdCommit	= chr(10);
 				$this->_cmdSigInt		= chr(3) . $this->_strCmdCommit;
 			
 				//set the prompt to a known value
