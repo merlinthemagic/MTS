@@ -89,21 +89,7 @@ class PowerShell extends Base
 					
 			} else {
 					
-				$rawData	= $rData['data'];
-				
-				$sStr		= "cmdReturnStart>>>";
-				$sPos		= strpos($rawData, $sStr);
-				$iPos		= $sPos + strlen($sStr);
-				$eStr		= "<<<cmdReturnEnd";
-				$ePos		= strpos($rawData, $eStr);
-					
-				$rLen		= ($ePos - $iPos);
-				$encReturn	= substr($rawData, $iPos, $rLen);
-				$json		= base64_decode($encReturn);
-				$jsonArr	= json_decode($json, true);
-				
-				//decode the data and return it
-				return base64_decode($jsonArr["result"]["data"]);
+				return $rData['data'];
 			}
 		}
 	}
@@ -231,6 +217,21 @@ class PowerShell extends Base
 					$lDataTime			= $exeTime;
 					$return['data']		.= $newData;
 					if ($regex !== false && preg_match("/".$regex."/", $return['data'])) {
+						$rawData	= $return['data'];
+						$sStr		= "cmdReturnStart>>>";
+						$sPos		= strpos($rawData, $sStr);
+						$iPos		= $sPos + strlen($sStr);
+						$eStr		= "<<<cmdReturnEnd";
+						$ePos		= strpos($rawData, $eStr);
+							
+						$rLen		= ($ePos - $iPos);
+						$encReturn	= substr($rawData, $iPos, $rLen);
+						$json		= base64_decode($encReturn);
+						$jsonArr	= json_decode($json, true);
+						
+						//decode the data
+						$return['data'] = base64_decode($jsonArr["result"]["data"]);
+						
 						//found pattern match
 						$done	= true;
 					}
