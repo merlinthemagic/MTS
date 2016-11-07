@@ -39,10 +39,14 @@ class Remotehost extends Device
 		return $this;
 	}
 	
-	public function getShell($shellObj=null)
+	public function getShell($shellObj=null, $shellType="default")
 	{
 		try {
-			if ($this->_shellObj === null) {
+			if ($shellType == "default") {
+				$shellType	= $this->_shellType;
+			}
+			
+			if (isset($this->_shellObjs[$shellType]) === false) {
 
 				//dont keep sensetive information around in case the class is dumped
 				$username				= $this->_shellUsername;
@@ -66,7 +70,7 @@ class Remotehost extends Device
 
 						if ($this->_shellType == 'ssh') {
 							//and replace it with the new one
-							$this->_shellObj		= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->connectByUsername($shellObj, $username, $password, $this->getHostname(), $this->_shellPort);
+							$this->_shellObjs[$shellType]		= \MTS\Factories::getActions()->getRemoteConnectionsSsh()->connectByUsername($shellObj, $username, $password, $this->getHostname(), $this->_shellPort);
 						} else {
 							throw new \Exception(__METHOD__ . ">> Not Handled for Type: " . $this->_shellType);
 						}
@@ -79,7 +83,7 @@ class Remotehost extends Device
 					throw new \Exception(__METHOD__ . ">> Missing Hostname");
 				}
 			}
-			return $this->_shellObj;
+			return $this->_shellObjs[$shellType];
 		
 		} catch (\Exception $e) {
 			switch($e->getCode()){

@@ -118,9 +118,9 @@ The goal is to have easy shell access, allowing root when needed, as securely as
 
 ### Basic use:
 
-You start by following the installation instructions at the very top of this Readme, then instantiate a shell. The first argument on getShell() is the shell name (only bash for now). 
+You start by following the installation instructions at the very top of this Readme, then instantiate a shell. The first argument on getShell() is the shell name (for now the options are "powershell", "cmd", "bash"). 
 The second argument depends on weather you choose to allow sudo access to python during the installation.
-If you choose to allow sudo on python then setting the second argument to true will return a shell logged in as root, while false will return a shell as the webserver user, i.e. apache or www-data.
+If you choose to allow sudo on python (Linux Only) then setting the second argument to true will return a shell logged in as root, while false will return a shell as the webserver user, i.e. apache or www-data.
 
 ```php
 //Get a shell as the webserver user i.e. apache or www-data
@@ -441,7 +441,7 @@ $windowObj->sendKeyPresses($keys);
 
 //Example 2, send a string of characters while holding down "shift". 
 $keys		= "My Search Key Words";
-$modifiers	= array("shift").
+$modifiers	= array("shift");
 $windowObj->sendKeyPresses($keys, $modifiers);
 
 //Example 3, press enter
@@ -452,7 +452,7 @@ $windowObj->sendKeyPresses($keys);
 
 Perform a mouse event on an element:
 
-Valid event options: 
+Valid events: 
 "up", "down", "move", "leftclick", "leftdoubleclick", "rightclick", "rightdoubleclick"
 ```php
 //left click an element
