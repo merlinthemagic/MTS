@@ -185,7 +185,6 @@ $return1 	= $shellObj->exeCmd('whoami');
 echo $return1; //root
 ```
 
-
 ### How It Works:
 PHP need only run as the standard webserver user, but the returned shell can have root priviliges.
 
