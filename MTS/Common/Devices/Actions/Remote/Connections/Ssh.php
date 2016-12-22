@@ -91,7 +91,7 @@ class Ssh extends Base
 					if (preg_match("/".$regExPass."/", $passReturn, $returnPass) == 1) {
 						$returnPass	= $returnPass[1];
 					}
-						
+
 				} catch (\Exception $e) {
 					switch($e->getCode()){
 						case 2500:
@@ -108,6 +108,8 @@ class Ssh extends Base
 					return $this->connectByUsernameToMikrotik($shellObj, $username, $password, $ipaddress, $port);
 				} elseif ($returnPass == $username."@") {
 					return $this->connectByUsernameToLinux($shellObj, $username, $password, $ipaddress, $port);
+				} elseif ($returnPass == "Permission denied") {
+					throw new \Exception(__METHOD__ . ">> Invaild Credentials");
 				}
 					
 			} elseif ($returnConn == "No route to host") {

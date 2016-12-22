@@ -32,7 +32,7 @@ class OperatingSystem extends Base
 				$osDetail			= php_uname();
 				if (preg_match("/^Linux\s/", $osDetail)) {
 					$osType			= 'linux';
-					
+
 					preg_match("/(x86_64|i386|i686)/i", $osDetail, $rawArch);
 					if (isset($rawArch[1])) {
 						$rawArch	= strtolower($rawArch[1]);
@@ -43,21 +43,27 @@ class OperatingSystem extends Base
 						}
 					}
 					
-					$cmdString		= 'cat /etc/os-release';
-					$cReturn		= $this->shellExec($cmdString);
+					$rFile		= "/etc/os-release";
+					$rFile2		= "/etc/redhat-release";
 					
-					if (strlen($cReturn) == 0) {
-						$cmdString		= 'cat /etc/redhat-release';
+					
+					if (file_exists($rFile) === true) {
+						$cmdString		= "cat " . $rFile;
 						$cReturn		= $this->shellExec($cmdString);
+					} elseif (file_exists($rFile2) === true) {
+						$cmdString		= "cat " . $rFile2;
+						$cReturn		= $this->shellExec($cmdString);
+					} else {
+						$cReturn	= null;
 					}
-						
+					
 					if ($cReturn !== null) {
 						preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/", $cReturn, $rawName);
 						
 						if (isset($rawName[1]) === true) {
 							$osName				= strtolower($rawName[1]);
 						}
-						
+
 						if ($osName == 'arch linux') {
 							$cmdString		= 'cat /proc/version';
 							$cReturn		= $this->shellExec($cmdString);
