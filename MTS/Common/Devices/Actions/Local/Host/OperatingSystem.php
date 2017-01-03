@@ -97,7 +97,7 @@ class OperatingSystem extends Base
 						}
 					}
 					
-				} elseif (preg_match("/^Windows\s/", $osDetail)) {
+				} elseif (preg_match("/^Windows\s/i", $osDetail)) {
 					
 					$osType			= 'windows';
 					$osName			= 'windows';

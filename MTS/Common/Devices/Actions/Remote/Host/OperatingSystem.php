@@ -37,49 +37,61 @@ class OperatingSystem extends Base
 					$cmdString		= "cat /etc/os-release";
 					$cReturn		= $shellObj->exeCmd($cmdString);
 	
-					if (strlen($cReturn) == 0) {
+					if (strlen($cReturn) == 0 || preg_match("/No such file/i", $cReturn) == 1) {
 						$cmdString		= "cat /etc/redhat-release";
 						$cReturn		= $shellObj->exeCmd($cmdString);
+						if (strlen($cReturn) == 0 || preg_match("/No such file/i", $cReturn) == 1) {
+							$cmdString		= "cat /etc/centos-release";
+							$cReturn		= $shellObj->exeCmd($cmdString);
+						}
 					}
 					
-					if (preg_match("/(Linux|Ubuntu|Debian)/", $cReturn)) {
-						$osType			= 'linux';
-	
-						$cmdString		= 'uname -a';
-						$uReturn		= $shellObj->exeCmd($cmdString);
-	
-						preg_match("/(x86_64|i386|i686)/i", $uReturn, $rawArch);
-						if (isset($rawArch[1])) {
-							$rawArch	= strtolower($rawArch[1]);
-							if ($rawArch == "x86_64") {
-								$osArch	= 64;
-							} elseif ($rawArch == "i386" || $rawArch == "i686") {
-								$osArch	= 32;
-							}
-						}
-												
-						if ($cReturn !== null) {
-							preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/", $cReturn, $rawName);
-					
-							if (isset($rawName[1]) === true) {
-								$osName				= strtolower($rawName[1]);
-							}
-					
-							if ($osName == 'arch linux') {
-								$cmdString		= 'cat /proc/version';
-								$c2Return		= $shellObj->exeCmd($cmdString);
-					
-								preg_match("/([0-9]{8})/", $c2Return, $rawMajorVersion);
-					
-								if (isset($rawMajorVersion[1]) === true) {
-									$osMajorVersion		= $rawMajorVersion[1];
+					if (strlen($cReturn) > 0 && preg_match("/No such file/i", $cReturn) == 0) {
+						
+						if (preg_match("/(CentOS|Linux|Ubuntu|Debian)/i", $cReturn)) {
+							$osType			= 'linux';
+		
+							$cmdString		= 'uname -a';
+							$uReturn		= $shellObj->exeCmd($cmdString);
+		
+							preg_match("/(x86_64|i386|i686)/i", $uReturn, $rawArch);
+							if (isset($rawArch[1])) {
+								$rawArch	= strtolower($rawArch[1]);
+								if ($rawArch == "x86_64") {
+									$osArch	= 64;
+								} elseif ($rawArch == "i386" || $rawArch == "i686") {
+									$osArch	= 32;
 								}
-					
-							} else {
-								preg_match("/VERSION_ID=\"([0-9]+)/", $cReturn, $rawMajorVersion);
-					
-								if (isset($rawMajorVersion[1]) === true) {
-									$osMajorVersion		= $rawMajorVersion[1];
+							}
+													
+							if ($cReturn !== null) {
+								
+								if (preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/i", $cReturn, $rawName) == 1) {
+									$osName				= strtolower($rawName[1]);
+								} elseif (preg_match("/CentOS/i", $cReturn, $rawName) == 1) {
+									$osName				= "centos linux";
+								} else {
+									throw new \Exception(__METHOD__ . ">> OS Name Not handled");
+								}
+						
+								if ($osName == 'arch linux') {
+									$cmdString		= 'cat /proc/version';
+									$c2Return		= $shellObj->exeCmd($cmdString);
+						
+									preg_match("/([0-9]{8})/", $c2Return, $rawMajorVersion);
+						
+									if (isset($rawMajorVersion[1]) === true) {
+										$osMajorVersion		= $rawMajorVersion[1];
+									}
+						
+								} else {
+									
+									if (preg_match("/VERSION_ID=\"([0-9]+)/", $cReturn, $rawMajorVersion) == 1) {
+										$osMajorVersion		= $rawMajorVersion[1];
+									} elseif (preg_match("/([0-9]+)/", $cReturn, $rawMajorVersion) == 1) {
+										//solve permanentely for centos minor 7,8 "CentOS release 6.8 (Final)"
+										$osMajorVersion		= $rawMajorVersion[1];
+									}
 								}
 							}
 						}
