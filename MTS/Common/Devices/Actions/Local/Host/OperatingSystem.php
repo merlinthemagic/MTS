@@ -33,14 +33,16 @@ class OperatingSystem extends Base
 				if (preg_match("/^Linux\s/", $osDetail)) {
 					$osType			= 'linux';
 
-					preg_match("/(x86_64|i386|i686)/i", $osDetail, $rawArch);
-					if (isset($rawArch[1])) {
+					if (preg_match("/(x86_64|i386|i686)/i", $osDetail, $rawArch) == 1) {
 						$rawArch	= strtolower($rawArch[1]);
 						if ($rawArch == "x86_64") {
 							$osArch	= 64;
 						} elseif ($rawArch == "i386" || $rawArch == "i686") {
 							$osArch	= 32;
 						}
+						
+					} else {
+						throw new \Exception(__METHOD__ . ">> OS Arch Not handled");
 					}
 					
 					$rFile		= "/etc/os-release";
@@ -53,6 +55,8 @@ class OperatingSystem extends Base
 						$cmdString		= "cat " . $rFile2;
 					} elseif (file_exists($rFile3) === true) {
 						$cmdString		= "cat " . $rFile3;
+					} else {
+						throw new \Exception(__METHOD__ . ">> Missing Release file");
 					}
 					
 					$cReturn	= null;
@@ -66,6 +70,8 @@ class OperatingSystem extends Base
 							$osName				= strtolower($rawName[1]);
 						} elseif (preg_match("/CentOS/i", $cReturn, $rawName) == 1) {
 							$osName				= "centos linux";
+						} else {
+							throw new \Exception(__METHOD__ . ">> OS Name Not handled");
 						}
 						
 						if ($osName == 'arch linux') {
@@ -85,6 +91,8 @@ class OperatingSystem extends Base
 							} elseif (preg_match("/([0-9]+)/", $cReturn, $rawMajorVersion) == 1) {
 								//solve permanentely for centos minor 7,8 "CentOS release 6.8 (Final)"
 								$osMajorVersion		= $rawMajorVersion[1];
+							} else {
+								throw new \Exception(__METHOD__ . ">> OS Version Not handled");
 							}
 						}
 					}
@@ -113,6 +121,8 @@ class OperatingSystem extends Base
 							$osArch	= 32;
 						}
 					}
+				} else {
+					throw new \Exception(__METHOD__ . ">> OS Type Not handled");
 				}
 
 				if (
