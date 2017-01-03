@@ -92,13 +92,13 @@ This assumes you have composer installed already.
 Issue command "composer require merlinthemagic/mts" (dev version) to make it part of your requirements
 
 2) Manual Install:
-Download MTS from GitHub and upload the MTS directory to a location on your server. i.e. C:\inet\wwwroot\tools\. 
+Download MTS from GitHub and upload the MTS directory to a location on your server. i.e. C:\inet\wwwroot\tools\MTS\. 
 You cannot only upload the content of the directory, you must upload the directory and maintain the directory name (MTS).
 
 Whenever you wish to use the MTS tools add:
 require_once "c:\path\to\mts\folder\EnableMTS.php";
 
-(replace c:\path\to\mts\folder with whatever path you chose to place the package in i.e. C:\inet\wwwroot\tools)
+(replace c:\path\to\mts\folder with whatever path you chose to place the package in i.e. C:\inet\wwwroot\tools\MTS)
 
 # The Tools:
 

@@ -45,25 +45,29 @@ class OperatingSystem extends Base
 					
 					$rFile		= "/etc/os-release";
 					$rFile2		= "/etc/redhat-release";
-					
-					
+					$rFile3		= "/etc/centos-release";
+					$cmdString	= null;
 					if (file_exists($rFile) === true) {
 						$cmdString		= "cat " . $rFile;
-						$cReturn		= $this->shellExec($cmdString);
 					} elseif (file_exists($rFile2) === true) {
 						$cmdString		= "cat " . $rFile2;
-						$cReturn		= $this->shellExec($cmdString);
-					} else {
-						$cReturn	= null;
+					} elseif (file_exists($rFile3) === true) {
+						$cmdString		= "cat " . $rFile3;
 					}
 					
-					if ($cReturn !== null) {
-						preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/", $cReturn, $rawName);
-						
-						if (isset($rawName[1]) === true) {
-							$osName				= strtolower($rawName[1]);
-						}
+					$cReturn	= null;
+					if ($cmdString !== null) {
+						$cReturn		= $this->shellExec($cmdString);
+					}
 
+					if ($cReturn !== null) {
+
+						if (preg_match("/NAME=\"(CentOS Linux|Debian GNU\/Linux|Ubuntu|Arch Linux)\"/i", $cReturn, $rawName) == 1) {
+							$osName				= strtolower($rawName[1]);
+						} elseif (preg_match("/CentOS/i", $cReturn, $rawName) == 1) {
+							$osName				= "centos linux";
+						}
+						
 						if ($osName == 'arch linux') {
 							$cmdString		= 'cat /proc/version';
 							$cReturn		= $this->shellExec($cmdString);
@@ -75,13 +79,16 @@ class OperatingSystem extends Base
 							}
 							
 						} else {
-							preg_match("/VERSION_ID=\"([0-9]+)/", $cReturn, $rawMajorVersion);
 							
-							if (isset($rawMajorVersion[1]) === true) {
+							if (preg_match("/VERSION_ID=\"([0-9]+)/", $cReturn, $rawMajorVersion) == 1) {
+								$osMajorVersion		= $rawMajorVersion[1];
+							} elseif (preg_match("/([0-9]+)/", $cReturn, $rawMajorVersion) == 1) {
+								//solve permanentely for centos minor 7,8 "CentOS release 6.8 (Final)"
 								$osMajorVersion		= $rawMajorVersion[1];
 							}
 						}
 					}
+					
 				} elseif (preg_match("/^Windows\s/", $osDetail)) {
 					
 					$osType			= 'windows';
