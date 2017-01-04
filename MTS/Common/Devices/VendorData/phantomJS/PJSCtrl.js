@@ -13,7 +13,7 @@ classData.stdIn.path		= classData.workPath + "stdIn";
 classData.cmdStack			= [];
 classData.initialized		= false;
 classData.debug				= false;
-classData.debugPath			= "C:\inetpub\wwwroot\Tools\MTS\WorkDirectory\debug.txt"; //null;
+classData.debugPath			= null;
 classData.loadWaitInterval	= 500;
 classData.windows			= [];
 
@@ -1401,6 +1401,7 @@ function writeError(e, eMsg, eCode)
 function writeDebug(funcName, data)
 {
 	try {
+		//NFSMKO UIF NBHKD
 		fSystem.write(classData.debugPath, "debugStart>>>" + getEpoch(true) + " - " + funcName + "\n" + data + "<<<debugEnd\n", 'a');
 	} catch(e) {
 		var eMsg	= "Failed to write debug";
