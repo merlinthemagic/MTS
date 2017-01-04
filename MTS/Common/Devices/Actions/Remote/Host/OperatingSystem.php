@@ -37,9 +37,9 @@ class OperatingSystem extends Base
 					//lets always try that file first
 					$reFiles	= array();
 					$reFiles[]	= "/etc/os-release";
+					$reFiles[]	= "/etc/system-release";
 					$reFiles[]	= "/etc/centos-release";
 					$reFiles[]	= "/etc/redhat-release";
-					$reFiles[]	= "/etc/system-release";
 					$reFiles[]	= "/etc/lsb-release";
 					
 					foreach ($reFiles as $reFile) {
@@ -60,6 +60,8 @@ class OperatingSystem extends Base
 									$osVersion		= $rawVer[1];
 								} elseif (preg_match("/release\s([0-9]+)/i", $cReturn, $rawVer) == 1) {
 									$osVersion		= $rawVer[1];
+								} elseif (preg_match("/DISTRIB_RELEASE=([0-9]+)/i", $cReturn, $rawVer) == 1) {
+									$osVersion		= $rawVer[1];
 								} elseif ($osName == 'arch') {
 									//Arch dists have their version in a different location
 									$archCmd	= "cat /proc/version";
@@ -68,6 +70,8 @@ class OperatingSystem extends Base
 										$osVersion		= $rawVer[1];
 									}
 								}
+								
+								
 							}
 					
 							if ($osName !== null && $osVersion !== null) {

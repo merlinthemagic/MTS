@@ -60,6 +60,8 @@ class OperatingSystem extends Base
 									$osVersion		= $rawVer[1];
 								} elseif (preg_match("/release\s([0-9]+)/i", $cReturn, $rawVer) == 1) {
 									$osVersion		= $rawVer[1];
+								} elseif (preg_match("/DISTRIB_RELEASE=([0-9]+)/i", $cReturn, $rawVer) == 1) {
+									$osVersion		= $rawVer[1];
 								} elseif ($osName == 'arch') {
 									//Arch dists have their version in a different location
 									$archCmd	= "cat /proc/version";
