@@ -114,40 +114,10 @@ class OperatingSystem extends Base
 					throw new \Exception(__METHOD__ . ">> Could not determine OS Architecture");
 				}
 				
-				$osObj	= null;
-				if ($osType == 'linux') {
-					if ($osName == 'centos') {
-						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\CentOSBase();
-					} elseif ($osName == 'red hat') {
-						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\RHELBase();
-					} elseif ($osName == 'debian') {
-						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\DebianBase();
-					} elseif ($osName == 'ubuntu') {
-						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\UbuntuBase();
-					} elseif ($osName == 'arch') {
-						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Linux\ArchBase();
-					}
-					
-				} elseif ($osType == 'windows') {
-					if ($osName == 'windows') {
-						$osObj	= new \MTS\Common\Data\Computer\OperatingSystems\Microsoft\Windows();
-					}
-				}
-				
-				if ($osObj !== null) {
-					
-					$osObj->setMajorVersion($osVersion);
-					$osObj->setArchitecture($osArch);
-					$this->_classStore[$cacheId]	= $osObj;
-					return $this->_classStore[$cacheId];
-					
-				} else {
-					throw new \Exception(__METHOD__ . ">> OS Type: " . $osType . " and name:" . $osName . ", not handled");
-				}
-
-			} else {
-				return $this->_classStore[$cacheId];
+				$this->_classStore[$cacheId]	= \MTS\Factories::getDevices()->getOsObj($osType, $osName, $osArch, $osVersion);
 			}
+			
+			return $this->_classStore[$cacheId];
 		}
 
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
