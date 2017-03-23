@@ -18,7 +18,7 @@ This project simply wraps their work so it is easy for you to access using PHP.
 ### Basic use:
 
 This package creates a instance of PhantomJS, you can then open a website and execute standard functions against it through PHP.
-You start by following the installation instructions at the very top of this Readme, then instantiate a browser.
+You start by following the installation instructions: <a href="https://github.com/merlinthemagic/MTS/blob/master/INSTALL.md">Click Here</a>, then instantiate a browser.
 
 ```php
 //Some websites are either far away or just slow, so it is a good idea to up the allowed execution time.

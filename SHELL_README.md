@@ -15,7 +15,7 @@ The goal is to have easy shell access, allowing root when needed, as securely as
 
 ### Basic use:
 
-You start by following the installation instructions at the very top of this Readme, then instantiate a shell. The first argument on getShell() is the shell name (for now the options are "powershell", "cmd", "bash"). 
+You start by following the installation instructions: <a href="https://github.com/merlinthemagic/MTS/blob/master/INSTALL.md">Click Here</a>, then instantiate a shell. The first argument on getShell() is the shell name (for now the options are "powershell", "cmd", "bash"). 
 The second argument depends on weather you choose to allow sudo access to python during the installation.
 If you choose to allow sudo on python (Linux Only) then setting the second argument to true will return a shell logged in as root, while false will return a shell as the webserver user, i.e. apache or www-data.
 
