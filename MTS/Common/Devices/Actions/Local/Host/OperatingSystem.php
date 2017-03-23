@@ -10,6 +10,11 @@ class OperatingSystem extends Base
 		$this->_classStore['requestType']	= __FUNCTION__;
 		return $this->execute();
 	}
+	public function getFreeRam()
+	{
+		$this->_classStore['requestType']	= __FUNCTION__;
+		return $this->execute();
+	}
 	private function execute()
 	{
 		$requestType		= $this->_classStore['requestType'];
@@ -118,6 +123,21 @@ class OperatingSystem extends Base
 			}
 			
 			return $this->_classStore[$cacheId];
+			
+		} else if ($requestType == 'getFreeRam') {
+			
+			$osObj		= $this->getOsObj();
+			
+			if ($osObj->getType() == "Linux") {
+				$strCmd		= "cat /proc/meminfo | grep -i MemAvailable";
+				$rData		= trim($this->shellExec($strCmd));
+				if (preg_match("/([0-9]+)\s+(kB)/", $rData, $rawMem) == 1) {
+					
+					if ($rawMem[2] == "kB") {
+						return $rawMem[1] * 1024;
+					}
+				}	
+			}
 		}
 
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
