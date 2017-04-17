@@ -185,7 +185,9 @@ class PhantomJS extends Base implements BrowserInterface
 			if ($result['code'] != 200) {
 				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
 			} else {
-				return json_decode($result['data']['dom'], true);
+				$rData				= json_decode($result['data']['dom'], true);
+				$rData["innerHTML"]	= urldecode($rData["innerHTML"]);
+				return $rData;
 			}
 	
 		} catch (\Exception $e) {

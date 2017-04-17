@@ -1,41 +1,39 @@
 {
-  "name": "merlinthemagic/mts",
-  "description": "PHP Automation Tools",
-  "type": "library",
-  "homepage": "https://github.com/merlinthemagic/MTS",
-  "keywords": [
-    "PHP",
-    "Automation",
-    "Shell",
-    "Browser",
-    "PhantomJS",
-    "Bash"
-  ],
-  "authors": [
-    {
-      "name": "Martin Madsen",
-      "email": "dev@martinpetermadsen.com",
-      "role": "Developer",
-      "homepage": "https://github.com/merlinthemagic"
-    }
-  ],
-  "support": {
-    "issues": "https://github.com/merlinthemagic/MTS/issues"
-  },
-  "require": {
-	"php": ">=5.3.0"
-  },
-  "autoload": {
-	"files": [
-		"MTS/EnableMTS.php"
-	]
-  },
-  "scripts": {
-       "post-install-cmd": "php vendor/merlinthemagic/mts/MtsSetup.php",
-       "post-update-cmd": "php vendor/merlinthemagic/mts/MtsSetup.php",
-       "post-package-install": "php vendor/merlinthemagic/mts/MtsSetup.php",
-       "post-package-update": "php vendor/merlinthemagic/mts/MtsSetup.php",
-       "post-package-install": "php vendor/merlinthemagic/mts/MtsSetup.php"
-       
-    }
+	"name" : "merlinthemagic/mts",
+	"description" : "PHP Automation Tools",
+	"type" : "library",
+	"homepage" : "https://github.com/merlinthemagic/MTS",
+	"keywords" : [
+		"PHP",
+		"Automation",
+		"Shell",
+		"Browser",
+		"PhantomJS",
+		"Bash"
+	],
+	"authors" : [{
+			"name" : "Martin Madsen",
+			"email" : "dev@martinpetermadsen.com",
+			"role" : "Developer",
+			"homepage" : "https://github.com/merlinthemagic"
+		}
+	],
+	"support" : {
+		"issues" : "https://github.com/merlinthemagic/MTS/issues",
+		"email" : "github@martinpetermadsen.com"
+	},
+	"require" : {
+		"php" : ">=5.3.0"
+	},
+	"autoload" : {
+		"files" : [
+			"MTS/EnableMTS.php"
+		]
+	},
+	"scripts" : {
+		"post-install-cmd" : "php vendor/merlinthemagic/mts/MtsSetup.php",
+		"post-update-cmd" : "php vendor/merlinthemagic/mts/MtsSetup.php",
+		"post-package-install" : "php vendor/merlinthemagic/mts/MtsSetup.php",
+		"post-package-update" : "php vendor/merlinthemagic/mts/MtsSetup.php"
+	}
 }

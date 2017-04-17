@@ -255,9 +255,9 @@ function getElement(cmdObj)
 			throw "Selector must be set";
 		}
 
-		var selector	= cmdObj.cmd.options.selector;
-		var result		= windowObj.pjsPage.evaluate(function(selector){
-	        var element = document.querySelector(selector);
+			var selector	= cmdObj.cmd.options.selector;
+			var result		= windowObj.pjsPage.evaluate(function(selector){
+	        var element		= document.querySelector(selector);
 	        
 	        if (element === null) {
 	        	 return 'selectorNotExist';
@@ -288,6 +288,13 @@ function getElement(cmdObj)
 		        		result.text		= element.text;
 		    		} else {
 		    			result.text		= null;
+		    		}
+		        	
+		        	//get innerHTML
+		        	if (typeof element.innerHTML !== "undefined") {
+		        		result.innerHTML	= encodeURIComponent(element.innerHTML);
+		    		} else {
+		    			result.innerHTML	= null;
 		    		}
 		        	
 		        	//get location
