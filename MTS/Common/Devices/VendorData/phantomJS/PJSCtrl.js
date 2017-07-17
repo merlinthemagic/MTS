@@ -425,18 +425,6 @@ function setCookie(cmdObj)
 		nCookie.httponly	= cmdObj.cmd.options.httponly;
 		nCookie.secure		= cmdObj.cmd.options.secure;
 		nCookie.expires		= cmdObj.cmd.options.expires;
-		
-		
-		
-//		var newCookie	= {
-//							  'name'     : cmdObj.cmd.options.name,
-//							  'value'    : cmdObj.cmd.options.value,
-//							  'domain'   : cmdObj.cmd.options.domain,
-//							  'path'     : cmdObj.cmd.options.path,
-//							  'httponly' : cmdObj.cmd.options.httponly,
-//							  'secure'   : cmdObj.cmd.options.secure,
-//							  'expires'  : (parseInt(cmdObj.cmd.options.expiration) * 1000)
-//						};
 
 		var success		= windowObj.pjsPage.addCookie(nCookie);
 
