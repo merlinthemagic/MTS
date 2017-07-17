@@ -80,6 +80,8 @@ function exeCmd(cmdObj)
 				commandWaitForWindowLoad(cmdObj, clickElement);
 			} else if (cmdObj.cmd.name == "getcookies") {
 				commandWaitForWindowLoad(cmdObj, getCookies);
+			} else if (cmdObj.cmd.name == "setcookie") {
+				commandWaitForWindowLoad(cmdObj, setCookie);
 			} else if (cmdObj.cmd.name == "mouseeventonelement") {
 				commandWaitForWindowLoad(cmdObj, mouseEventOnElement);
 			} else if (cmdObj.cmd.name == "getselectorexists") {
@@ -185,7 +187,7 @@ function closeWindow(cmdObj)
 					//close the window and free up the memory
 					windowObj.pjsPage.close();
 					//remove from the array
-					myArray.splice(i, 1);
+					classData.windows.splice(i, 1);
 					break;
 				}
 			}
@@ -401,6 +403,55 @@ function getCookies(cmdObj)
 
 	} catch(e) {
 		cmdObj.result.error.msg		= "Failed to get cookies. Error: " + e;
+		writeReturn(cmdObj);
+		processLoop();
+	}
+}
+function setCookie(cmdObj)
+{
+	try {
+		
+		//several active issues setting cookies, see:
+		//https://github.com/ariya/phantomjs/issues/13409
+		//https://github.com/ariya/phantomjs/issues/14047
+		
+		var windowObj	= getWindowByCommand(cmdObj);
+		
+		var nCookie			= {};
+		nCookie.name		= cmdObj.cmd.options.name;
+		nCookie.value		= cmdObj.cmd.options.value;
+		nCookie.domain		= cmdObj.cmd.options.domain;
+		nCookie.path		= cmdObj.cmd.options.path;
+		nCookie.httponly	= cmdObj.cmd.options.httponly;
+		nCookie.secure		= cmdObj.cmd.options.secure;
+		nCookie.expires		= cmdObj.cmd.options.expires;
+		
+		
+		
+//		var newCookie	= {
+//							  'name'     : cmdObj.cmd.options.name,
+//							  'value'    : cmdObj.cmd.options.value,
+//							  'domain'   : cmdObj.cmd.options.domain,
+//							  'path'     : cmdObj.cmd.options.path,
+//							  'httponly' : cmdObj.cmd.options.httponly,
+//							  'secure'   : cmdObj.cmd.options.secure,
+//							  'expires'  : (parseInt(cmdObj.cmd.options.expiration) * 1000)
+//						};
+
+		var success		= windowObj.pjsPage.addCookie(nCookie);
+
+//		if (success === true) {
+			cmdObj.result.code		= 200;
+			writeReturn(cmdObj);
+			processLoop();
+//		} else {
+//			cmdObj.result.error.msg		= "Failed to set cookie";
+//			writeReturn(cmdObj);
+//			processLoop();
+//		}
+
+	} catch(e) {
+		cmdObj.result.error.msg		= "Failed to set Url. Error: " + e;
 		writeReturn(cmdObj);
 		processLoop();
 	}
@@ -854,7 +905,7 @@ function terminate(cmdObj)
 			//give time to pickup return
 			//we are sure to exit successfully now
 			phantom.exit(1);
-		}, 2000);
+		}, 4000);
 	} catch(e) {
 		phantom.exit(1);
 	}

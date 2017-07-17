@@ -18,7 +18,7 @@ class Devices
 		if ($hostname !== null) {
 			$rHost->setHostname($hostname);
 		}
-		return $rHost; 
+		return $rHost;
 	}
 	public function getOsObj($osType, $osName, $osArch=null, $majorVersion=null)
 	{

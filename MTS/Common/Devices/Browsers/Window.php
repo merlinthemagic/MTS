@@ -127,6 +127,10 @@ class Window
 	{
 		return $this->getBrowser()->getCookies($this);
 	}
+	public function setCookie($name, $value, $domain=null, $path=null, $expireTime=null, $serverOnly=false, $secureOnly=false)
+	{
+		return $this->getBrowser()->setCookie($this, $name, $value, $domain, $path, $expireTime, $serverOnly, $secureOnly);
+	}
 	public function focusElement($selector)
 	{
 		return $this->getBrowser()->focusElement($this, $selector);

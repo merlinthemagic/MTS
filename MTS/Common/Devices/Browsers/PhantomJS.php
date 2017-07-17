@@ -259,6 +259,72 @@ class PhantomJS extends Base implements BrowserInterface
 		}
 	}
 	
+	public function setCookie($windowObj, $name, $value, $domain, $path, $expireTime, $serverOnly, $secureOnly)
+	{
+		try {
+
+			//validate
+			if ($name == "") {
+				throw new \Exception(__METHOD__ . ">> Name is required");
+			} elseif ($value == "") {
+				throw new \Exception(__METHOD__ . ">> Value is required");
+			} elseif (is_bool($serverOnly) === false) {
+				throw new \Exception(__METHOD__ . ">> Server only must be bool");
+			} elseif (is_bool($secureOnly) === false) {
+				throw new \Exception(__METHOD__ . ">> Secure must be bool");
+			}
+			
+			if ($path == "") {
+				$path	= "/";
+			}
+			if ($expireTime!= "") {
+				
+				if (ctype_digit((string) $expireTime) === false || $expireTime < 0 || $expireTime > 2147483647) {
+					throw new \Exception(__METHOD__ . ">> Expiration must be integer between 0 and 2147483647");
+				}
+				
+			} else {
+				$expireTime = 2147483647;
+			}
+
+			$curUrl			= $windowObj->getURL();
+			if ($curUrl == "") {
+				throw new \Exception(__METHOD__ . ">> Domain is required, current window does not have a URL");
+			}
+			
+			$urlParts	= parse_url($curUrl);
+			$urlhost	= trim($urlParts["host"]);
+			
+			if ($domain == "") {
+				$domain		= $urlhost;
+			} else {
+
+				if (strpos($urlhost, $domain) === false) {
+					throw new \Exception(__METHOD__ . ">> Cookie domain must match the current url domain");
+				}
+			}
+
+			$options				= array();
+			$options['name']		= $name;
+			$options['value']		= $value;
+			$options['domain']		= $domain;
+			$options['path']		= $path;
+			$options['expiration']	= $expireTime;
+			$options['httponly']	= $serverOnly;
+			$options['secure']		= $secureOnly;
+
+			$result					= $this->getResultArray($this->browserExecute($windowObj, 'setcookie', $options));
+			if ($result['code'] != 200) {
+				throw new \Exception(__METHOD__ . ">> Got result code: " . $result['code'] . ", EMsg: " . $result['error']['msg'] . ", ECode: " . $result['error']['code']);
+			}
+			
+		} catch (\Exception $e) {
+			switch($e->getCode()){
+				default;
+				throw $e;
+			}
+		}
+	}
 	public function sendKeyPresses($windowObj, $keys, $modifiers)
 	{
 		try {
@@ -728,6 +794,7 @@ class PhantomJS extends Base implements BrowserInterface
 							}
 						}
 					}
+					
 				} else {
 					//wait for a tiny bit no need to saturate the CPU
 					usleep(10000);

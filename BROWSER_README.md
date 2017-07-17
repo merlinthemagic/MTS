@@ -184,6 +184,22 @@ Get all cookies from a page:
 $cookies	= $windowObj->getCookies();
 ```
 
+Set a cookie for the current page
+```php
+$name			= "MyCookieName"; //String: mandetory cookie name.
+$value			= "My Cookie Value"; //String: mandetory cookie value.
+$domain			= null; //String: defaults to current domain in window URL
+$path			= null; //String: defaults to "/";
+$expireTime		= null; //Int (epoch): default is 2147483647
+$serverOnly		= false; //Bool: default false; if true cookie cannot be read by client scripts.
+$secureOnly		= false; //Bool: default false; if true cookie can only be transmitted using secure (defined by the user agent, i.e. TLS) channel.
+
+$windowObj->setCookie($name, $value, $domain, $path, $expireTime, $serverOnly, $secureOnly);
+```
+Note: PhantomJS 2.1.1 have several issues regarding setting cookies:
+https://github.com/ariya/phantomjs/issues/13409
+https://github.com/ariya/phantomjs/issues/14047
+
 Get details of an element i.e. value:
 ```php
 //limited currently, will get more detail over time

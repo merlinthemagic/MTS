@@ -143,6 +143,7 @@ class Shell extends Base
 				} else {
 					throw new \Exception(__METHOD__ . ">> Not able to setup shell of type: " . $shellName);
 				}
+				
 			} elseif ($osObj->getType() == "Windows") {
 				
 				if ($shellType == 'powershell') {
