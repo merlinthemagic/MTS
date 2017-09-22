@@ -125,11 +125,17 @@ class SetupMTS
 	
 		$timeZone	= $phpEnv->getIniTimezone();
 		if ($timeZone === false) {
+			
+			$iniFile				= $phpEnv->getIniFile();
 			$result['errorLevel']	= "Error";
 			$result['msgHead']		= "PHP does not have its timezone set. This is required";
-			$result['msgLines'][]	= "Find the line: ';date.timezone =' in ".$phpEnv->getIniFile()->getPathAsString()."";
-			$result['msgLines'][]	= "Change it by removing the ';' in front and set the value to reflect your time zone.";
-			$result['msgLines'][]	= "For Los Angeles that would be: 'date.timezone = America/Los_Angeles'";
+			if (is_object($iniFile) === true) {
+				$result['msgLines'][]	= "Find the line: ';date.timezone =' in ".$iniFile->getPathAsString()."";
+				$result['msgLines'][]	= "Change it by removing the ';' in front and set the value to reflect your time zone.";
+				$result['msgLines'][]	= "For Los Angeles that would be: 'date.timezone = America/Los_Angeles'";
+			} else {
+				$result['msgLines'][]	= "PHP is not loading any php.ini file. This is required to specify the timezone";
+			}
 		}
 		return $result;
 	}

@@ -76,6 +76,7 @@ class Processes extends Base
 					}
 					
 					return false;
+					
 				} else {
 					//command did not execute, at the very least we should have the 2 header lines
 				}

@@ -44,12 +44,19 @@ class PhpEnvironment extends Base
 				return new \DateTimeZone($timezone);
 			}
 		} elseif ($requestType == 'getIniFile') {
-			$iniLocation	= php_ini_loaded_file();
-			$dirs			= explode(DIRECTORY_SEPARATOR, $iniLocation);
-			$fileName		= array_pop($dirs);
-			$exePath		= implode(DIRECTORY_SEPARATOR, $dirs);
 			
-			return \MTS\Factories::getFiles()->getFile($fileName, $exePath);
+			$iniLocation	= php_ini_loaded_file();
+			if ($iniLocation !== false) {
+				$dirs			= explode(DIRECTORY_SEPARATOR, $iniLocation);
+				$fileName		= array_pop($dirs);
+				$exePath		= implode(DIRECTORY_SEPARATOR, $dirs);
+				
+				return \MTS\Factories::getFiles()->getFile($fileName, $exePath);
+				
+			} else {
+				return false;
+			}
+			
 		} elseif ($requestType == 'isConnectedToInternet') {
 			
 			//expand so we first check if we can resolve domains, or we get a false positive
