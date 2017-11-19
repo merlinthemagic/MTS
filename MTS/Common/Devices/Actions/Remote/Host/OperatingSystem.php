@@ -50,7 +50,7 @@ class OperatingSystem extends Base
 						if (preg_match("/No such file/i", $cReturn) == 0) {
 						
 							if ($osName === null) {
-								if (preg_match("/(centos|debian|ubuntu|arch|red hat)/i", $cReturn, $rawName) == 1) {
+								if (preg_match("/(centos|debian|ubuntu|arch|red hat|rhel)/i", $cReturn, $rawName) == 1) {
 									$osName		= strtolower($rawName[1]);
 									$osType		= 'linux';
 								}
@@ -70,10 +70,8 @@ class OperatingSystem extends Base
 										$osVersion		= $rawVer[1];
 									}
 								}
-								
-								
 							}
-					
+
 							if ($osName !== null && $osVersion !== null) {
 								break;
 							}

@@ -56,7 +56,7 @@ class OperatingSystem extends Base
 							$cReturn	= $this->shellExec($strCmd);
 							
 							if ($osName === null) {
-								if (preg_match("/(centos|debian|ubuntu|arch|red hat)/i", $cReturn, $rawName) == 1) {
+								if (preg_match("/(centos|debian|ubuntu|arch|red hat|rhel)/i", $cReturn, $rawName) == 1) {
 									$osName		= strtolower($rawName[1]);
 								}
 							}
