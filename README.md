@@ -92,10 +92,10 @@ if you want to scrap/grab content of website you will meet 2 condition of this:
 1. content that can get via server side scripting
 in this case we PHP user commonly use: file_get_contents, curl, regular expression, or php library for parsing html dom like simple_dom_parser or advanced_dom_parser
 2. content that can get only from client side scripting
-some website hide their content using javascript like AJAX, new element(dom) creation, encryption, flash, or hide with https, captcha, or some trick that prevent bot (automate program/application) to steal their content. Of course in this case, we cant get it using PHP, we must get this using several tools like greasemonkey, macro adds-on, etc.
-for example, surely you know about adf.ly. They url shortener server which will pay you if someone click your link. In this bussiness, of course they wont allow bot to click their links. So they will create very complex encryption to do this. If you want bypass the ads, you can decrypt the encryption which is hard or just get someone script who can decrypt it from internet. But ofc they are not, they will change the encryption in unspecific times. So we call this (almost) impossible for server scripting to grab the real link.
+*some website hide their content using javascript like AJAX, new element(dom) creation, encryption, flash, or hide with https, captcha, or some trick that prevent bot (automate program/application) to steal their content. Of course in this case, we cant get it using PHP, we must get this using several tools like greasemonkey, macro adds-on, etc.
+*for example, surely you know about adf.ly. They are url shortener server which will pay you if someone click your link. In this bussiness, of course they wont allow bot to click their links. So they will create very complex encryption to do this. If you want bypass the ads, you can decrypt the encryption which is hard or just get someone script who can decrypt it from internet. But ofc they are not stup*d, they will change the encryption in unspecific times. So we call this (almost) impossible for server scripting to grab the real link.
 
-But we can still get it by server side scripting using phantomJS, casperJS, slimmerJS, selenium, etc which is using javascript. So if you are PHP developer and you want to use them, you need split your script 1 for the javascript and 1 for PHP. But this will not happen if you use MTS. MTS use phantomJS in the browser component, so MTS can do all the phantomJS can do. with MTS:
+But we can still get it by server side scripting using phantomJS which is using javascript. So if you are PHP developer and you want to use them, you need split your script 1 for the javascript and 1 for PHP. But this will not happen if you use MTS. MTS use phantomJS in the browser component, so MTS can do all the phantomJS can do. with MTS:
 - You dont need struggle to learn javascript programming and phantomJS docs
 - you dont need to split your code which is sometimes hard to handle phantomJS script return with PHP
 - AND.. all your code will write on pure PHP
@@ -177,7 +177,7 @@ static-content: magician
 new-content-ajax: i'm merlin
 new-content-createElement: Welcome to my website
 ```
-Awesome right?
+Awesome right? :+1:
 
 To learn how to use MTS browser component, please read the docs: <a href="https://github.com/merlinthemagic/MTS/blob/master/BROWSER_README.md">Browser Documentation</a>.
 
