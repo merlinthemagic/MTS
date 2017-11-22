@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Actions\Remote\Host;
 use MTS\Common\Devices\Actions\Remote\Base;
 
@@ -95,7 +95,7 @@ class Users extends Base
 						}
 					}
 					
-				} elseif ($osObj->getType() == "Windows") {
+				} elseif ($osObj->getType() == "windows") {
 
 					$pShellObj	= $shellObj->getParentShell();
 					if ($pShellObj === null) {
@@ -188,7 +188,7 @@ class Users extends Base
 				if (preg_match("/\[(.*?)\@(.*?)\]\s\>/", $reData, $rawUser) == 1) {
 					return trim($rawUser[1]);
 				}
-			} elseif ($osObj->getType() == "Windows") {
+			} elseif ($osObj->getType() == "windows") {
 				$username			= trim($shellObj->exeCmd("whoami"));
 				if (strlen($username) > 0) {
 					return $username;
