@@ -22,7 +22,7 @@ With this component you can handle browser behaviour using PHP. To do this, MTS 
 
 Take a look for the example: (*you can found this in example folder*)
 - <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#example-1-input-something-in-inputtext">1. Input something in input=text</a>
-- <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#example-1-input-something-in-inputtext">2: Scrapping a content of website</a>
+- <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#example-2-scrapping-a-content-of-website">2: Scrapping a content of website</a>
 
 ### Example 1: Input something in input=text
 Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI. This example will explain how to solve this case easly using MTS.
@@ -102,9 +102,13 @@ We simulate browser to open the page -> focus on input text -> type something ->
 ### example 2: Scrapping a content of website
 if you want to scrap/grab content of website you will meet 2 condition of this:
 1. content that can get via server side scripting
+
 in this case we PHP user commonly use: file_get_contents, curl, regular expression, or php library for parsing html dom like simple_dom_parser or advanced_dom_parser
+
 2. content that can get only from client side scripting
+
 *some website hide their content using javascript like AJAX, new element(dom) creation, encryption, flash, or hide with https, captcha, or some trick that prevent bot (automate program/application) to steal their content. Of course in this case, we cant get it using PHP, we must get this using several tools like greasemonkey, macro adds-on, etc.
+
 *for example, surely you know about adf.ly. They are url shortener server which will pay you if someone click your link. In this bussiness, of course they wont allow bot to click their links. So they will create very complex encryption to do this. If you want bypass the ads, you can decrypt the encryption which is hard or just get someone script who can decrypt it from internet. But ofc they are not stup*d, they will change the encryption in unspecific times. So we call this (almost) impossible for server scripting to grab the real link.
 
 But we can still get it by server side scripting using phantomJS which is using javascript. So if you are PHP developer and you want to use them, you need split your script 1 for the javascript and 1 for PHP. But this will not happen if you use MTS. MTS use phantomJS in the browser component, so MTS can do all the phantomJS can do. with MTS:
@@ -163,7 +167,7 @@ to grab `.static-content` we can use simple script PHP like this:
 	echo $match[0]; //output: magician
 ?>
 ```
-But we never get `.new-content-ajax` or `.new-content-createElement`, because DOM/content isnt already there when PHP download the main.html. In this case we can use MTS.
+But we never get `.new-content-ajax` or `.new-content-createElement` using PHP, because DOM/content isn't already there when PHP download the main.html. In this case we can use MTS.
 
 ```
 <?php
