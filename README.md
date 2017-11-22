@@ -20,14 +20,11 @@ With this component you can handle browser behaviour using PHP. To do this, MTS 
 - automate something
 - many more ...
 
-Take a look for the example:
-- <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-shell">1. Input something in input=text</a>
-
+Take a look for the example: (*you can found this in example folder*)
+- <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#example-1-input-something-in-inputtext">1. Input something in input=text</a>
+- <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#example-1-input-something-in-inputtext">2: Scrapping a content of website</a>
 
 ### Example 1: Input something in input=text
-
-*you can found this in example folder*
-
 Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI. This example will explain how to solve this case easly using MTS.
 
 First, We create demo. In this case we have script that will display name which user inserted in input text and save it into database (we simulate to write on text file instead insert to db).
@@ -102,7 +99,7 @@ We simulate browser to open the page -> focus on input text -> type something ->
 - if our apps is too complex or already finished we recommend use MTS which is no need to broke your old code.
 - if you dont have access to modify the scriptm like searching article in wikipedia/google, login at fb/twitter, post something in forum. if that website have API and you ready to struggle with that, we recommend to learn the API. but if they dont have API or you want take the easy part, you can use MTS for this.
 
-##example 2: Scrapping a content of website
+### example 2: Scrapping a content of website
 if you want to scrap/grab content of website you will meet 2 condition of this:
 1. content that can get via server side scripting
 in this case we PHP user commonly use: file_get_contents, curl, regular expression, or php library for parsing html dom like simple_dom_parser or advanced_dom_parser
