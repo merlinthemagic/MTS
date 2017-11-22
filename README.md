@@ -10,8 +10,9 @@ To use MTS please read <a href="https://github.com/merlinthemagic/MTS/blob/maste
 
 
 There are two component in MTS
-* <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-browser">The Browser</a>
-* <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-shell">The Shell</a>
+* <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-browser">The Browser</a> read the <a href="https://github.com/merlinthemagic/MTS/blob/master/BROWSER_README.md">docs</a>
+* <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-shell">The Shell</a> read the <a href="https://github.com/merlinthemagic/MTS/blob/master/SHELL_README.md">docs</a>.
+
 
 ## The Browser:
 With this component you can handle browser behaviour using PHP. To do this, MTS used PhantomJS as a headless browser. Using this component, you can do this:
@@ -121,7 +122,6 @@ But we can still get it by server side scripting using phantomJS which is using 
 No, we wont ruin someone bussiness and we wont use live website as example, because we always need to modify script example if the real website change their html (prevent dependencies). But you can do this easly using MTS, just find the way by yourself.
 
 So, let's create the example
-NOTE: you can get this example2 code on example folder
 
 main.html
 ```
