@@ -2,7 +2,7 @@ My philosophy:
 
 <b>People should only do interesting work. If it can be automated it should be automated.</b>
 
-### What is MTS?
+## What is MTS?
 
 MTS is a PHP library used to handle shells and browsers. Which is hard for PHP to handle both of them using built-in function. MTS can give you power to automate processes both of them (browser and shell).
 
