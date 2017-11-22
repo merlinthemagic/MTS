@@ -7,6 +7,9 @@ My philosophy:
 MTS is a PHP library used to handle shells and browsers. Which is hard for PHP to handle both of them using built-in function. MTS can give you power to automate processes both of them (browser and shell).
 
 There are two component in MTS
+* <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-browser">The Browser</a>
+* <a href="">The Shell</a>
+
 ## The Browser:
 With this component you can handle browser behaviour. MTS using PhantomJS as a headless browser. Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI.
 
