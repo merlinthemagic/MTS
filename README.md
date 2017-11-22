@@ -11,11 +11,22 @@ There are two component in MTS
 * <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-shell">The Shell</a>
 
 ## The Browser:
-With this component you can handle browser behaviour. MTS using PhantomJS as a headless browser. Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI.
+With this component you can handle browser behaviour using PHP. To do this, MTS used PhantomJS as a headless browser. Using this component, you can do this:
+- take webpage screenshot 
+- run javascript or add new javascript in the webpage 
+- get DOM HTML element
+- manipulate the webpage
+- trigger event on webpage (click, enter, type word, focus, etc)
+- automate something
+- many more ...
 
 ##Example 1: Input something in input=text
+
 *you can found this in example folder*
-We have script that will display name that user insert in input text and save it into database (we simulate to write on text file).
+
+Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI. This example will explain how to solve easly this case using MTS.
+
+First, We create demo. In this case we have script that will display name which user inserted in input text and save it into database (we simulate to write on text file instead insert to db).
 
 input.html
 ```
