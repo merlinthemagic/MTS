@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Actions\Local\Host;
 use MTS\Common\Devices\Actions\Local\Base;
 
@@ -144,7 +144,7 @@ class Shell extends Base
 					throw new \Exception(__METHOD__ . ">> Not able to setup shell of type: " . $shellName);
 				}
 				
-			} elseif ($osObj->getType() == "Windows") {
+			} elseif ($osObj->getType() == "windows") {
 				
 				if ($shellType == 'powershell') {
 
