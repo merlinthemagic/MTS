@@ -6,6 +6,9 @@ My philosophy:
 
 MTS is a PHP library used to handle shells and browsers. Which is hard for PHP to handle both of them using built-in function. MTS can give you power to automate processes both of them (browser and shell).
 
+To use MTS please read <a href="https://github.com/merlinthemagic/MTS/blob/master/INSTALL.md">Installation Guide</a>.
+
+
 There are two component in MTS
 * <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-browser">The Browser</a>
 * <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-shell">The Shell</a>
@@ -97,19 +100,19 @@ We simulate browser to open the page -> focus on input text -> type something ->
 *conclusion from example 1 :*
 - if our apps is not complex or not yet finish developed, and we can modify the source, we recommend to edit your source code / create another script to automate that.
 - if our apps is too complex or already finished we recommend use MTS which is no need to broke your old code.
-- if you dont have access to modify the scriptm like searching article in wikipedia/google, login at fb/twitter, post something in forum. if that website have API and you ready to struggle with that, we recommend to learn the API. but if they dont have API or you want take the easy part, you can use MTS for this.
+- if you dont have access to modify the script like searching article in wikipedia/google, login at fb/twitter, post something in forum. if that website have API and you ready to struggle with that, we recommend to learn the API. but if they dont have API or you want take the easy part, you can use MTS for this.
 
 ### example 2: Scrapping a content of website
 if you want to scrap/grab content of website you will meet 2 condition of this:
 1. content that can get via server side scripting
-*in this case we PHP user commonly use: file_get_contents, curl, regular expression, or php library for parsing html dom like simple_dom_parser or advanced_dom_parser
+- in this case we PHP user commonly use: file_get_contents, curl, regular expression, or php library for parsing html dom like simple_dom_parser or advanced_dom_parser
 
 2. content that can get only from client side scripting
-*some website hide their content using javascript like AJAX, new element(dom) creation, encryption, flash, or hide with https, captcha, or some trick that prevent bot (automate program/application) to steal their content. Of course in this case, we cant get it using PHP, we must get this using several tools like greasemonkey, macro adds-on, etc.
+- some website hide their content using javascript like AJAX, new element(dom) creation, encryption, flash, or hide with https, captcha, or some trick that prevent bot (automate program/application) to steal their content. Of course in this case, we cant get it using PHP, we must get this using several tools like greasemonkey, macro adds-on, etc.
 
-*for example, surely you know about adf.ly. They are url shortener server which will pay you if someone click your link. In this bussiness, of course they wont allow bot to click their links. So they will create very complex encryption to do this. If you want bypass the ads, you can decrypt the encryption which is hard or just get someone script who can decrypt it from internet. But ofc they are not stup*d, they will change the encryption in unspecific times. So we call this (almost) impossible for server scripting to grab the real link.
+for example, surely you know about adf.ly. They are url shortener server which will pay you if someone click your link. In this bussiness, of course they wont allow bot to click their links. So they will create very complex encryption to do this. If you want bypass the ads, you can decrypt the encryption which is hard or just get someone script who can decrypt it from internet. But ofc they are not stup*d, they will change the encryption in unspecific times. So we call this (almost) impossible for server scripting to grab the real link.
 
-*But we can still get it by server side scripting using phantomJS which is using javascript. So if you are PHP developer and you want to use them, you need split your script 1 for the javascript and 1 for PHP. But this will not happen if you use MTS. MTS use phantomJS in the browser component, so MTS can do all the phantomJS can do. with MTS:
+But we can still get it by server side scripting using phantomJS which is using javascript. So if you are PHP developer and you want to use them, you need split your script 1 for the javascript and 1 for PHP. But this will not happen if you use MTS. MTS use phantomJS in the browser component, so MTS can do all the phantomJS can do. with MTS:
 - You dont need struggle to learn javascript programming and phantomJS docs
 - you dont need to split your code which is sometimes hard to handle phantomJS script return with PHP
 - AND.. all your code will write on pure PHP
@@ -197,6 +200,3 @@ To learn how to use MTS browser component, please read the docs: <a href="https:
 
 ## The Shell:
 <a href="https://github.com/merlinthemagic/MTS/blob/master/SHELL_README.md">Shell Documentation</a>.
-
-## The Install:
-<a href="https://github.com/merlinthemagic/MTS/blob/master/INSTALL.md">Installation Documentation</a>.
