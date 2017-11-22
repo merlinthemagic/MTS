@@ -20,11 +20,15 @@ With this component you can handle browser behaviour using PHP. To do this, MTS 
 - automate something
 - many more ...
 
-##Example 1: Input something in input=text
+Take a look for the example:
+- <a href="https://github.com/plonknimbuzz/MTS/blob/master/README.md#the-shell">1. Input something in input=text</a>
+
+
+### Example 1: Input something in input=text
 
 *you can found this in example folder*
 
-Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI. This example will explain how to solve easly this case using MTS.
+Most of web developer sometimes meet hard practice or create duplicate function which one run in browser and 1 run in CLI. This example will explain how to solve this case easly using MTS.
 
 First, We create demo. In this case we have script that will display name which user inserted in input text and save it into database (we simulate to write on text file instead insert to db).
 
