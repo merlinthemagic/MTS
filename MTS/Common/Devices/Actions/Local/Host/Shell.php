@@ -50,7 +50,7 @@ class Shell extends Base
 						//get python exe path
 						$pythonExe	= \MTS\Factories::getActions()->getLocalApplicationPaths()->getExecutionFile('python');
 					
-						if ($screenExe !== false || $pythonExe !== false) {
+						if ($screenExe !== false && $pythonExe !== false) {
 							
 							$exeCmd		= "";
 							
