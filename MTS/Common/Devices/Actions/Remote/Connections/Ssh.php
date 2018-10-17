@@ -59,11 +59,15 @@ class Ssh extends Base
 		$osObj			= \MTS\Factories::getActions()->getRemoteOperatingSystem()->getOsObj($shellObj);
 
 		if ($osObj->getType() == "Linux") {
+		    
+		    if ($username === null) {
+		        $username		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
+		    }
 
 			$returnConn	= null;
 			try {
 				$connCmd		= "ssh -p ".$port." -o \"StrictHostKeyChecking no\" -o \"GSSAPIAuthentication=no\" ".$username."@".$ipaddress."";
-				$regExConn		= "(".$ipaddress."'s password:|No route to host|Could not resolve hostname)";
+				$regExConn		= "(".$ipaddress."'s password:|No route to host|Could not resolve hostname|".$username."@)";
 				$connReturn		= $shellObj->exeCmd($connCmd, $regExConn, $timeout);
 				if (preg_match("/".$regExConn."/", $connReturn, $returnConn) == 1) {
 					$returnConn	= $returnConn[1];
@@ -117,6 +121,9 @@ class Ssh extends Base
 			} elseif ($returnConn == "Could not resolve hostname") {
 				throw new \Exception(__METHOD__ . ">> SSH: Could not resolve hostname: " . $ipaddress);
 			}
+		} elseif ($returnPass == $username."@") {
+		    //public key auth
+		    return $this->connectByUsernameToLinux($shellObj, $username, $password, $ipaddress, $port);
 		}
 		
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
