@@ -60,8 +60,13 @@ class Ssh extends Base
 
 		if ($osObj->getType() == "Linux") {
 		    
-		    if ($username === null) {
-		        $username		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
+		    if ($password === null) {
+		        $phpUsername		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
+		        if ($username === null) {
+		            $username = $phpUsername;
+		        } elseif ($username != $phpUsername) {
+		            
+		        }
 		    }
 
 			$returnConn	= null;
@@ -116,14 +121,15 @@ class Ssh extends Base
 					throw new \Exception(__METHOD__ . ">> Invaild Credentials");
 				}
 					
+			} elseif ($returnPass == $username."@") {
+			    //public key auth
+			    return $this->connectByUsernameToLinux($shellObj, $username, $password, $ipaddress, $port);
+			    
 			} elseif ($returnConn == "No route to host") {
 				throw new \Exception(__METHOD__ . ">> SSH: No route to host");
 			} elseif ($returnConn == "Could not resolve hostname") {
 				throw new \Exception(__METHOD__ . ">> SSH: Could not resolve hostname: " . $ipaddress);
 			}
-		} elseif ($returnPass == $username."@") {
-		    //public key auth
-		    return $this->connectByUsernameToLinux($shellObj, $username, $password, $ipaddress, $port);
 		}
 		
 		throw new \Exception(__METHOD__ . ">> Not Handled for Request Type: " . $requestType);
