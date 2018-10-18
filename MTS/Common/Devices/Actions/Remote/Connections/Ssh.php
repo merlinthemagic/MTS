@@ -60,13 +60,8 @@ class Ssh extends Base
 
 		if ($osObj->getType() == "Linux") {
 		    
-		    if ($password === null) {
-		        $phpUsername		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
-		        if ($username === null) {
-		            $username = $phpUsername;
-		        } elseif ($username != $phpUsername) {
-		            
-		        }
+		    if ($username === null) {
+		        $username		= \MTS\Factories::getActions()->getRemoteUsers()->getUsername($shellObj);
 		    }
 
 			$returnConn	= null;
