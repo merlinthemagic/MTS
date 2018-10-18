@@ -116,7 +116,7 @@ class Ssh extends Base
 					throw new \Exception(__METHOD__ . ">> Invaild Credentials");
 				}
 					
-			} elseif ($returnPass == $username."@") {
+			} elseif ($returnConn == $username."@") {
 			    //public key auth
 			    return $this->connectByUsernameToLinux($shellObj, $username, $password, $ipaddress, $port);
 			    
