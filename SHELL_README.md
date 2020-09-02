@@ -1,5 +1,8 @@
 
+PSA: If you are using linux consider switching to <a href="https://github.com/merlinthemagic/MTM-SSH">MTM-SSH</a> or <a href="https://github.com/merlinthemagic/MTM-Shells">MTM-Shells</a> if you do not require ssh. These libs are maintained while MTS is not.
+
 ## The Shell:
+
 The exec() or shell_exec() functions are good for executing single commands, but they are no where near as flexible as a real shell. Ever struggled to find out why a command returned nothing, hours later you find out its a permissions issue? 
 Would it not be nice if the built in functions were more verbose?
 
