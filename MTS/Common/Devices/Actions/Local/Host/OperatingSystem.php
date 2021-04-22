@@ -89,11 +89,9 @@ class OperatingSystem extends Base
 					$osName			= 'windows';
 					
 					$cmdString		= "wmic OS get Name";
-					$cReturn		= $this->shellExec($cmdString);
-					preg_match("/Microsoft\s+Windows\s+(.+?)\|/i", $cReturn, $rawVersion);
-					if (isset($rawVersion[1])) {
-						$rawVer		= strtolower($rawVersion[1]);
-						$osVersion	= $rawVer;
+					$rawName		= strtr($this->shellExec($cmdString), array("Microsoftr" => "Microsoft", "Serverr" => "Server"));
+					if (preg_match("/Microsoft\s+Windows\s+(.+?)\|/i", $rawName, $raw) == 1) {
+						$osVersion	= strtolower(trim($raw[1]));
 					}
 					
 					$cmdString		= "wmic OS get OSArchitecture";
