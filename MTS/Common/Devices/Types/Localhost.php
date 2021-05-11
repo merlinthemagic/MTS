@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Types;
 use \MTS\Common\Devices\Device;
 
@@ -43,7 +43,7 @@ class Localhost extends Device
 		if ($shellName == 'default') {
 			if ($this->getOS()->getType() == "Linux") {
 				$shellName = 'bash';
-			} elseif ($this->getOS()->getType() == "Windows") {
+			} elseif ($this->getOS()->getType() == "windows") {
 				$shellName = 'powershell';
 			} else {
 				throw new \Exception("MTS shell does not support OS Type: " . $this->getOS()->getType());

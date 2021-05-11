@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Actions\Local\Host;
 use MTS\Common\Devices\Actions\Local\Base;
 
@@ -44,7 +44,7 @@ class ApplicationPaths extends Base
 					return false;
 				}
 				
-			} elseif ($osObj->getType() == "Windows") {
+			} elseif ($osObj->getType() == "windows") {
 
 				$cmdString		= "where ".$this->_classStore['appName']."";
 				$cReturn		= $this->shellExec($cmdString);

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>example2</title>
+</head>
+<body>
+	<div class="static-content">magician</div>
+	<div>Who am i? <b class="new-content-ajax"></b></div>
+	<button>press me for the answer</button>
+	<div class="new-content-createElement"></div>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script>
+		$(function(){
+			$('button').click(function(){
+				$.ajax({
+					url: 'process.php',
+					type: 'post',
+					success: function(d){
+						$('.new-content-ajax').text(d);
+					},
+					error: function(){
+						alert('error');
+					}
+				})
+			});
+			
+			setTimeout(function(){
+				$('.new-content-createElement').html('<div>trash</div>');
+				$('.new-content-createElement').append('<div>trash</div>');
+				$('.new-content-createElement').append('<h1>Welcome to my website</h1>');
+				$('.new-content-createElement').append('<div>trash</div>');
+				$('.new-content-createElement').append('<div>trash</div>');
+			}, 3000);
+		});
+	</script>
+</body>
+</html>

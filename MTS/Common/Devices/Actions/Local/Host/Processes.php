@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Actions\Local\Host;
 use MTS\Common\Devices\Actions\Local\Base;
 
@@ -59,7 +59,7 @@ class Processes extends Base
 				}  else {
 					throw new \Exception(__METHOD__ . ">> Cannot Determine if PID: " . $pid . " is running, missing application 'kill'");
 				}
-			} elseif ($osObj->getType() == "Windows") {
+			} elseif ($osObj->getType() == "windows") {
 
 				$cmdString	= "tasklist";
 				$rData		= $this->shellExec($cmdString);
@@ -152,7 +152,7 @@ class Processes extends Base
 						$this->shellExec($cmdString);
 						return;
 					}
-				} elseif ($osObj->getType() == "Windows") {
+				} elseif ($osObj->getType() == "windows") {
 
 					if ($delay === null) {
 						

@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 
 //setup the MTS (Merlin Tool Set) for use
 
@@ -37,7 +37,7 @@ if (defined('MTS_BASE_PATH') === false) {
 function mtsEnvironmentalSetup()
 {
 	$osObj	= \MTS\Factories::getActions()->getLocalOperatingSystem()->getOsObj();
-	if ($osObj->getType() != "Linux" && $osObj->getType() != "Windows") {
+	if ($osObj->getType() != "Linux" && $osObj->getType() != "windows") {
 		throw new \Exception("MTS does not support OS Type: " . $osObj->getType());
 	}
 	
