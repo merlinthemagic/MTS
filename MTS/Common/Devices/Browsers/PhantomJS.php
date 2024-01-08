@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Browsers;
 
 class PhantomJS extends Base implements BrowserInterface
@@ -592,14 +592,14 @@ class PhantomJS extends Base implements BrowserInterface
 			
 			//execute command
 			$wData		= $this->browserWrite($cmdJson);
-			if (strlen($wData['error']) > 0) {
+			if (strlen($wData['error'] ?? '') > 0) {
 				throw new \Exception(__METHOD__ . ">> Failed to write command to browser. Error: " . $wData['error']);
 			} else {
 				
 				if ($maxTimeout > 0) {
 					
 					$rData	= $this->browserRead($cmdJson);
-					if (strlen($rData['error']) > 0) {
+					if (strlen($rData['error'] ?? '') > 0) {
 						throw new \Exception(__METHOD__ . ">> Failed to read command from browser. Error: " . $rData['error']);
 					} else {
 						

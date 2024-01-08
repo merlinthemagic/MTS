@@ -1,5 +1,5 @@
 <?php
-//© 2016 Martin Madsen
+//Â© 2016 Martin Madsen
 namespace MTS\Common\Devices\Actions\Local\Host;
 use MTS\Common\Devices\Actions\Local\Base;
 
@@ -96,12 +96,12 @@ class OperatingSystem extends Base
 					
 					$cmdString		= "wmic OS get OSArchitecture";
 					$cReturn		= $this->shellExec($cmdString);
-					preg_match("/(64-bit|32-bit)/i", $cReturn, $rawArch);
+					preg_match("/(64-bit|32-bit|64 bits|32 bits)/i", $cReturn, $rawArch);
 					if (isset($rawArch[1])) {
 						$rawArch	= strtolower($rawArch[1]);
-						if ($rawArch == "64-bit") {
+						if ($rawArch == "64-bit" || $rawArch == "64 bits") {
 							$osArch	= 64;
-						} elseif ($rawArch == "32-bit") {
+						} elseif ($rawArch == "32-bit" || $rawArch == "32 bits") {
 							$osArch	= 32;
 						}
 					}
